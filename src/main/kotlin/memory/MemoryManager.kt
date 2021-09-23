@@ -7,11 +7,9 @@ import java.io.FileInputStream
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(var delayRegister: UByte = 0.toUByte(),
                     var soundRegister: UByte = 0.toUByte(),
-
                     var I: Int = 0, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
-                    var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val stack: Stack = Stack(STACK_SIZE),
-
+                    var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val ram: ValidatedMemory = ValidatedMemory(MEMORY_SIZE),
                     val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
                    ) {

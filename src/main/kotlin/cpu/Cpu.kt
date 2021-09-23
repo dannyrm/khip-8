@@ -5,6 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rightByte
 import rightNibbleByte
+import toHex
 import x
 import java.io.File
 
@@ -28,12 +29,14 @@ class Cpu(private val memoryManager: MemoryManager,
         halt = true
     }
 
+    private fun pcHex() = toHex(memoryManager.PC)
+
     /**
      * 00E0 - CLS
      * Clear the display.
      * TODO: implement screen clearing
      */
-    fun clearScreen(value: UInt) {
+    fun clearScreen(unusedValue: UInt) {
         LOG.trace("CLS")
     }
 
@@ -41,10 +44,10 @@ class Cpu(private val memoryManager: MemoryManager,
      * 00EE - RET
      * Sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
      */
-    fun doReturn(value: UInt) {
+    fun doReturn(unusedValue: UInt) {
         memoryManager.PC = memoryManager.stack.pop()
 
-        LOG.trace("RET ${memoryManager.PC}")
+        LOG.trace("RET")
     }
 
     /**
@@ -52,9 +55,11 @@ class Cpu(private val memoryManager: MemoryManager,
      * Jump to location nnn - The interpreter sets the program counter to nnn.
      */
     fun jump(value: UInt) {
-        memoryManager.PC = rightNibbleByte(value)
+        val nnn = rightNibbleByte(value)
 
-        LOG.trace("JP ${memoryManager.PC}")
+        LOG.trace("JP ${toHex(nnn)}")
+
+        memoryManager.PC = nnn
     }
 
     /**
@@ -63,10 +68,12 @@ class Cpu(private val memoryManager: MemoryManager,
      * Increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.
      */
     fun call(value: UInt) {
-        memoryManager.stack.push(memoryManager.PC)
-        memoryManager.PC = rightNibbleByte(value)
+        val nnn = rightNibbleByte(value)
 
-        LOG.trace("CALL ${memoryManager.PC}")
+        LOG.trace("CALL ${toHex(nnn)}")
+
+        memoryManager.stack.push(memoryManager.PC)
+        memoryManager.PC = nnn
     }
 
     /**
@@ -82,7 +89,7 @@ class Cpu(private val memoryManager: MemoryManager,
             memoryManager.PC++
         }
 
-        LOG.trace("SE V$x, $byte")
+        LOG.trace("SE V${toHex(x)}, ${toHex(byte)}")
     }
 
     // TODO

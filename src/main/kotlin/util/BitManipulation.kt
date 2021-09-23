@@ -17,6 +17,7 @@ fun y(value: UInt) : UByte = (value and 0xF0.toUInt() shr 4).toUByte()
 fun rightNibbleByte(value: UInt): UInt = value and 0xFFF.toUInt()
 
 // Create a big endian 16 bit word from two 8 bit bytes
-fun createBigEndianWordFromBytes(value1: UByte, value2: UByte): UInt {
-    return (value1.toUInt() shl 8) or value2.toUInt()
-}
+fun createBigEndianWordFromBytes(value1: UByte, value2: UByte): UInt = (value1.toUInt() shl 8) or value2.toUInt()
+
+fun toHex(value: UInt): String = value.toString(16)
+fun toHex(value: UByte): String = value.toString(16)
