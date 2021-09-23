@@ -1,5 +1,6 @@
 package memory
 
+import createBigEndianWordFromBytes
 import java.io.File
 import java.io.FileInputStream
 
@@ -8,7 +9,7 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
                     var soundRegister: UByte = 0.toUByte(),
 
                     var I: Int = 0, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
-                    var PC: UInt = 0.toUInt(), // 16 bits, program counter
+                    var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val stack: Stack = Stack(STACK_SIZE),
 
                     val ram: ValidatedMemory = ValidatedMemory(MEMORY_SIZE),
@@ -23,6 +24,14 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
                 ram[PROGRAM_START_ADDRESS + index] = byte
             }
         }
+    }
+
+    fun fetchNextInstruction(): UInt {
+        val pc = PC.toInt()
+        val instruction = createBigEndianWordFromBytes(ram[pc], ram[pc+1])
+        PC += 2.toUInt()
+
+        return instruction
     }
 
     companion object {

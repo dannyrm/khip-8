@@ -1,4 +1,5 @@
-import memory.MemoryManager
+package memory
+
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -21,10 +22,30 @@ class MemoryManagerUnitTest {
         }
     }
 
-    private fun loadFile(fileName: String): File {
-        return File(
-            MemoryManagerUnitTest::class.java.getResource(fileName).toURI()
+    @Test
+    fun `Fetch next instruction`() {
+        val memoryManager = MemoryManager()
+        memoryManager.loadProgram(
+            loadFile("inputs/15-puzzle.ch8")
         )
+
+        expectThat(memoryManager.PC).isEqualTo(0x200.toUInt())
+
+        var instruction = memoryManager.fetchNextInstruction()
+        expectThat(instruction).isEqualTo(0x00E0.toUInt())
+        expectThat(memoryManager.PC).isEqualTo(0x202.toUInt())
+
+        instruction = memoryManager.fetchNextInstruction()
+        expectThat(instruction).isEqualTo(0x6C00.toUInt())
+        expectThat(memoryManager.PC).isEqualTo(0x204.toUInt())
+
+        instruction = memoryManager.fetchNextInstruction()
+        expectThat(instruction).isEqualTo(0x4C00.toUInt())
+        expectThat(memoryManager.PC).isEqualTo(0x206.toUInt())
+    }
+
+    private fun loadFile(fileName: String): File {
+        return File(this.javaClass.classLoader.getResource(fileName).toURI())
     }
 
     /**

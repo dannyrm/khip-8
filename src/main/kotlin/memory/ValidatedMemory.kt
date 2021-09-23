@@ -3,7 +3,8 @@ package memory
 import java.lang.IllegalArgumentException
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class ValidatedMemory(private val memorySize: Int,var memory: UByteArray = UByteArray(memorySize)) {
+class ValidatedMemory(private val memorySize: Int) {
+    private val memory: UByteArray = UByteArray(memorySize)
 
     operator fun set(address: Int, value: UByte) {
         checkRange(address, memorySize)
@@ -18,7 +19,7 @@ class ValidatedMemory(private val memorySize: Int,var memory: UByteArray = UByte
     }
 
     private fun checkRange(address: Int, maxValue: Int) {
-        if (address !in 0..maxValue) {
+        if (address !in 0 until maxValue) {
             throw IllegalArgumentException("Invalid address specified ($address). Must be in range (0..$maxValue)")
         }
     }
