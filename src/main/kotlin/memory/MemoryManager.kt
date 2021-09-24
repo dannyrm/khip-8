@@ -34,33 +34,57 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
         return instruction
     }
 
+    fun loadSpriteDigitsIntoMemory() {
+        populateRam(INTERPRETER_START_ADDRESS,
+            arrayOf(
+                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0xF0.toUByte()), // Zero
+                ubyteArrayOf(0x20.toUByte(), 0x60.toUByte(), 0x20.toUByte(), 0x20.toUByte(), 0x70.toUByte()), // One
+                ubyteArrayOf(0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte()), // Two
+                ubyteArrayOf(0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte()), // Three
+                ubyteArrayOf(0x90.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0x10.toUByte()), // Four
+                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte()), // Five
+                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte()), // Six
+                ubyteArrayOf(0xF0.toUByte(), 0x10.toUByte(), 0x20.toUByte(), 0x40.toUByte(), 0x40.toUByte()), // Seven
+                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte()), // Eight
+                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte()), // Nine
+                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0x90.toUByte()), // A
+                ubyteArrayOf(0xE0.toUByte(), 0x90.toUByte(), 0xE0.toUByte(), 0x90.toUByte(), 0xE0.toUByte()), // B
+                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0x80.toUByte(), 0x80.toUByte(), 0xF0.toUByte()), // C
+                ubyteArrayOf(0xE0.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0xE0.toUByte()), // D
+                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte()), // E
+                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0x80.toUByte()), // F
+            )
+        )
+    }
+
+    private fun populateRam(startLocation: Int, arrays: Array<UByteArray>) {
+        var currentLocation = startLocation
+
+        for (array in arrays) {
+            for (element in array) {
+                ram[currentLocation++] = element
+            }
+        }
+    }
+
     override fun toString(): String {
         val stringBuilder = StringBuilder()
 
-        val nl = System.lineSeparator()
+        val newLine = System.lineSeparator()
 
         stringBuilder.append(
-            "Registers: {" +
-            nl +
-            "\tI = ${wordHex(I)}, PC = ${wordHex(PC)}, DT = ${toHex(delayRegister)}, ST = ${toHex(soundRegister)}" +
-            nl +
-            "}" +
-            nl +
-            "General Registers: {" +
-            nl +
+            "Registers: {$newLine" +
+            "\tI = ${wordHex(I)}, PC = ${wordHex(PC)}, DT = ${toHex(delayRegister)}, ST = ${toHex(soundRegister)}$newLine" +
+            "}$newLine" +
+            "General Registers: {$newLine" +
             registers +
-            "}" +
-            nl +
-            "Stack = {" +
-            nl +
+            "}$newLine" +
+            "Stack = {$newLine" +
             stack +
-            "}" +
-            nl +
-            "Ram = {" +
-            nl +
+            "}$newLine" +
+            "Ram = {$newLine" +
             ram +
-            "}" +
-            nl
+            "}$newLine"
         )
 
         return stringBuilder.toString()
@@ -71,6 +95,7 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
         private const val NUM_GENERAL_PURPOSE_REGISTERS = 16 // 16 registers, named Vx where x = 1...F
         private const val STACK_SIZE = 16 // Up to 16 levels of nested subroutines
 
+        private const val INTERPRETER_START_ADDRESS = 0x000
         private const val PROGRAM_START_ADDRESS = 0x200
     }
 }

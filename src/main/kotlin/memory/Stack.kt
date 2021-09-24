@@ -24,19 +24,22 @@ data class Stack(private val stackSize: Int,
     override fun toString(): String {
         val stringBuilder = StringBuilder()
 
-        val stackEnds = "\t----------"
+        val stackDelimiters = "\t----------"
 
         stringBuilder.append("\tSize = $stackSize, SP = ${toHex(SP.toUByte())}")
         stringBuilder.append(System.lineSeparator())
-        stringBuilder.append(stackEnds)
-        stringBuilder.append(System.lineSeparator())
 
-        for(i in SP-1 downTo 0) {
-            stringBuilder.append("\t| ${wordHex(stack[i])} | ${System.lineSeparator()}")
+        if (SP > 0) {
+            stringBuilder.append(stackDelimiters)
+            stringBuilder.append(System.lineSeparator())
+
+            for(i in SP-1 downTo 0) {
+                stringBuilder.append("\t| ${wordHex(stack[i])} | ${System.lineSeparator()}")
+            }
+
+            stringBuilder.append(stackDelimiters)
+            stringBuilder.append(System.lineSeparator())
         }
-
-        stringBuilder.append(stackEnds)
-        stringBuilder.append(System.lineSeparator())
 
         return stringBuilder.toString()
     }
