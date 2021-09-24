@@ -19,5 +19,17 @@ fun rightNibbleByte(value: UInt): UInt = value and 0xFFF.toUInt()
 // Create a big endian 16 bit word from two 8 bit bytes
 fun createBigEndianWordFromBytes(value1: UByte, value2: UByte): UInt = (value1.toUInt() shl 8) or value2.toUInt()
 
-fun toHex(value: UInt): String = value.toString(16)
-fun toHex(value: UByte): String = value.toString(16)
+fun toHex(value: UInt, paddedLength: Int): String {
+    var baseHexValue = value.toString(16).uppercase()
+
+    for (i in baseHexValue.length until paddedLength) {
+        baseHexValue = "0" + baseHexValue
+    }
+
+    return "0x${baseHexValue}"
+}
+
+fun toHex(value: UByte): String = toHex(value.toUInt(), 2)
+fun wordHex(value: Int) = wordHex(value.toUInt())
+fun wordHex(value: UInt) = toHex(value, 4)
+fun nibbleByteHex(value: UInt) = toHex(value, 3)

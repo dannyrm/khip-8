@@ -9,7 +9,7 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
 
     fun load(rom: File) {
         memoryManager.loadProgram(rom)
-        LOG.trace("Program Loaded...")
+        LOG.debug("Program Loaded...")
     }
 
     fun start() {

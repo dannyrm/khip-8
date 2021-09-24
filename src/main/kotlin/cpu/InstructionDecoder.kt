@@ -5,7 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rightByte
 import rightNibble
-import toHex
+import wordHex
 
 class InstructionDecoder {
     private lateinit var cpu: Cpu
@@ -17,7 +17,7 @@ class InstructionDecoder {
     fun decode(instruction: UInt): (UInt) -> Unit {
         val unrecognisedOpcodeException = IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
 
-        LOG.trace("Decoding instruction: ${toHex(instruction)}")
+        LOG.trace("Decoding instruction: ${wordHex(instruction)}")
 
         return when (instruction.toInt()) {
             0x00E0 -> cpu::clearScreen

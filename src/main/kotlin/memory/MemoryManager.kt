@@ -1,13 +1,15 @@
 package memory
 
 import createBigEndianWordFromBytes
+import toHex
+import wordHex
 import java.io.File
 import java.io.FileInputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(var delayRegister: UByte = 0.toUByte(),
                     var soundRegister: UByte = 0.toUByte(),
-                    var I: Int = 0, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
+                    var I: UInt = 0.toUInt(), // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
                     val stack: Stack = Stack(STACK_SIZE),
                     var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val ram: ValidatedMemory = ValidatedMemory(MEMORY_SIZE),
@@ -26,10 +28,42 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
 
     fun fetchNextInstruction(): UInt {
         val pc = PC.toInt()
-        val instruction = createBigEndianWordFromBytes(ram[pc], ram[pc+1])
+        val instruction = createBigEndianWordFromBytes(ram[pc], ram[pc + 1])
         PC += 2.toUInt()
 
         return instruction
+    }
+
+    override fun toString(): String {
+        val stringBuilder = StringBuilder()
+
+        val nl = System.lineSeparator()
+
+        stringBuilder.append(
+            "Registers: {" +
+            nl +
+            "\tI = ${wordHex(I)}, PC = ${wordHex(PC)}, DT = ${toHex(delayRegister)}, ST = ${toHex(soundRegister)}" +
+            nl +
+            "}" +
+            nl +
+            "General Registers: {" +
+            nl +
+            registers +
+            "}" +
+            nl +
+            "Stack = {" +
+            nl +
+            stack +
+            "}" +
+            nl +
+            "Ram = {" +
+            nl +
+            ram +
+            "}" +
+            nl
+        )
+
+        return stringBuilder.toString()
     }
 
     companion object {
