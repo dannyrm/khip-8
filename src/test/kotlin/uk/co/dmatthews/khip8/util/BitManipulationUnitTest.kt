@@ -1,4 +1,4 @@
-package util
+package uk.co.dmatthews.khip8.util
 
 import createBigEndianWordFromBytes
 import leftNibble

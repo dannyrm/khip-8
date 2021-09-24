@@ -1,6 +1,6 @@
-package cpu
+package uk.co.dmatthews.khip8.cpu
 
-import memory.MemoryManager
+import uk.co.dmatthews.khip8.memory.MemoryManager
 import nibbleByteHex
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

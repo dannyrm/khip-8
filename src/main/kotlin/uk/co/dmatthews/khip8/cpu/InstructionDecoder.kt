@@ -1,4 +1,4 @@
-package cpu
+package uk.co.dmatthews.khip8.cpu
 
 import leftNibble
 import org.slf4j.Logger

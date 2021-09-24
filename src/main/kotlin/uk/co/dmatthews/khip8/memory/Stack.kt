@@ -1,4 +1,4 @@
-package memory
+package uk.co.dmatthews.khip8.memory
 
 import toHex
 import wordHex

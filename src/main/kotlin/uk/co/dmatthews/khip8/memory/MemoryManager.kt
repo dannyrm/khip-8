@@ -1,4 +1,4 @@
-package memory
+package uk.co.dmatthews.khip8.memory
 
 import createBigEndianWordFromBytes
 import toHex
@@ -35,7 +35,8 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
     }
 
     fun loadSpriteDigitsIntoMemory() {
-        populateRam(INTERPRETER_START_ADDRESS,
+        populateRam(
+            INTERPRETER_START_ADDRESS,
             arrayOf(
                 ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0xF0.toUByte()), // Zero
                 ubyteArrayOf(0x20.toUByte(), 0x60.toUByte(), 0x20.toUByte(), 0x20.toUByte(), 0x70.toUByte()), // One

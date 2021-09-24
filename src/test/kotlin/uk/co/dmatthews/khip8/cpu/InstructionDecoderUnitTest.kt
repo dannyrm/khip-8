@@ -1,4 +1,4 @@
-package cpu
+package uk.co.dmatthews.khip8.cpu
 
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -118,6 +118,12 @@ class InstructionDecoderUnitTest {
     @ValueSource(ints = [ 0x8126, 0x8326, 0x8456 ])
     fun `Decode shift right instruction (SHR Vx {, Vy})`(param: Int) {
         expectThat(instructionDecoder.decode(param.toUInt())).isEqualTo(cpu::shiftRight)
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [ 0x812E, 0x832E, 0x845E ])
+    fun `Decode shift left instruction (SHL Vx {, Vy})`(param: Int) {
+        expectThat(instructionDecoder.decode(param.toUInt())).isEqualTo(cpu::shiftLeft)
     }
 
     @ParameterizedTest

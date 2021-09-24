@@ -1,5 +1,0 @@
-package display
-
-interface Display {
-
-}

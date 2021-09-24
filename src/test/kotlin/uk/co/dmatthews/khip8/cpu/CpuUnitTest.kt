@@ -1,11 +1,11 @@
-package cpu
+package uk.co.dmatthews.khip8.cpu
 
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import memory.MemoryManager
-import memory.Stack
+import uk.co.dmatthews.khip8.memory.MemoryManager
+import uk.co.dmatthews.khip8.memory.Stack
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 

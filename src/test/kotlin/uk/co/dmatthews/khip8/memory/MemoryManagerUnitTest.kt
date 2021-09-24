@@ -1,4 +1,4 @@
-package memory
+package uk.co.dmatthews.khip8.memory
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
