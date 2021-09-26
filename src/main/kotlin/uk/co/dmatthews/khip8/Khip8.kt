@@ -20,7 +20,7 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
 
     fun start() {
         LOG.debug("System starting state: ${System.lineSeparator()}")
-        LOG.debug(toString())
+        LOG.debug(memoryManager.toString())
         cpu.start()
     }
 

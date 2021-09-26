@@ -94,6 +94,40 @@ class DisplayMemoryUnitTest {
     }
 
     @Test
+    fun `Check setting works correctly for clipping value`() {
+        val displayMemory = DisplayMemory()
+        displayMemory[55,5] = 0xFF.toUByte()
+        displayMemory[56,6] = 0xFF.toUByte()
+        displayMemory[57,7] = 0xFF.toUByte()
+        displayMemory[58,8] = 0xFF.toUByte()
+        displayMemory[59,9] = 0xFF.toUByte()
+        displayMemory[60,10] = 0xFF.toUByte()
+        displayMemory[61,11] = 0xFF.toUByte()
+        displayMemory[62,12] = 0xFF.toUByte()
+        displayMemory[63,13] = 0xFF.toUByte()
+
+        for (i in 0..4) {
+            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        }
+
+        println(displayMemory)
+
+        expectThat(displayMemory.buffer[5]).isEqualTo(0x1FE.toULong())
+        expectThat(displayMemory.buffer[6]).isEqualTo(0xFF.toULong())
+        expectThat(displayMemory.buffer[7]).isEqualTo(0x7F.toULong())
+        expectThat(displayMemory.buffer[8]).isEqualTo(0x3F.toULong())
+        expectThat(displayMemory.buffer[9]).isEqualTo(0x1F.toULong())
+        expectThat(displayMemory.buffer[10]).isEqualTo(0xF.toULong())
+        expectThat(displayMemory.buffer[11]).isEqualTo(0x7.toULong())
+        expectThat(displayMemory.buffer[12]).isEqualTo(0x3.toULong())
+        expectThat(displayMemory.buffer[13]).isEqualTo(0x1.toULong())
+
+        for (i in 14 until 32) {
+            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        }
+    }
+
+    @Test
     fun `Check toString`() {
         val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFF.toUByte()

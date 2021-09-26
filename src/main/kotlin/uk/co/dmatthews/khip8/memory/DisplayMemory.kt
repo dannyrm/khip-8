@@ -19,7 +19,7 @@ class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS
 
         if (MAX_WIDTH_IN_BITS - adjustedX <= NUMBER_OF_BITS_IN_BYTE) {
             // Sprites that are drawn partially off-screen will be clipped.
-            buffer[adjustedY] = buffer[adjustedY] xor (value.toULong() shr (MAX_WIDTH_IN_BITS - x))
+            buffer[adjustedY] = buffer[adjustedY] xor (value.toULong() shr (NUMBER_OF_BITS_IN_BYTE - (MAX_WIDTH_IN_BITS - x)))
         } else {
             // Shifts the byte to the correct position to perform the xor
             buffer[adjustedY] = buffer[adjustedY] xor (value.toULong() shl (MAX_WIDTH_IN_BITS - adjustedX - NUMBER_OF_BITS_IN_BYTE))
