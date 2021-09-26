@@ -119,8 +119,6 @@ class DisplayMemoryUnitTest {
             expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
         }
 
-        println(displayMemory)
-
         expectThat(displayMemory.buffer[5]).isEqualTo(0x1FE.toULong())
         expectThat(displayMemory.buffer[6]).isEqualTo(0xFF.toULong())
         expectThat(displayMemory.buffer[7]).isEqualTo(0x7F.toULong())
@@ -151,8 +149,6 @@ class DisplayMemoryUnitTest {
             expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
         }
 
-        println(displayMemory)
-
         expectThat(displayMemory.buffer[5]).isEqualTo(0x1AE.toULong())
         expectThat(displayMemory.buffer[6]).isEqualTo(0x101.toULong())
         expectThat(displayMemory.buffer[7]).isEqualTo(0x3C0000000007F.toULong())
@@ -176,6 +172,19 @@ class DisplayMemoryUnitTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `Check address wrapping works correctly`() {
+        val displayMemory = DisplayMemory()
+        displayMemory[65,5] = 0xFF.toUByte() // Two greater than the max width. Should wrap to position 1
+        // Two greater than the max width. Should wrap to 2. 10 Greater than the max height - should wrap to 10
+        displayMemory[66,42] = 0xFF.toUByte()
+
+        println(displayMemory)
+
+        expectThat(displayMemory.buffer[5]).isEqualTo(0x7F80000000000000.toULong())
+        expectThat(displayMemory.buffer[10]).isEqualTo(0x3FC0000000000000.toULong())
     }
 
     @Test
