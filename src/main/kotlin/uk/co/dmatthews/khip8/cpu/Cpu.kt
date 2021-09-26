@@ -7,11 +7,13 @@ import org.slf4j.LoggerFactory
 import rightByte
 import rightNibbleByte
 import toHex
+import uk.co.dmatthews.khip8.display.Display
 import x
 import java.io.File
 
 class Cpu(private val memoryManager: MemoryManager,
           private val instructionDecoder: InstructionDecoder,
+          private val display: Display,
           var halt: Boolean = false) {
 
     fun start() {
@@ -33,9 +35,9 @@ class Cpu(private val memoryManager: MemoryManager,
     /**
      * 00E0 - CLS
      * Clear the display.
-     * TODO: implement screen clearing
      */
     fun clearScreen(unusedValue: UInt) {
+        display.clear()
         LOG.debug("CLS")
     }
 

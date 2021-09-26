@@ -8,6 +8,7 @@ import uk.co.dmatthews.khip8.memory.MemoryManager
 import uk.co.dmatthews.khip8.memory.Stack
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import uk.co.dmatthews.khip8.display.Display
 
 @ExtendWith(MockKExtension::class)
 class CpuUnitTest {
@@ -15,6 +16,7 @@ class CpuUnitTest {
 
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var instructionDecoder: InstructionDecoder
+    @MockK(relaxed = true) private lateinit var display: Display
 
     @Test
     fun `ret sets correct value to pc`() {
@@ -24,7 +26,7 @@ class CpuUnitTest {
         every { stack.pop() } returns stackValue
         every { memoryManager.stack } returns stack
 
-        cpu.doReturn(UNUSED_VALUE.toUInt())
+        cpu.doReturn(UNUSED_VALUE)
 
         // Value popped from the stack set to the PC
         verify { stack.pop() }
@@ -36,6 +38,13 @@ class CpuUnitTest {
         cpu.jump(0x1321.toUInt())
 
         verify { memoryManager setProperty MemoryManager::PC.name value 0x321.toUInt() }
+    }
+
+    @Test
+    fun `Clear screen calls the display to clear`() {
+        cpu.clearScreen(UNUSED_VALUE)
+
+        verify { display.clear() }
     }
 
     @Test
@@ -54,6 +63,6 @@ class CpuUnitTest {
     }
 
     companion object {
-        const val UNUSED_VALUE = 1
+        private val UNUSED_VALUE : UInt = 1.toUInt()
     }
 }

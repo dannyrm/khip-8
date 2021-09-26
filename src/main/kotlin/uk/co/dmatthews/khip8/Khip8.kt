@@ -5,6 +5,7 @@ import uk.co.dmatthews.khip8.memory.MemoryManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.co.dmatthews.khip8.cpu.InstructionDecoder
+import uk.co.dmatthews.khip8.display.Display
 import java.io.File
 
 class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
@@ -36,7 +37,9 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
 fun main(args: Array<String>) {
     val memoryManager = MemoryManager()
     val instructionDecoder = InstructionDecoder()
-    val cpu = Cpu(memoryManager, instructionDecoder)
+    val display = Display()
+
+    val cpu = Cpu(memoryManager, instructionDecoder, display)
     instructionDecoder.setCpu(cpu)
 
     val khip8 = Khip8(cpu, memoryManager)
