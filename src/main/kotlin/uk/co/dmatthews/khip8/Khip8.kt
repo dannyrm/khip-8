@@ -5,7 +5,7 @@ import uk.co.dmatthews.khip8.memory.MemoryManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.co.dmatthews.khip8.cpu.InstructionDecoder
-import uk.co.dmatthews.khip8.display.Display
+import uk.co.dmatthews.khip8.memory.DisplayMemory
 import java.io.File
 
 class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
@@ -20,7 +20,7 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
 
     fun start() {
         LOG.debug("System starting state: ${System.lineSeparator()}")
-        LOG.debug(memoryManager.toString())
+        LOG.debug(toString())
         cpu.start()
     }
 
@@ -37,9 +37,8 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
 fun main(args: Array<String>) {
     val memoryManager = MemoryManager()
     val instructionDecoder = InstructionDecoder()
-    val display = Display()
 
-    val cpu = Cpu(memoryManager, instructionDecoder, display)
+    val cpu = Cpu(memoryManager, instructionDecoder)
     instructionDecoder.setCpu(cpu)
 
     val khip8 = Khip8(cpu, memoryManager)

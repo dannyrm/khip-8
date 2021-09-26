@@ -13,7 +13,8 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
                     val stack: Stack = Stack(STACK_SIZE),
                     var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val ram: ValidatedMemory = ValidatedMemory(MEMORY_SIZE),
-                    val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
+                    val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS),
+                    val displayMemory: DisplayMemory = DisplayMemory()
                    ) {
 
     fun loadProgram(input: File) {
@@ -85,7 +86,10 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
             "}$newLine" +
             "Ram = {$newLine" +
             ram +
-            "}$newLine"
+            "}$newLine" +
+            "Display Memory {$newLine" +
+            "$displayMemory" +
+            "}"
         )
 
         return stringBuilder.toString()

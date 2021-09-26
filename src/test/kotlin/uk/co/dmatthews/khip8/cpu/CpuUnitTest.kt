@@ -8,7 +8,7 @@ import uk.co.dmatthews.khip8.memory.MemoryManager
 import uk.co.dmatthews.khip8.memory.Stack
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import uk.co.dmatthews.khip8.display.Display
+import uk.co.dmatthews.khip8.memory.DisplayMemory
 
 @ExtendWith(MockKExtension::class)
 class CpuUnitTest {
@@ -16,7 +16,7 @@ class CpuUnitTest {
 
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var instructionDecoder: InstructionDecoder
-    @MockK(relaxed = true) private lateinit var display: Display
+    @MockK(relaxed = true) private lateinit var displayMemory: DisplayMemory
 
     @Test
     fun `ret sets correct value to pc`() {
@@ -42,9 +42,12 @@ class CpuUnitTest {
 
     @Test
     fun `Clear screen calls the display to clear`() {
+        val displayMemory = mockk<DisplayMemory>(relaxed = true)
+        every { memoryManager.displayMemory } returns displayMemory
+
         cpu.clearScreen(UNUSED_VALUE)
 
-        verify { display.clear() }
+        verify { displayMemory.clear() }
     }
 
     @Test
