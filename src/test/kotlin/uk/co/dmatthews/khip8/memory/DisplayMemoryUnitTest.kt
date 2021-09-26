@@ -40,6 +40,17 @@ class DisplayMemoryUnitTest {
     }
 
     @Test
+    fun `Check xoring works correctly in simple case`() {
+        val displayMemory = DisplayMemory()
+        displayMemory[5,5] = 0xFF.toUByte()
+        displayMemory[5,5] = 0xFF.toUByte()
+
+        for (i in 0 until 32) {
+            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        }
+    }
+
+    @Test
     fun `Check setting works multiple values works correctly for non clipping value`() {
         val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFF.toUByte()
@@ -65,7 +76,6 @@ class DisplayMemoryUnitTest {
 
         for (y in 0 until MAX_HEIGHT_IN_BITS) {
             for (x in 0 until MAX_WIDTH_IN_BITS) {
-                println("$x, $y")
                 if (x in 5..12 && y == 5) {
                     expectThat(displayMemory.getPixelState(x, y)).isTrue()
                 } else {
@@ -83,7 +93,6 @@ class DisplayMemoryUnitTest {
 
         for (y in 0 until MAX_HEIGHT_IN_BITS) {
             for (x in 0 until MAX_WIDTH_IN_BITS) {
-                println("$x, $y")
                 if ((x in 5..12 && y == 5) || (x in 25..32 && y == 31)) {
                     expectThat(displayMemory.getPixelState(x, y)).isTrue()
                 } else {
@@ -94,7 +103,7 @@ class DisplayMemoryUnitTest {
     }
 
     @Test
-    fun `Check setting works correctly for clipping value`() {
+    fun `Check setting works correctly for clipped value`() {
         val displayMemory = DisplayMemory()
         displayMemory[55,5] = 0xFF.toUByte()
         displayMemory[56,6] = 0xFF.toUByte()
@@ -128,10 +137,63 @@ class DisplayMemoryUnitTest {
     }
 
     @Test
+    fun `Check complex xor`() {
+        val displayMemory = DisplayMemory()
+        displayMemory[55,5] = 0xFF.toUByte()
+        displayMemory[56,6] = 0xFF.toUByte()
+        displayMemory[57,7] = 0xFF.toUByte()
+
+        displayMemory[53,5] = 0x0A.toUByte()
+        displayMemory[55,6] = 0xFF.toUByte()
+        displayMemory[10,7] = 0xF.toUByte()
+
+        for (i in 0..4) {
+            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        }
+
+        println(displayMemory)
+
+        expectThat(displayMemory.buffer[5]).isEqualTo(0x1AE.toULong())
+        expectThat(displayMemory.buffer[6]).isEqualTo(0x101.toULong())
+        expectThat(displayMemory.buffer[7]).isEqualTo(0x3C0000000007F.toULong())
+
+        for (i in 8 until 32) {
+            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        }
+    }
+
+    @Test
+    fun `Check get multiple pixel state values works correctly for clipped value`() {
+        val displayMemory = DisplayMemory()
+        displayMemory[61,31] = 0xFF.toUByte()
+
+        for (y in 0 until MAX_HEIGHT_IN_BITS) {
+            for (x in 0 until MAX_WIDTH_IN_BITS) {
+                if ((x in 61..63 && y == 31)) {
+                    expectThat(displayMemory.getPixelState(x, y)).isTrue()
+                } else {
+                    expectThat(displayMemory.getPixelState(x, y)).isFalse()
+                }
+            }
+        }
+    }
+
+    @Test
     fun `Check toString`() {
         val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFF.toUByte()
         displayMemory[25,31] = 0xFF.toUByte()
+        displayMemory[55,5] = 0xFF.toUByte()
+        displayMemory[56,6] = 0xFF.toUByte()
+        displayMemory[57,7] = 0xFF.toUByte()
+        displayMemory[58,8] = 0xFF.toUByte()
+        displayMemory[59,9] = 0xFF.toUByte()
+        displayMemory[60,10] = 0xFF.toUByte()
+        displayMemory[61,11] = 0xFF.toUByte()
+        displayMemory[62,12] = 0xFF.toUByte()
+        displayMemory[63,13] = 0xFF.toUByte()
+
+        println(displayMemory.toString())
 
         val nl = System.lineSeparator()
 
@@ -141,15 +203,15 @@ class DisplayMemoryUnitTest {
                 "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
                 "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
                 "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000011111111000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
-                "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
+                "\t0000011111111000000000000000000000000000000000000000000111111110$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000011111111$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000001111111$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000000111111$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000000011111$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000000001111$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000000000111$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000000000011$nl" +
+                "\t0000000000000000000000000000000000000000000000000000000000000001$nl" +
                 "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
                 "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
                 "\t0000000000000000000000000000000000000000000000000000000000000000$nl" +
