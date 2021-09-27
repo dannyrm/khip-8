@@ -35,6 +35,13 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
         return instruction
     }
 
+    /**
+     * Instructions are 16 bits long
+     */
+    fun skipNextInstruction() {
+        PC += 2.toUInt()
+    }
+
     fun loadSpriteDigitsIntoMemory() {
         populateRam(
             INTERPRETER_START_ADDRESS,

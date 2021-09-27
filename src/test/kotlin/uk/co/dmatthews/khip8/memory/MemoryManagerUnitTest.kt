@@ -77,6 +77,15 @@ class MemoryManagerUnitTest {
     }
 
     @Test
+    fun `Check skip next instruction works as expected`() {
+        val memoryManager = MemoryManager()
+
+        expectThat(memoryManager.PC).isEqualTo(0x200.toUInt())
+        memoryManager.skipNextInstruction()
+        expectThat(memoryManager.PC).isEqualTo(0x202.toUInt())
+    }
+
+    @Test
     fun `check toString format`() {
         val memoryManager = MemoryManager(ram = ValidatedMemory(42))
 

@@ -10,6 +10,7 @@ import rightNibbleByte
 import toHex
 import uk.co.dmatthews.khip8.memory.DisplayMemory
 import x
+import y
 
 class Cpu(private val memoryManager: MemoryManager,
           private val instructionDecoder: InstructionDecoder,
@@ -36,7 +37,6 @@ class Cpu(private val memoryManager: MemoryManager,
      * 0nnn - SYS addr
      * Jump to a machine code routine at nnn.
      * This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
-     * TODO
      */
     fun sysCall(value: UInt) {
         LOG.debug("SYS addr")
@@ -97,7 +97,7 @@ class Cpu(private val memoryManager: MemoryManager,
         val byte = rightByte(value)
 
         if (memoryManager.registers[x.toInt()] == byte) {
-            memoryManager.PC++
+            memoryManager.skipNextInstruction()
         }
 
         LOG.debug("SE V${toHex(x)}, ${toHex(byte)}")
@@ -107,30 +107,46 @@ class Cpu(private val memoryManager: MemoryManager,
      * 4xkk - SNE Vx, byte
      * Skip next instruction if Vx != kk.
      * The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
-     * TODO
      */
     fun skipIfRegisterAndMemoryNotEqual(value: UInt) {
-        LOG.debug("SNE Vx, byte")
+        val x = x(value)
+        val byte = rightByte(value)
+
+        if (memoryManager.registers[x.toInt()] != byte) {
+            memoryManager.skipNextInstruction()
+        }
+
+        LOG.debug("SNE V${toHex(x)}, ${toHex(byte)}")
     }
 
     /**
      * 5xy0 - SE Vx, Vy
      * Skip next instruction if Vx = Vy.
      * The interpreter compares register Vx to register Vy, and if they are equal, increments the program counter by 2.
-     * TODO
      */
     fun skipIfRegisterAndRegisterEqual(value: UInt) {
-        LOG.debug("SE Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        if (memoryManager.registers[x.toInt()] == memoryManager.registers[y.toInt()]) {
+            memoryManager.skipNextInstruction()
+        }
+
+        LOG.debug("SE V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * 6xkk - LD Vx, byte
      * Set Vx = kk.
      * The interpreter puts the value kk into register Vx.
-     * TODO
      */
     fun loadMemoryIntoRegister(value: UInt) {
-        LOG.debug("LD Vx, byte")
+        val x = x(value)
+        val byte = rightByte(value)
+
+        memoryManager.registers[x.toInt()] = byte
+
+        LOG.debug("LD V${toHex(x)}, ${toHex(byte)}")
     }
 
     /**
