@@ -75,7 +75,7 @@ class InstructionDecoderUnitTest {
     @ParameterizedTest
     @ValueSource(ints = [ 0x7120, 0x7320, 0x7450 ])
     fun `Decode Add memory to register instruction (ADD Vx, byte)`(param: Int) {
-        expectThat(instructionDecoder.decode(param.toUInt())).isEqualTo(cpu::addMemoryToRegister)
+        expectThat(instructionDecoder.decode(param.toUInt())).isEqualTo(cpu::addValueToRegister)
     }
 
     @ParameterizedTest

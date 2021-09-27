@@ -37,7 +37,7 @@ class InstructionDecoder {
                         }
                     }
                     0x6 -> cpu::loadMemoryIntoRegister
-                    0x7 -> cpu::addMemoryToRegister
+                    0x7 -> cpu::addValueToRegister
                     0x8 -> {
                         return when (rightNibble(instruction).toInt()) {
                             0x0 -> cpu::loadRegisterIntoRegister

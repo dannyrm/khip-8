@@ -20,10 +20,16 @@ class Cpu(private val memoryManager: MemoryManager,
         LOG.debug("Starting CPU...")
 
         while (!halt) {
-            // FETCH .. DECODE .. EXECUTE
+            // FETCH
             val instruction = memoryManager.fetchNextInstruction()
+
+            // DECODE
             val decodedInstruction = instructionDecoder.decode(instruction)
+
+            // EXECUTE
             decodedInstruction.invoke(instruction)
+
+            // Wait until the next instruction should be executed
             delay(FREQUENCY_IN_MILLIS)
         }
     }
@@ -153,50 +159,78 @@ class Cpu(private val memoryManager: MemoryManager,
      * 7xkk - ADD Vx, byte
      * Set Vx = Vx + kk.
      * Adds the value kk to the value of register Vx, then stores the result in Vx.
-     * TODO
-     */
-    fun addMemoryToRegister(value: UInt) {
-        LOG.debug("ADD Vx, byte")
+     * If the final value exceeds decimal 0xFF, the register will wraparound to a corresponding value that can be
+     * stored. In other words, the register will always be reduced modulo decimal 256.
+     * See https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions
+     * */
+    fun addValueToRegister(value: UInt) {
+        val x = x(value)
+        val byte = rightByte(value)
+
+        val currentValue = memoryManager.registers[x.toInt()]
+
+        memoryManager.registers[x.toInt()] = (currentValue + byte).toUByte()
+
+        LOG.debug("ADD V${toHex(x)}, ${toHex(byte)}")
     }
 
     /**
      * 8xy0 - LD Vx, Vy
      * Set Vx = Vy.
      * Stores the value of register Vy in register Vx.
-     * TODO
      */
     fun loadRegisterIntoRegister(value: UInt) {
-        LOG.debug("LD Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        memoryManager.registers[x.toInt()] = memoryManager.registers[y.toInt()]
+
+        LOG.debug("LD V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * 8xy1 - OR Vx, Vy
      * Set Vx = Vx OR Vy.
      * Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx.
-     * TODO
      */
     fun or(value: UInt) {
-        LOG.debug("OR Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        val result = memoryManager.registers[x.toInt()] or memoryManager.registers[y.toInt()]
+        memoryManager.registers[x.toInt()] = result
+
+        LOG.debug("OR V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * 8xy2 - AND Vx, Vy
      * Set Vx = Vx AND Vy.
-     * Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
-     * TODO
+     * Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx.
      */
     fun and(value: UInt) {
-        LOG.debug("AND Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        val result = memoryManager.registers[x.toInt()] and memoryManager.registers[y.toInt()]
+        memoryManager.registers[x.toInt()] = result
+
+        LOG.debug("AND V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * 8xy3 - XOR Vx, Vy
      * Set Vx = Vx XOR Vy.
      * Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx.
-     * TODO
      */
     fun xor(value: UInt) {
-        LOG.debug("XOR Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        val result = memoryManager.registers[x.toInt()] xor memoryManager.registers[y.toInt()]
+        memoryManager.registers[x.toInt()] = result
+
+        LOG.debug("XOR V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
@@ -205,30 +239,57 @@ class Cpu(private val memoryManager: MemoryManager,
      * The values of Vx and Vy are added together.
      * If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0.
      * Only the lowest 8 bits of the result are kept, and stored in Vx.
-     * TODO
      */
     fun addRegisterAndRegister(value: UInt) {
-        LOG.debug("ADD Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        val xValue = memoryManager.registers[x.toInt()]
+        val yValue = memoryManager.registers[y.toInt()]
+
+        val result = xValue.toUInt() + yValue.toUInt()
+
+        memoryManager.registers[0xF] = if (result > 255.toUInt()) 0x1.toUByte() else 0x0.toUByte()
+        memoryManager.registers[x.toInt()] = result.toUByte()
+
+        LOG.debug("ADD V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * 8xy5 - SUB Vx, Vy
      * Set Vx = Vx - Vy, set VF = NOT borrow.
      * If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
-     * TODO
      */
     fun subtractYRegisterFromXRegister(value: UInt) {
-        LOG.debug("SUB Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        val xValue = memoryManager.registers[x.toInt()]
+        val yValue = memoryManager.registers[y.toInt()]
+
+        val result = xValue.toUInt() - yValue.toUInt()
+
+        memoryManager.registers[0xF] = if (xValue > yValue) 0x1.toUByte() else 0x0.toUByte()
+        memoryManager.registers[x.toInt()] = result.toUByte()
+
+        LOG.debug("SUB V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * 8xy6 - SHR Vx {, Vy}
-     * Set Vx = Vx SHR 1.
-     * If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
-     * TODO
+     * Store the value of register VY shifted right one bit in register VX
+     * Set register VF to the least significant bit prior to the shift
+     * See https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions
      */
     fun shiftRight(value: UInt) {
-        LOG.debug("SHR Vx {, Vy}")
+        val x = x(value)
+        val y = y(value)
+
+        val yValue = memoryManager.registers[y.toInt()]
+        memoryManager.registers[0xF] = yValue and 1.toUByte()
+        memoryManager.registers[x.toInt()] = (yValue.toUInt() shr 1).toUByte()
+
+        LOG.debug("SHR V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
