@@ -276,6 +276,25 @@ class CpuUnitTest {
         verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
     }
 
+    @ParameterizedTest
+    @CsvSource(value = ["8127,1,2,FE,45,47,0","8FE7,F,E,FF,FF,0,0","8FE7,F,E,09,08,FF,0", "8FE7,F,E,08,08,0,0",
+                        "8FE7,F,E,F1,0F,1E,0","8FE7,F,E,0F,F1,E2,1","8127,1,2,45,FE,B9,1"])
+    fun `subtract y and x then store in x 8XY7`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterResult: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
+        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+        cpu.subtractXRegisterFromYRegister(instruction.toUInt())
+
+        verify { memoryManager.registers[yRegisterLocation] = yRegisterResult.toUByte() }
+        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+    }
+
     companion object {
         private val UNUSED_VALUE : UInt = 1.toUInt()
     }

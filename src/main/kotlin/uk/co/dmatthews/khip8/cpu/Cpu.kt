@@ -295,11 +295,21 @@ class Cpu(private val memoryManager: MemoryManager,
     /**
      * 8xy7 - SUBN Vx, Vy
      * Set Vx = Vy - Vx, set VF = NOT borrow.
-     * If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
-     * TODO
+     * If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vy.
      */
     fun subtractXRegisterFromYRegister(value: UInt) {
-        LOG.debug("SUBN Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        val xValue = memoryManager.registers[x.toInt()]
+        val yValue = memoryManager.registers[y.toInt()]
+
+        val result = yValue.toUInt() - xValue.toUInt()
+
+        memoryManager.registers[0xF] = if (yValue > xValue) 0x1.toUByte() else 0x0.toUByte()
+        memoryManager.registers[y.toInt()] = result.toUByte()
+
+        LOG.debug("SUBN V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
