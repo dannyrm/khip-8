@@ -1,5 +1,6 @@
 package uk.co.dmatthews.khip8.cpu
 
+import kotlinx.coroutines.delay
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import nibbleByteHex
 import org.slf4j.Logger
@@ -12,9 +13,9 @@ import x
 
 class Cpu(private val memoryManager: MemoryManager,
           private val instructionDecoder: InstructionDecoder,
-          var halt: Boolean = false) {
+          private var halt: Boolean = false) {
 
-    fun start() {
+    suspend fun start() {
         LOG.debug("Starting CPU...")
 
         while (!halt) {
@@ -22,12 +23,23 @@ class Cpu(private val memoryManager: MemoryManager,
             val instruction = memoryManager.fetchNextInstruction()
             val decodedInstruction = instructionDecoder.decode(instruction)
             decodedInstruction.invoke(instruction)
+            delay(FREQUENCY_IN_MILLIS)
         }
     }
 
     fun halt() {
         LOG.debug("Halting CPU...")
         halt = true
+    }
+
+    /**
+     * 0nnn - SYS addr
+     * Jump to a machine code routine at nnn.
+     * This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
+     * TODO
+     */
+    fun sysCall(value: UInt) {
+        LOG.debug("SYS addr")
     }
 
     /**
@@ -392,17 +404,9 @@ class Cpu(private val memoryManager: MemoryManager,
         LOG.debug("LD Vx, [I]")
     }
 
-    /**
-     * 0nnn - SYS addr
-     * Jump to a machine code routine at nnn.
-     * This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
-     * TODO
-     */
-    fun sysCall(value: UInt) {
-        LOG.debug("SYS addr")
-    }
-
     companion object {
+        // 500 Hz, calculated as 1000 / 500 = 2.
+        const val FREQUENCY_IN_MILLIS = 17L
         private val LOG: Logger = LoggerFactory.getLogger(Cpu::class.java)
     }
 }

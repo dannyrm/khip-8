@@ -7,8 +7,8 @@ import java.io.File
 import java.io.FileInputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class MemoryManager(var delayRegister: UByte = 0.toUByte(),
-                    var soundRegister: UByte = 0.toUByte(),
+class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
+                    var soundRegister: TimerRegister = TimerRegister(),
                     var I: UInt = 0.toUInt(), // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
                     val stack: Stack = Stack(STACK_SIZE),
                     var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
@@ -76,7 +76,7 @@ class MemoryManager(var delayRegister: UByte = 0.toUByte(),
 
         stringBuilder.append(
             "Registers: {$newLine" +
-            "\tI = ${wordHex(I)}, PC = ${wordHex(PC)}, DT = ${toHex(delayRegister)}, ST = ${toHex(soundRegister)}$newLine" +
+            "\tI = ${wordHex(I)}, PC = ${wordHex(PC)}, DT = ${toHex(delayRegister.value)}, ST = ${toHex(soundRegister.value)}$newLine" +
             "}$newLine" +
             "General Registers: {$newLine" +
             registers +

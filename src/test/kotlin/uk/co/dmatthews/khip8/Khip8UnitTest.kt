@@ -1,5 +1,6 @@
 package uk.co.dmatthews.khip8
 
+import io.mockk.coVerify
 import uk.co.dmatthews.khip8.cpu.Cpu
 import io.mockk.mockk
 import io.mockk.verify
@@ -14,7 +15,7 @@ class Khip8UnitTest {
         val memoryManager = mockk<MemoryManager>(relaxed = true)
         val cpu = mockk<Cpu>(relaxed = true)
 
-        val khip8 = Khip8(cpu, memoryManager)
+        Khip8(cpu, memoryManager)
 
         verify { memoryManager.loadSpriteDigitsIntoMemory() }
     }
@@ -33,15 +34,32 @@ class Khip8UnitTest {
     }
 
     @Test
-    fun `start starts the cpu`() {
+    fun `start starts the cpu and timers`() {
         val memoryManager = mockk<MemoryManager>(relaxed = true)
         val cpu = mockk<Cpu>(relaxed = true)
-
-        val file = mockk<File>()
 
         val khip8 = Khip8(cpu, memoryManager)
         khip8.start()
 
-        verify { cpu.start() }
+        coVerify {
+            cpu.start()
+            memoryManager.soundRegister.start()
+            memoryManager.delayRegister.start()
+        }
+    }
+
+    @Test
+    fun `halt stops the cpu and timers`() {
+        val memoryManager = mockk<MemoryManager>(relaxed = true)
+        val cpu = mockk<Cpu>(relaxed = true)
+
+        val khip8 = Khip8(cpu, memoryManager)
+        khip8.halt()
+
+        coVerify {
+            cpu.halt()
+            memoryManager.soundRegister.halt()
+            memoryManager.delayRegister.halt()
+        }
     }
 }

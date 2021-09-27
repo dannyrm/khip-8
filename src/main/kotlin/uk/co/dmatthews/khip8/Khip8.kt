@@ -1,5 +1,7 @@
 package uk.co.dmatthews.khip8
 
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import uk.co.dmatthews.khip8.cpu.Cpu
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import org.slf4j.Logger
@@ -21,7 +23,18 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager) {
     fun start() {
         LOG.debug("System starting state: ${System.lineSeparator()}")
         LOG.debug(memoryManager.toString())
-        cpu.start()
+
+        runBlocking {
+            launch { cpu.start() }
+            launch { memoryManager.delayRegister.start() }
+            launch { memoryManager.soundRegister.start() }
+        }
+    }
+
+    fun halt() {
+        cpu.halt()
+        memoryManager.delayRegister.halt()
+        memoryManager.soundRegister.halt()
     }
 
     private fun boot() {

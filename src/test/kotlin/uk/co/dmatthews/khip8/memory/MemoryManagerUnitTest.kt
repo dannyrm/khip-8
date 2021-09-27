@@ -83,8 +83,8 @@ class MemoryManagerUnitTest {
         memoryManager.ram[24] = 0x11.toUByte()
 
         memoryManager.I = 0x55.toUInt()
-        memoryManager.delayRegister = 0x44.toUByte()
-        memoryManager.soundRegister = 0x33.toUByte()
+        memoryManager.delayRegister.value = 0x44.toUByte()
+        memoryManager.soundRegister.value = 0x33.toUByte()
 
         memoryManager.registers[1] = 0x11.toUByte()
         memoryManager.registers[3] = 0x22.toUByte()
