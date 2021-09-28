@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import rightByte
 import rightNibbleByte
 import toHex
-import uk.co.dmatthews.khip8.memory.DisplayMemory
+import wordHex
 import x
 import y
 
@@ -286,7 +286,7 @@ class Cpu(private val memoryManager: MemoryManager,
         val y = y(value)
 
         val yValue = memoryManager.registers[y.toInt()]
-        memoryManager.registers[0xF] = yValue and 1u
+        memoryManager.registers[0xF] = yValue and 0x1u
         memoryManager.registers[x.toInt()] = (yValue.toUInt() shr 1).toUByte()
 
         LOG.debug("SHR V${toHex(x)}, V${toHex(y)}")
@@ -314,42 +314,60 @@ class Cpu(private val memoryManager: MemoryManager,
 
     /**
      * 8xyE - SHL Vx {, Vy}
-     * Set Vx = Vx SHL 1.
-     * If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
-     * TODO
+     * Store the value of register VY shifted left one bit in register VX
+     * Set register VF to the most significant bit prior to the shift
+     * See https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions
      */
     fun shiftLeft(value: UInt) {
-        LOG.debug("SHL Vx {, Vy}")
+        val x = x(value)
+        val y = y(value)
+
+        val yValue = memoryManager.registers[y.toInt()]
+        memoryManager.registers[0xF] = ((yValue and 0x80u).toUInt() shr 7).toUByte()
+        memoryManager.registers[x.toInt()] = (yValue.toUInt() shl 0x1).toUByte()
+
+        LOG.debug("SHL V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * 9xy0 - SNE Vx, Vy
      * Skip next instruction if Vx != Vy.
      * The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
-     * TODO
      */
     fun skipIfRegisterAndRegisterNotEqual(value: UInt) {
-        LOG.debug("SNE Vx, Vy")
+        val x = x(value)
+        val y = y(value)
+
+        if (memoryManager.registers[x.toInt()] != memoryManager.registers[y.toInt()]) {
+            memoryManager.skipNextInstruction()
+        }
+
+        LOG.debug("SNE V${toHex(x)}, V${toHex(y)}")
     }
 
     /**
      * Annn - LD I, addr
      * Set I = nnn.
      * The value of register I is set to nnn.
-     * TODO
      */
     fun loadMemoryIntoIRegister(value: UInt) {
-        LOG.debug("LD I, addr")
+        val value = rightNibbleByte(value)
+
+        memoryManager.I = value
+        LOG.debug("LD I, ${wordHex(value)}")
     }
 
     /**
      * Bnnn - JP V0, addr
      * Jump to location nnn + V0.
      * The program counter is set to nnn plus the value of V0.
-     * TODO
      */
     fun jumpWithOffset(value: UInt) {
-        LOG.debug("JP V0, addr")
+        val value = rightNibbleByte(value)
+
+        memoryManager.PC = value + memoryManager.registers[0]
+
+        LOG.debug("JP V0, ${wordHex(value)}")
     }
 
     /**

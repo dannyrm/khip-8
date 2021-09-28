@@ -112,6 +112,18 @@ class CpuUnitTest {
     }
 
     @Test
+    fun `Skip if register and register are not equal 9XY0`() {
+        val memory = mockk<ValidatedMemory>()
+        every { memoryManager.registers } returns memory
+        every { memory[5] } returns 0xAu
+        every { memory[8] } returns 0xBu
+
+        cpu.skipIfRegisterAndRegisterNotEqual(0x9580u)
+
+        verify { memoryManager.skipNextInstruction() }
+    }
+
+    @Test
     fun `Do not skip if register and register are not equal 5XY0`() {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
@@ -119,6 +131,18 @@ class CpuUnitTest {
         every { memory[8] } returns 0xBu
 
         cpu.skipIfRegisterAndRegisterEqual(0x5580u)
+
+        verify(exactly = 0) { memoryManager.skipNextInstruction() }
+    }
+
+    @Test
+    fun `Do not skip if register and register are equal 9XY0`() {
+        val memory = mockk<ValidatedMemory>()
+        every { memoryManager.registers } returns memory
+        every { memory[5] } returns 0xAu
+        every { memory[8] } returns 0xAu
+
+        cpu.skipIfRegisterAndRegisterNotEqual(0x9580u)
 
         verify(exactly = 0) { memoryManager.skipNextInstruction() }
     }
@@ -277,6 +301,22 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
+    @CsvSource(value = ["812E,1,2,45,8A,0","835E,3,5,F5,EA,1","835E,3,5,FF,FE,1"])
+    fun `left shift y and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
+                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
+                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
+                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
+        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+        cpu.shiftLeft(instruction.toUInt())
+
+        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+    }
+
+    @ParameterizedTest
     @CsvSource(value = ["8127,1,2,FE,45,47,0","8FE7,F,E,FF,FF,0,0","8FE7,F,E,09,08,FF,0", "8FE7,F,E,08,08,0,0",
                         "8FE7,F,E,F1,0F,1E,0","8FE7,F,E,0F,F1,E2,1","8127,1,2,45,FE,B9,1"])
     fun `subtract y and x then store in x 8XY7`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
@@ -293,6 +333,26 @@ class CpuUnitTest {
 
         verify { memoryManager.registers[yRegisterLocation] = yRegisterResult.toUByte() }
         verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["A123,123","AFFF,FFF"])
+    fun `Load memory into I register ANNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) iRegisterValue: Int) {
+        cpu.loadMemoryIntoIRegister(instruction.toUInt())
+
+        verify { memoryManager.I = iRegisterValue.toUInt() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["B123,12,135","BFFF,FF,10FE","B001,01,02"])
+    fun `Jump with offset BNNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) v0RegisterValue: Int,
+                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) pcValue: Int) {
+        every { memoryManager.registers[0] } returns v0RegisterValue.toUByte()
+        cpu.jumpWithOffset(instruction.toUInt())
+
+        verify { memoryManager.PC = pcValue.toUInt() }
     }
 
     companion object {
