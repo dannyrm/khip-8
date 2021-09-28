@@ -11,29 +11,29 @@ class ValidatedMemoryUnitTest {
     @Test
     fun `Store and retrieve values`() {
         val validatedMemory = ValidatedMemory(4)
-        validatedMemory[0] = 1.toUByte()
-        validatedMemory[2] = 2.toUByte()
+        validatedMemory[0] = 1u
+        validatedMemory[2] = 2u
 
-        expectThat(validatedMemory[2]).isEqualTo(2.toUByte())
-        expectThat(validatedMemory[0]).isEqualTo(1.toUByte())
+        expectThat(validatedMemory[2]).isEqualTo(2u)
+        expectThat(validatedMemory[0]).isEqualTo(1u)
     }
 
     @Test
     fun `Store, replace and retrieve values`() {
         val validatedMemory = ValidatedMemory(4)
-        validatedMemory[0] = 1.toUByte()
-        validatedMemory[2] = 2.toUByte()
-        validatedMemory[0] = 3.toUByte()
-        validatedMemory[2] = 4.toUByte()
+        validatedMemory[0] = 1u
+        validatedMemory[2] = 2u
+        validatedMemory[0] = 3u
+        validatedMemory[2] = 4u
 
-        expectThat(validatedMemory[2]).isEqualTo(4.toUByte())
-        expectThat(validatedMemory[0]).isEqualTo(3.toUByte())
+        expectThat(validatedMemory[2]).isEqualTo(4u)
+        expectThat(validatedMemory[0]).isEqualTo(3u)
     }
 
     @Test
     fun `Set value outside range`() {
         val validatedMemory = ValidatedMemory(4)
-        validatedMemory[0] = 1.toUByte()
+        validatedMemory[0] = 1u
 
         expectThrows<IllegalArgumentException> { 2.toUByte().also { validatedMemory[5] = it } }
         expectThrows<IllegalArgumentException> { 2.toUByte().also { validatedMemory[-1] = it } }
@@ -42,7 +42,7 @@ class ValidatedMemoryUnitTest {
     @Test
     fun `Get value outside range`() {
         val validatedMemory = ValidatedMemory(4)
-        validatedMemory[0] = 1.toUByte()
+        validatedMemory[0] = 1u
 
         expectThrows<IllegalArgumentException> { validatedMemory[5] }
         expectThrows<IllegalArgumentException> { validatedMemory[-1] }
@@ -51,11 +51,11 @@ class ValidatedMemoryUnitTest {
     @Test
     fun `Set and get values at extreme of range`() {
         val validatedMemory = ValidatedMemory(4)
-        validatedMemory[0] = 10.toUByte()
-        validatedMemory[3] = 5.toUByte()
+        validatedMemory[0] = 10u
+        validatedMemory[3] = 5u
 
-        expectThat(validatedMemory[0]).isEqualTo(10.toUByte())
-        expectThat(validatedMemory[3]).isEqualTo(5.toUByte())
+        expectThat(validatedMemory[0]).isEqualTo(10u)
+        expectThat(validatedMemory[3]).isEqualTo(5u)
     }
 
     @Test
@@ -70,8 +70,8 @@ class ValidatedMemoryUnitTest {
     @Test
     fun `Check toString format with partially completed memory`() {
         val validatedMemory = ValidatedMemory(45)
-        validatedMemory[0] = 1.toUByte()
-        validatedMemory[42] = 5.toUByte()
+        validatedMemory[0] = 1u
+        validatedMemory[42] = 5u
 
         expectThat(validatedMemory.toString()).isEqualTo("\t0x0000 | 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00  *" + System.lineSeparator() +
                 "\t0x0014 | 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00" + System.lineSeparator() +

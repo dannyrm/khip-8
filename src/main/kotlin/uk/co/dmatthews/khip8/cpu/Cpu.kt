@@ -249,7 +249,7 @@ class Cpu(private val memoryManager: MemoryManager,
 
         val result = xValue.toUInt() + yValue.toUInt()
 
-        memoryManager.registers[0xF] = if (result > 255.toUInt()) 0x1.toUByte() else 0x0.toUByte()
+        memoryManager.registers[0xF] = if (result > 255u) 0x1u else 0x0u
         memoryManager.registers[x.toInt()] = result.toUByte()
 
         LOG.debug("ADD V${toHex(x)}, V${toHex(y)}")
@@ -269,7 +269,7 @@ class Cpu(private val memoryManager: MemoryManager,
 
         val result = xValue.toUInt() - yValue.toUInt()
 
-        memoryManager.registers[0xF] = if (xValue > yValue) 0x1.toUByte() else 0x0.toUByte()
+        memoryManager.registers[0xF] = if (xValue > yValue) 0x1u else 0x0u
         memoryManager.registers[x.toInt()] = result.toUByte()
 
         LOG.debug("SUB V${toHex(x)}, V${toHex(y)}")
@@ -286,7 +286,7 @@ class Cpu(private val memoryManager: MemoryManager,
         val y = y(value)
 
         val yValue = memoryManager.registers[y.toInt()]
-        memoryManager.registers[0xF] = yValue and 1.toUByte()
+        memoryManager.registers[0xF] = yValue and 1u
         memoryManager.registers[x.toInt()] = (yValue.toUInt() shr 1).toUByte()
 
         LOG.debug("SHR V${toHex(x)}, V${toHex(y)}")
@@ -306,7 +306,7 @@ class Cpu(private val memoryManager: MemoryManager,
 
         val result = yValue.toUInt() - xValue.toUInt()
 
-        memoryManager.registers[0xF] = if (yValue > xValue) 0x1.toUByte() else 0x0.toUByte()
+        memoryManager.registers[0xF] = if (yValue > xValue) 0x1u else 0x0u
         memoryManager.registers[y.toInt()] = result.toUByte()
 
         LOG.debug("SUBN V${toHex(x)}, V${toHex(y)}")

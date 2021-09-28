@@ -25,7 +25,7 @@ class CpuUnitTest {
 
     @Test
     fun `ret sets correct value to pc 00EE`() {
-        val stackValue = 42.toUInt()
+        val stackValue = 42u
 
         val stack = mockk<Stack>()
         every { stack.pop() } returns stackValue
@@ -40,9 +40,9 @@ class CpuUnitTest {
 
     @Test
     fun `jmp sets correct value to pc 1NNN`() {
-        cpu.jump(0x1321.toUInt())
+        cpu.jump(0x1321u)
 
-        verify { memoryManager setProperty MemoryManager::PC.name value 0x321.toUInt() }
+        verify { memoryManager setProperty MemoryManager::PC.name value 0x321u }
     }
 
     @Test
@@ -59,9 +59,9 @@ class CpuUnitTest {
     fun `Skip if register and byte are equal 3XNN`() {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xA.toUByte()
+        every { memory[5] } returns 0xAu
 
-        cpu.skipIfRegisterAndMemoryEqual(0x350A.toUInt())
+        cpu.skipIfRegisterAndMemoryEqual(0x350Au)
 
         verify { memoryManager.skipNextInstruction() }
     }
@@ -70,9 +70,9 @@ class CpuUnitTest {
     fun `Do not skip if register and byte are not equal 3XNN`() {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xB.toUByte()
+        every { memory[5] } returns 0xBu
 
-        cpu.skipIfRegisterAndMemoryEqual(0x350A.toUInt())
+        cpu.skipIfRegisterAndMemoryEqual(0x350Au)
 
         verify(exactly = 0) { memoryManager.skipNextInstruction() }
     }
@@ -81,9 +81,9 @@ class CpuUnitTest {
     fun `Skip if register and byte are not equal 4XNN`() {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xA.toUByte()
+        every { memory[5] } returns 0xAu
 
-        cpu.skipIfRegisterAndMemoryNotEqual(0x450A.toUInt())
+        cpu.skipIfRegisterAndMemoryNotEqual(0x450Au)
 
         verify(exactly = 0) { memoryManager.skipNextInstruction() }
     }
@@ -92,9 +92,9 @@ class CpuUnitTest {
     fun `Do not skip if register and byte are equal 4XNN`() {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xB.toUByte()
+        every { memory[5] } returns 0xBu
 
-        cpu.skipIfRegisterAndMemoryNotEqual(0x450A.toUInt())
+        cpu.skipIfRegisterAndMemoryNotEqual(0x450Au)
 
         verify { memoryManager.skipNextInstruction() }
     }
@@ -103,10 +103,10 @@ class CpuUnitTest {
     fun `Skip if register and register are equal 5XY0`() {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xA.toUByte()
-        every { memory[8] } returns 0xA.toUByte()
+        every { memory[5] } returns 0xAu
+        every { memory[8] } returns 0xAu
 
-        cpu.skipIfRegisterAndRegisterEqual(0x5580.toUInt())
+        cpu.skipIfRegisterAndRegisterEqual(0x5580u)
 
         verify { memoryManager.skipNextInstruction() }
     }
@@ -115,27 +115,27 @@ class CpuUnitTest {
     fun `Do not skip if register and register are not equal 5XY0`() {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xA.toUByte()
-        every { memory[8] } returns 0xB.toUByte()
+        every { memory[5] } returns 0xAu
+        every { memory[8] } returns 0xBu
 
-        cpu.skipIfRegisterAndRegisterEqual(0x5580.toUInt())
+        cpu.skipIfRegisterAndRegisterEqual(0x5580u)
 
         verify(exactly = 0) { memoryManager.skipNextInstruction() }
     }
 
     @Test
     fun `call puts pc on stack then sets pc to nnn 2NNN`() {
-        val pcValue = 42.toUInt()
+        val pcValue = 42u
 
         val stack = mockk<Stack>()
         every { stack.push(pcValue) } just runs
         every { memoryManager.stack } returns stack
         every { memoryManager getProperty MemoryManager::PC.name } returns pcValue
 
-        cpu.call(0x2321.toUInt())
+        cpu.call(0x2321u)
 
         verify { stack.push(pcValue) }
-        verify { memoryManager setProperty MemoryManager::PC.name value 0x321.toUInt() }
+        verify { memoryManager setProperty MemoryManager::PC.name value 0x321u }
     }
 
     @ParameterizedTest
@@ -296,6 +296,6 @@ class CpuUnitTest {
     }
 
     companion object {
-        private val UNUSED_VALUE : UInt = 1.toUInt()
+        private val UNUSED_VALUE : UInt = 1u
     }
 }

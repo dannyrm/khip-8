@@ -18,97 +18,96 @@ class BitManipulationUnitTest {
     @Test
     fun `Get Right most byte`() {
         expectThat(
-            rightByte(0x4321.toUInt())
-        ).isEqualTo(0x21.toUByte()
-        )
+            rightByte(0x4321u)
+        ).isEqualTo(0x21u)
     }
 
     @Test
     fun `Get left Nibble`() {
         expectThat(
-            leftNibble(0x4321.toUInt())
-        ).isEqualTo(0x4.toUByte()
+            leftNibble(0x4321u)
+        ).isEqualTo(0x4u
         )
     }
 
     @Test
     fun `Get right Nibble`() {
         expectThat(
-            rightNibble(0x4321.toUInt())
-        ).isEqualTo(0x1.toUByte()
+            rightNibble(0x4321u)
+        ).isEqualTo(0x1u
         )
     }
 
     @Test
     fun `Get x value`() {
         expectThat(
-            x(0x4321.toUInt())
-        ).isEqualTo(0x3.toUByte()
+            x(0x4321u)
+        ).isEqualTo(0x3u
         )
     }
 
     @Test
     fun `Get y value`() {
         expectThat(
-            y(0x4321.toUInt())
-        ).isEqualTo(0x2.toUByte()
+            y(0x4321u)
+        ).isEqualTo(0x2u
         )
     }
 
     @Test
     fun `Get right nibble bytes`() {
         expectThat(
-            rightNibbleByte(0x4321.toUInt())
-        ).isEqualTo(0x321.toUInt()
+            rightNibbleByte(0x4321u)
+        ).isEqualTo(0x321u
         )
     }
 
     @Test
     fun `Create big endian word`() {
         expectThat(
-            createBigEndianWordFromBytes(0x43.toUByte(), 0x21.toUByte())
-        ).isEqualTo(0x4321.toUInt()
+            createBigEndianWordFromBytes(0x43u, 0x21u)
+        ).isEqualTo(0x4321u
         )
     }
 
     @Test
     fun `Int to hex converts Int to hex`() {
-        expectThat(toHex(15.toUInt(), 2)).isEqualTo("0x0F")
+        expectThat(toHex(15u, 2)).isEqualTo("0x0F")
     }
 
     @Test
     fun `Int to hex with padding of 2`() {
-        expectThat(toHex(0x1.toUInt(), 2)).isEqualTo("0x01")
+        expectThat(toHex(0x1u, 2)).isEqualTo("0x01")
     }
 
     @Test
     fun `Int to hex with padding of 4`() {
-        expectThat(toHex(0x123.toUInt(), 4)).isEqualTo("0x0123")
+        expectThat(toHex(0x123u, 4)).isEqualTo("0x0123")
     }
 
     @Test
     fun `Int to hex with padding of 4 and value matches limit`() {
-        expectThat(toHex(0x1234.toUInt(), 4)).isEqualTo("0x1234")
+        expectThat(toHex(0x1234u, 4)).isEqualTo("0x1234")
     }
 
     @Test
     fun `Int to hex with padding of 4 and value over limit`() {
-        expectThat(toHex(0x12345.toUInt(), 4)).isEqualTo("0x12345")
+        expectThat(toHex(0x12345u, 4)).isEqualTo("0x12345")
     }
 
     @Test
     fun `Byte to hex converts Byte to hex`() {
-        expectThat(toHex(15.toUByte())).isEqualTo("0x0F")
+        expectThat(toHex(15u)).isEqualTo("0x0F")
     }
 
     @Test
     fun `wordHex converts with padding of 4`() {
-        expectThat(wordHex(0x123.toUInt())).isEqualTo("0x0123")
+        expectThat(wordHex(0x123u)).isEqualTo("0x0123")
     }
 
     @Test
     fun `wordHex does not cut off if value is larger`() {
-        expectThat(wordHex(0x12345.toUInt())).isEqualTo("0x12345")
+        expectThat(wordHex(0x12345u)).isEqualTo("0x12345")
     }
 
     @Test
@@ -123,11 +122,11 @@ class BitManipulationUnitTest {
 
     @Test
     fun `nibbleByteHex converts with padding of 3`() {
-        expectThat(nibbleByteHex(0x12.toUInt())).isEqualTo("0x012")
+        expectThat(nibbleByteHex(0x12u)).isEqualTo("0x012")
     }
 
     @Test
     fun `nibbleByteHex does not cut off if value is larger`() {
-        expectThat(nibbleByteHex(0x12345.toUInt())).isEqualTo("0x12345")
+        expectThat(nibbleByteHex(0x12345u)).isEqualTo("0x12345")
     }
 }

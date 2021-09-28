@@ -22,12 +22,12 @@ class InstructionDecoderUnitTest {
 
     @Test
     fun `Decode Clear Screen instruction (CLS)`() {
-        expectThat(instructionDecoder.decode(0x00E0.toUInt())).isEqualTo(cpu::clearScreen)
+        expectThat(instructionDecoder.decode(0x00E0u)).isEqualTo(cpu::clearScreen)
     }
 
     @Test
     fun `Decode Subroutine return instruction (RET)`() {
-        expectThat(instructionDecoder.decode(0x00EE.toUInt())).isEqualTo(cpu::doReturn)
+        expectThat(instructionDecoder.decode(0x00EEu)).isEqualTo(cpu::doReturn)
     }
 
     @ParameterizedTest

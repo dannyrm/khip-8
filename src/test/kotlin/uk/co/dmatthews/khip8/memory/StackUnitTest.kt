@@ -10,51 +10,51 @@ class StackUnitTest {
     @Test
     fun `push and pop`() {
         val stack = Stack(4)
-        stack.push(1.toUInt())
+        stack.push(1u)
 
-        expectThat(stack.pop()).isEqualTo(1.toUInt())
+        expectThat(stack.pop()).isEqualTo(1u)
     }
 
     @Test
     fun `push and pop multiple times`() {
         val stack = Stack(4)
-        stack.push(1.toUInt())
-        stack.push(2.toUInt())
-        stack.push(3.toUInt())
-        stack.push(4.toUInt())
+        stack.push(1u)
+        stack.push(2u)
+        stack.push(3u)
+        stack.push(4u)
 
-        expectThat(stack.pop()).isEqualTo(4.toUInt())
-        expectThat(stack.pop()).isEqualTo(3.toUInt())
-        expectThat(stack.pop()).isEqualTo(2.toUInt())
-        expectThat(stack.pop()).isEqualTo(1.toUInt())
+        expectThat(stack.pop()).isEqualTo(4u)
+        expectThat(stack.pop()).isEqualTo(3u)
+        expectThat(stack.pop()).isEqualTo(2u)
+        expectThat(stack.pop()).isEqualTo(1u)
     }
 
     @Test
     fun `push to full stack`() {
         val stack = Stack(4)
-        stack.push(1.toUInt())
-        stack.push(2.toUInt())
-        stack.push(3.toUInt())
-        stack.push(4.toUInt())
-        expectThrows<IllegalStateException> { stack.push(5.toUInt()) }
+        stack.push(1u)
+        stack.push(2u)
+        stack.push(3u)
+        stack.push(4u)
+        expectThrows<IllegalStateException> { stack.push(5u) }
     }
 
     @Test
     fun `pop from empty stack`() {
         val stack = Stack(4)
-        stack.push(1.toUInt())
+        stack.push(1u)
 
-        expectThat(stack.pop()).isEqualTo(1.toUInt())
+        expectThat(stack.pop()).isEqualTo(1u)
         expectThrows<IllegalStateException> { stack.pop() }
     }
 
     @Test
     fun `Check toString correct with elements`() {
         val stack = Stack(4)
-        stack.push(1.toUInt())
-        stack.push(2.toUInt())
-        stack.push(3.toUInt())
-        stack.push(4.toUInt())
+        stack.push(1u)
+        stack.push(2u)
+        stack.push(3u)
+        stack.push(4u)
 
         val nl = System.lineSeparator()
 

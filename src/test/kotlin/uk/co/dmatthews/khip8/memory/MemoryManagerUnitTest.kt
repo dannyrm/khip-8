@@ -29,19 +29,19 @@ class MemoryManagerUnitTest {
             loadFile("inputs/15-puzzle.ch8")
         )
 
-        expectThat(memoryManager.PC).isEqualTo(0x200.toUInt())
+        expectThat(memoryManager.PC).isEqualTo(0x200u)
 
         var instruction = memoryManager.fetchNextInstruction()
-        expectThat(instruction).isEqualTo(0x00E0.toUInt())
-        expectThat(memoryManager.PC).isEqualTo(0x202.toUInt())
+        expectThat(instruction).isEqualTo(0x00E0u)
+        expectThat(memoryManager.PC).isEqualTo(0x202u)
 
         instruction = memoryManager.fetchNextInstruction()
-        expectThat(instruction).isEqualTo(0x6C00.toUInt())
-        expectThat(memoryManager.PC).isEqualTo(0x204.toUInt())
+        expectThat(instruction).isEqualTo(0x6C00u)
+        expectThat(memoryManager.PC).isEqualTo(0x204u)
 
         instruction = memoryManager.fetchNextInstruction()
-        expectThat(instruction).isEqualTo(0x4C00.toUInt())
-        expectThat(memoryManager.PC).isEqualTo(0x206.toUInt())
+        expectThat(instruction).isEqualTo(0x4C00u)
+        expectThat(memoryManager.PC).isEqualTo(0x206u)
     }
 
     @Test
@@ -52,22 +52,22 @@ class MemoryManagerUnitTest {
         println(memoryManager)
 
         val expectedValues = ubyteArrayOf(
-            0xF0.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0xF0.toUByte(),
-            0x20.toUByte(), 0x60.toUByte(), 0x20.toUByte(), 0x20.toUByte(), 0x70.toUByte(),
-            0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(),
-            0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(),
-            0x90.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0x10.toUByte(),
-            0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(),
-            0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(),
-            0xF0.toUByte(), 0x10.toUByte(), 0x20.toUByte(), 0x40.toUByte(), 0x40.toUByte(),
-            0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(),
-            0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(),
-            0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0x90.toUByte(),
-            0xE0.toUByte(), 0x90.toUByte(), 0xE0.toUByte(), 0x90.toUByte(), 0xE0.toUByte(),
-            0xF0.toUByte(), 0x80.toUByte(), 0x80.toUByte(), 0x80.toUByte(), 0xF0.toUByte(),
-            0xE0.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0xE0.toUByte(),
-            0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(),
-            0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0x80.toUByte(),
+            0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u,
+            0x20u, 0x60u, 0x20u, 0x20u, 0x70u,
+            0xF0u, 0x10u, 0xF0u, 0x80u, 0xF0u,
+            0xF0u, 0x10u, 0xF0u, 0x10u, 0xF0u,
+            0x90u, 0x90u, 0xF0u, 0x10u, 0x10u,
+            0xF0u, 0x80u, 0xF0u, 0x10u, 0xF0u,
+            0xF0u, 0x80u, 0xF0u, 0x90u, 0xF0u,
+            0xF0u, 0x10u, 0x20u, 0x40u, 0x40u,
+            0xF0u, 0x90u, 0xF0u, 0x90u, 0xF0u,
+            0xF0u, 0x90u, 0xF0u, 0x10u, 0xF0u,
+            0xF0u, 0x90u, 0xF0u, 0x90u, 0x90u,
+            0xE0u, 0x90u, 0xE0u, 0x90u, 0xE0u,
+            0xF0u, 0x80u, 0x80u, 0x80u, 0xF0u,
+            0xE0u, 0x90u, 0x90u, 0x90u, 0xE0u,
+            0xF0u, 0x80u, 0xF0u, 0x80u, 0xF0u,
+            0xF0u, 0x80u, 0xF0u, 0x80u, 0x80u,
         )
 
         for (i in 0 until 80) {
@@ -80,31 +80,31 @@ class MemoryManagerUnitTest {
     fun `Check skip next instruction works as expected`() {
         val memoryManager = MemoryManager()
 
-        expectThat(memoryManager.PC).isEqualTo(0x200.toUInt())
+        expectThat(memoryManager.PC).isEqualTo(0x200u)
         memoryManager.skipNextInstruction()
-        expectThat(memoryManager.PC).isEqualTo(0x202.toUInt())
+        expectThat(memoryManager.PC).isEqualTo(0x202u)
     }
 
     @Test
     fun `check toString format`() {
         val memoryManager = MemoryManager(ram = ValidatedMemory(42))
 
-        memoryManager.ram[24] = 0x11.toUByte()
+        memoryManager.ram[24] = 0x11u
 
-        memoryManager.I = 0x55.toUInt()
-        memoryManager.delayRegister.value = 0x44.toUByte()
-        memoryManager.soundRegister.value = 0x33.toUByte()
+        memoryManager.I = 0x55u
+        memoryManager.delayRegister.value = 0x44u
+        memoryManager.soundRegister.value = 0x33u
 
-        memoryManager.registers[1] = 0x11.toUByte()
-        memoryManager.registers[3] = 0x22.toUByte()
-        memoryManager.registers[9] = 0x66.toUByte()
+        memoryManager.registers[1] = 0x11u
+        memoryManager.registers[3] = 0x22u
+        memoryManager.registers[9] = 0x66u
 
-        memoryManager.stack.push(0x77.toUInt())
-        memoryManager.stack.push(0x88.toUInt())
-        memoryManager.stack.push(0x99.toUInt())
+        memoryManager.stack.push(0x77u)
+        memoryManager.stack.push(0x88u)
+        memoryManager.stack.push(0x99u)
 
-        memoryManager.displayMemory[5,5] = 0xFF.toUByte()
-        memoryManager.displayMemory[25,31] = 0xFF.toUByte()
+        memoryManager.displayMemory[5,5] = 0xFFu
+        memoryManager.displayMemory[25,31] = 0xFFu
 
         var newLine = System.lineSeparator()
 

@@ -9,7 +9,7 @@ import java.io.FileInputStream
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
                     var soundRegister: TimerRegister = TimerRegister(),
-                    var I: UInt = 0.toUInt(), // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
+                    var I: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
                     val stack: Stack = Stack(STACK_SIZE),
                     var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val ram: ValidatedMemory = ValidatedMemory(MEMORY_SIZE),
@@ -30,7 +30,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     fun fetchNextInstruction(): UInt {
         val pc = PC.toInt()
         val instruction = createBigEndianWordFromBytes(ram[pc], ram[pc + 1])
-        PC += 2.toUInt()
+        PC += 2u
 
         return instruction
     }
@@ -39,29 +39,29 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
      * Instructions are 16 bits long
      */
     fun skipNextInstruction() {
-        PC += 2.toUInt()
+        PC += 2u
     }
 
     fun loadSpriteDigitsIntoMemory() {
         populateRam(
             INTERPRETER_START_ADDRESS,
             arrayOf(
-                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0xF0.toUByte()), // Zero
-                ubyteArrayOf(0x20.toUByte(), 0x60.toUByte(), 0x20.toUByte(), 0x20.toUByte(), 0x70.toUByte()), // One
-                ubyteArrayOf(0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte()), // Two
-                ubyteArrayOf(0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte()), // Three
-                ubyteArrayOf(0x90.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0x10.toUByte()), // Four
-                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte()), // Five
-                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte()), // Six
-                ubyteArrayOf(0xF0.toUByte(), 0x10.toUByte(), 0x20.toUByte(), 0x40.toUByte(), 0x40.toUByte()), // Seven
-                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte()), // Eight
-                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x10.toUByte(), 0xF0.toUByte()), // Nine
-                ubyteArrayOf(0xF0.toUByte(), 0x90.toUByte(), 0xF0.toUByte(), 0x90.toUByte(), 0x90.toUByte()), // A
-                ubyteArrayOf(0xE0.toUByte(), 0x90.toUByte(), 0xE0.toUByte(), 0x90.toUByte(), 0xE0.toUByte()), // B
-                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0x80.toUByte(), 0x80.toUByte(), 0xF0.toUByte()), // C
-                ubyteArrayOf(0xE0.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0x90.toUByte(), 0xE0.toUByte()), // D
-                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte()), // E
-                ubyteArrayOf(0xF0.toUByte(), 0x80.toUByte(), 0xF0.toUByte(), 0x80.toUByte(), 0x80.toUByte()), // F
+                ubyteArrayOf(0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u), // Zero
+                ubyteArrayOf(0x20u, 0x60u, 0x20u, 0x20u, 0x70u), // One
+                ubyteArrayOf(0xF0u, 0x10u, 0xF0u, 0x80u, 0xF0u), // Two
+                ubyteArrayOf(0xF0u, 0x10u, 0xF0u, 0x10u, 0xF0u), // Three
+                ubyteArrayOf(0x90u, 0x90u, 0xF0u, 0x10u, 0x10u), // Four
+                ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x10u, 0xF0u), // Five
+                ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x90u, 0xF0u), // Six
+                ubyteArrayOf(0xF0u, 0x10u, 0x20u, 0x40u, 0x40u), // Seven
+                ubyteArrayOf(0xF0u, 0x90u, 0xF0u, 0x90u, 0xF0u), // Eight
+                ubyteArrayOf(0xF0u, 0x90u, 0xF0u, 0x10u, 0xF0u), // Nine
+                ubyteArrayOf(0xF0u, 0x90u, 0xF0u, 0x90u, 0x90u), // A
+                ubyteArrayOf(0xE0u, 0x90u, 0xE0u, 0x90u, 0xE0u), // B
+                ubyteArrayOf(0xF0u, 0x80u, 0x80u, 0x80u, 0xF0u), // C
+                ubyteArrayOf(0xE0u, 0x90u, 0x90u, 0x90u, 0xE0u), // D
+                ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x80u, 0xF0u), // E
+                ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x80u, 0x80u), // F
             )
         )
     }

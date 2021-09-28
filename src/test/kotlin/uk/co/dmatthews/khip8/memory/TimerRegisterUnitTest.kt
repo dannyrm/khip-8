@@ -13,11 +13,11 @@ import kotlin.test.Test
 
 class TimerRegisterUnitTest: CoroutineTest() {
     private lateinit var timerRegister: TimerRegister
-    private var expectedTimerValue: UByte = 0.toUByte()
+    private var expectedTimerValue: UByte = 0u
 
     @Test
     fun `Check decrements correctly and halts correctly`() {
-        expectedTimerValue = 5.toUByte()
+        expectedTimerValue = 5u
 
         timerRegister = TimerRegister()
         timerRegister.value = expectedTimerValue
@@ -30,10 +30,10 @@ class TimerRegisterUnitTest: CoroutineTest() {
     }
 
     suspend fun checkDecrement() {
-        while (expectedTimerValue >= 0.toUByte()) {
+        while (expectedTimerValue >= 0u) {
             delay(16)
             expectThat(timerRegister.value).isEqualTo(expectedTimerValue)
-            if (expectedTimerValue > 0.toUByte()) {
+            if (expectedTimerValue > 0u) {
                 expectedTimerValue--
             }
         }

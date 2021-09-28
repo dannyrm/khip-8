@@ -1,11 +1,11 @@
 package uk.co.dmatthews.khip8.memory
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS) { 0.toULong() }) {
+class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS) { 0u }) {
 
     fun clear() {
         for (i in 0 until MAX_HEIGHT_IN_BITS) {
-            buffer[i] = 0.toULong()
+            buffer[i] = 0u
         }
     }
 
@@ -30,7 +30,7 @@ class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS
         val mask = (0x1.toULong() shl (MAX_WIDTH_IN_BITS -1 - x)).toULong()
 
         val row = buffer[y]
-        return ((row and mask) > 0.toULong())
+        return ((row and mask) > 0u)
     }
 
     override fun toString(): String {
