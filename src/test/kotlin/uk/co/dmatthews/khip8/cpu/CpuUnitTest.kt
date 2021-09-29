@@ -11,6 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.converter.ConvertWith
 import org.junit.jupiter.params.provider.CsvSource
+import strikt.api.expectThat
+import strikt.assertions.isGreaterThanOrEqualTo
+import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
 import uk.co.dmatthews.khip8.memory.DisplayMemory
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
@@ -353,6 +356,18 @@ class CpuUnitTest {
         cpu.jumpWithOffset(instruction.toUInt())
 
         verify { memoryManager.PC = pcValue.toUInt() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["C100,1,0,0"])
+    // TODO Better if this could work with ranges
+    fun `Random with mask CXNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeFrom: Int,
+                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeTo: Int) {
+        cpu.random(instruction.toUInt())
+
+        verify { memoryManager.registers[eq(xRegisterLocation)] = 0u }
     }
 
     companion object {

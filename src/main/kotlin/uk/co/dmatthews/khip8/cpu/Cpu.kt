@@ -375,10 +375,17 @@ class Cpu(private val memoryManager: MemoryManager,
      * Set Vx = random byte AND kk.
      * The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk.
      * The results are stored in Vx.
-     * TODO
      */
     fun random(value: UInt) {
-        LOG.debug("RND Vx, byte")
+        val x = x(value)
+        val byte = rightByte(value)
+
+        val randomValue = (0x0..0xFF).random().toUByte()
+        val randomValueMasked = randomValue and byte
+
+        memoryManager.registers[x.toInt()] = randomValueMasked
+
+        LOG.debug("RND V${toHex(x)}, ${toHex(byte)}")
     }
 
     /**
