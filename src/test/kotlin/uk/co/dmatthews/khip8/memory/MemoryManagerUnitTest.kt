@@ -49,8 +49,6 @@ class MemoryManagerUnitTest {
         val memoryManager = MemoryManager()
         memoryManager.loadSpriteDigitsIntoMemory()
 
-        println(memoryManager)
-
         val expectedValues = ubyteArrayOf(
             0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u,
             0x20u, 0x60u, 0x20u, 0x20u, 0x70u,
@@ -71,15 +69,48 @@ class MemoryManagerUnitTest {
         )
 
         for (i in 0 until 80) {
-            println(i)
             expectThat(memoryManager.ram[i]).isEqualTo(expectedValues[i])
+        }
+    }
+
+    @Test
+    fun `Check correct data for each sprite digit`() {
+        val memoryManager = MemoryManager()
+        memoryManager.loadSpriteDigitsIntoMemory()
+
+        val expectedValues = arrayOf(
+            ubyteArrayOf(0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u),
+            ubyteArrayOf(0x20u, 0x60u, 0x20u, 0x20u, 0x70u),
+            ubyteArrayOf(0xF0u, 0x10u, 0xF0u, 0x80u, 0xF0u),
+            ubyteArrayOf(0xF0u, 0x10u, 0xF0u, 0x10u, 0xF0u),
+            ubyteArrayOf(0x90u, 0x90u, 0xF0u, 0x10u, 0x10u),
+            ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x10u, 0xF0u),
+            ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x90u, 0xF0u),
+            ubyteArrayOf(0xF0u, 0x10u, 0x20u, 0x40u, 0x40u),
+            ubyteArrayOf(0xF0u, 0x90u, 0xF0u, 0x90u, 0xF0u),
+            ubyteArrayOf(0xF0u, 0x90u, 0xF0u, 0x10u, 0xF0u),
+            ubyteArrayOf(0xF0u, 0x90u, 0xF0u, 0x90u, 0x90u),
+            ubyteArrayOf(0xE0u, 0x90u, 0xE0u, 0x90u, 0xE0u),
+            ubyteArrayOf(0xF0u, 0x80u, 0x80u, 0x80u, 0xF0u),
+            ubyteArrayOf(0xE0u, 0x90u, 0x90u, 0x90u, 0xE0u),
+            ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x80u, 0xF0u),
+            ubyteArrayOf(0xF0u, 0x80u, 0xF0u, 0x80u, 0x80u)
+        )
+
+        for (i in 0 until 16) {
+            val digitStartLocation = memoryManager.getLocationOfSpriteDigit(i.toUInt()).toInt()
+
+            expectThat(memoryManager.ram[digitStartLocation]).isEqualTo(expectedValues[i][0])
+            expectThat(memoryManager.ram[digitStartLocation+1]).isEqualTo(expectedValues[i][1])
+            expectThat(memoryManager.ram[digitStartLocation+2]).isEqualTo(expectedValues[i][2])
+            expectThat(memoryManager.ram[digitStartLocation+3]).isEqualTo(expectedValues[i][3])
+            expectThat(memoryManager.ram[digitStartLocation+4]).isEqualTo(expectedValues[i][4])
         }
     }
 
     @Test
     fun `Check skip next instruction works as expected`() {
         val memoryManager = MemoryManager()
-
         expectThat(memoryManager.PC).isEqualTo(0x200u)
         memoryManager.skipNextInstruction()
         expectThat(memoryManager.PC).isEqualTo(0x202u)
@@ -103,9 +134,6 @@ class MemoryManagerUnitTest {
         memoryManager.stack.push(0x88u)
         memoryManager.stack.push(0x99u)
 
-        memoryManager.displayMemory[5,5] = 0xFFu
-        memoryManager.displayMemory[25,31] = 0xFFu
-
         var newLine = System.lineSeparator()
 
         expectThat(memoryManager.toString()).isEqualTo(
@@ -127,41 +155,7 @@ class MemoryManagerUnitTest {
                     "\t0x0000 | 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00$newLine" +
                     "\t0x0014 | 0x00 0x00 0x00 0x00 0x11 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00  *$newLine" +
                     "\t0x0028 | 0x00 0x00$newLine" +
-                    "}$newLine" +
-                    "Display Memory {$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000011111111000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
-                    "\t0000000000000000000000000111111110000000000000000000000000000000$newLine" +
-                    "}"
+                    "}$newLine"
         )
     }
 

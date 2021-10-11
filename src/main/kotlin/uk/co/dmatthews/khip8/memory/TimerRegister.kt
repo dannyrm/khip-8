@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 class TimerRegister(var value: UByte = 0u, private var halt: Boolean = false) {
 
     fun halt() {
+        LOG.info("Halting timer register...")
         halt = true
     }
 

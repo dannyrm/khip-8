@@ -12,9 +12,8 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
                     var I: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
                     val stack: Stack = Stack(STACK_SIZE),
                     var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
-                    val ram: ValidatedMemory = ValidatedMemory(MEMORY_SIZE),
-                    val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS),
-                    val displayMemory: DisplayMemory = DisplayMemory()
+                    val ram: ValidatedMemory = ValidatedMemory(RAM_MEMORY_SIZE),
+                    val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
                    ) {
 
     fun loadProgram(input: File) {
@@ -66,8 +65,12 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
         )
     }
 
-    private fun populateRam(startLocation: Int, arrays: Array<UByteArray>) {
-        var currentLocation = startLocation
+    fun getLocationOfSpriteDigit(digit: UInt): UInt {
+        return INTERPRETER_START_ADDRESS + (digit * NUM_BYTES_PER_DIGIT)
+    }
+
+    private fun populateRam(startLocation: UInt, arrays: Array<UByteArray>) {
+        var currentLocation = startLocation.toInt()
 
         for (array in arrays) {
             for (element in array) {
@@ -93,21 +96,20 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
             "}$newLine" +
             "Ram = {$newLine" +
             ram +
-            "}$newLine" +
-            "Display Memory {$newLine" +
-            "$displayMemory" +
-            "}"
+            "}$newLine"
         )
 
         return stringBuilder.toString()
     }
 
     companion object {
-        private const val MEMORY_SIZE = 4096 // 4 KB memory available to Chip 8
+        const val RAM_MEMORY_SIZE = 4096 // 4 KB memory available to Chip 8
         private const val NUM_GENERAL_PURPOSE_REGISTERS = 16 // 16 registers, named Vx where x = 1...F
         private const val STACK_SIZE = 16 // Up to 16 levels of nested subroutines
 
-        private const val INTERPRETER_START_ADDRESS = 0x000
+        const val INTERPRETER_START_ADDRESS = 0x000u
         private const val PROGRAM_START_ADDRESS = 0x200
+
+        private const val NUM_BYTES_PER_DIGIT = 5u
     }
 }

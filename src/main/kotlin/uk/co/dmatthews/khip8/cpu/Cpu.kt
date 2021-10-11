@@ -1,25 +1,33 @@
 package uk.co.dmatthews.khip8.cpu
 
+import uk.co.dmatthews.khip8.input.Chip8InputManager
+import uk.co.dmatthews.khip8.display.Display
 import kotlinx.coroutines.delay
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import nibbleByteHex
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rightByte
+import rightNibble
 import rightNibbleByte
 import toHex
 import wordHex
 import x
 import y
 
-class Cpu(private val memoryManager: MemoryManager,
-          private val instructionDecoder: InstructionDecoder,
+class Cpu(private val instructionDecoder: InstructionDecoder,
+          private val display: Display,
+          private val memoryManager: MemoryManager,
+          private val chip8InputManager: Chip8InputManager,
           private var halt: Boolean = false) {
 
     suspend fun start() {
         LOG.debug("Starting CPU...")
 
         while (!halt) {
+            // Lock inputs so they can't change during the cycle.
+            chip8InputManager.lockInputs()
+
             // FETCH
             val instruction = memoryManager.fetchNextInstruction()
 
@@ -27,7 +35,7 @@ class Cpu(private val memoryManager: MemoryManager,
             val decodedInstruction = instructionDecoder.decode(instruction)
 
             // EXECUTE
-            decodedInstruction.invoke(instruction)
+            decodedInstruction.invoke(this, instruction)
 
             // Wait until the next instruction should be executed
             delay(FREQUENCY_IN_MILLIS)
@@ -53,7 +61,7 @@ class Cpu(private val memoryManager: MemoryManager,
      * Clear the display.
      */
     fun clearScreen(unusedValue: UInt) {
-        memoryManager.displayMemory.clear()
+        display.clear()
         LOG.debug("CLS")
     }
 
@@ -365,7 +373,7 @@ class Cpu(private val memoryManager: MemoryManager,
     fun jumpWithOffset(value: UInt) {
         val value = rightNibbleByte(value)
 
-        memoryManager.PC = value + memoryManager.registers[0]
+        memoryManager.PC = value + memoryManager.registers[0].toUInt()
 
         LOG.debug("JP V0, ${wordHex(value)}")
     }
@@ -389,19 +397,31 @@ class Cpu(private val memoryManager: MemoryManager,
     }
 
     /**
-     *
      * Dxyn - DRW Vx, Vy, nibble
-     * Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+     * uk.co.dmatthews.khip8.display.Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
      * The interpreter reads n bytes from memory, starting at the address stored in I.
      * These bytes are then displayed as sprites on screen at coordinates (Vx, Vy).
      * Sprites are XORed onto the existing screen.
      * If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0.
      * If the sprite is positioned so part of it is outside the coordinates of the display,
      * it wraps around to the opposite side of the screen.
-     * TODO
+     * TODO Is the wrapping behaviour right? Other docs say otherwise
      */
     fun draw(value: UInt) {
-        LOG.debug("DRW Vx, Vy, nibble")
+        val x = x(value)
+        val y = y(value)
+
+        val xValue = memoryManager.registers[x.toInt()].toInt()
+        val yValue = memoryManager.registers[y.toInt()].toInt()
+
+        val spriteHeight = rightNibble(value).toInt()
+        val startingAddress = memoryManager.I
+
+        for (i in 0 until spriteHeight) {
+            display[xValue, yValue+i] = memoryManager.ram[startingAddress.toInt()+i]
+        }
+
+        LOG.debug("DRW V${toHex(x)}, V${toHex(y)}, ${toHex(spriteHeight.toUByte())}")
     }
 
     /**
@@ -409,9 +429,15 @@ class Cpu(private val memoryManager: MemoryManager,
      * Skip next instruction if key with the value of Vx is pressed.
      * Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position,
      * PC is increased by 2.
-     * TODO
      */
     fun skipIfKeyPressed(value: UInt) {
+        val x = x(value)
+        val registerValue = memoryManager.registers[x.toInt()]
+
+        if (chip8InputManager.isActive(registerValue.toInt())) {
+            memoryManager.skipNextInstruction()
+        }
+        LOG.debug("SKP V${toHex(x)}")
     }
 
     /**
@@ -419,20 +445,29 @@ class Cpu(private val memoryManager: MemoryManager,
      * Skip next instruction if key with the value of Vx is not pressed.
      * Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position,
      * PC is increased by 2.
-     * TODO
      */
     fun skipIfKeyNotPressed(value: UInt) {
-        LOG.debug("SKNP Vx")
+        val x = x(value)
+        val registerValue = memoryManager.registers[x.toInt()]
+
+        if (!chip8InputManager.isActive(registerValue.toInt())) {
+            memoryManager.skipNextInstruction()
+        }
+        LOG.debug("SKNP V${toHex(x)}")
     }
 
     /**
      * Fx07 - LD Vx, DT
      * Set Vx = delay timer value.
      * The value of DT is placed into Vx.
-     * TODO
      */
     fun setRegisterToDelayTimerValue(value: UInt) {
-        LOG.debug("LD Vx, DT")
+        val x = x(value)
+        val delayTimerValue = memoryManager.delayRegister.value
+
+        memoryManager.registers[x.toInt()] = delayTimerValue
+
+        LOG.debug("LD V${toHex(x)}, DT ($delayTimerValue)")
     }
 
     /**
@@ -449,40 +484,54 @@ class Cpu(private val memoryManager: MemoryManager,
      * Fx15 - LD DT, Vx
      * Set delay timer = Vx.
      * DT is set equal to the value of Vx.
-     * TODO
      */
     fun setDelayTimerRegisterToValueInGeneralRegister(value: UInt) {
-        LOG.debug("LD DT, Vx")
+        val x = x(value)
+
+        memoryManager.delayRegister.value = memoryManager.registers[x.toInt()]
+
+        LOG.debug("LD DT, V${toHex(x)}")
     }
 
     /**
      * Fx18 - LD ST, Vx
      * Set sound timer = Vx.
      * ST is set equal to the value of Vx.
-     * TODO
      */
     fun setSoundTimerRegisterToValueInGeneralRegister(value: UInt) {
-        LOG.debug("LD ST, Vx")
+        val x = x(value)
+
+        memoryManager.soundRegister.value = memoryManager.registers[x.toInt()]
+
+        LOG.debug("LD ST, V${toHex(x)}")
     }
 
     /**
      * Fx1E - ADD I, Vx
      * Set I = I + Vx.
      * The values of I and Vx are added, and the results are stored in I.
-     * TODO
      */
-    fun addIRegisterToGeneralRegister(value: UInt) {
-        LOG.debug("ADD I, Vx")
+    fun addGeneralRegisterToIRegister(value: UInt) {
+        val x = x(value)
+
+        // I is a 16 bit register
+        memoryManager.I = (memoryManager.I + memoryManager.registers[x.toInt()]) % 0xFFFFu
+
+        LOG.debug("ADD I, V${toHex(x)}")
     }
 
     /**
      * Fx29 - LD F, Vx
      * Set I = location of sprite for digit Vx.
      * The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
-     * TODO
+     * TODO write tests
      */
     fun loadIRegisterWithLocationOfSpriteForDigit(value: UInt) {
-        LOG.debug("LD F, Vx")
+        val x = x(value)
+
+        memoryManager.I = memoryManager.getLocationOfSpriteDigit(memoryManager.registers[x.toInt()].toUInt())
+
+        LOG.debug("LD F, V${toHex(x)}")
     }
 
     /**
@@ -490,35 +539,72 @@ class Cpu(private val memoryManager: MemoryManager,
      * Store BCD representation of Vx in memory locations I, I+1, and I+2.
      * The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I,
      * the tens digit at location I+1, and the ones digit at location I+2.
-     * TODO
+     * TODO write tests
      */
     fun storeBCDRepresentation(value: UInt) {
-        LOG.debug("LD B, Vx")
+        val x = x(value)
+        val xValueString = memoryManager.registers[x.toInt()].toString()
+
+        var nextLocation = memoryManager.I
+
+        for (i in 0 until 3-xValueString.length) {
+            memoryManager.ram[nextLocation.toInt()] = 0u
+            nextLocation++
+        }
+
+        for (i in xValueString.indices) {
+            memoryManager.ram[nextLocation.toInt()] = xValueString[i].toString().toUByte()
+            nextLocation++
+        }
+
+        LOG.debug("LD B, V${toHex(x)}")
     }
 
     /**
      * Fx55 - LD [I], Vx
-     * Store registers V0 through Vx in memory starting at location I.
+     * Store registers V0 through Vx (inclusive) in memory starting at location I.
      * The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
-     * TODO
+     * TODO: Write tests
      */
     fun loadAllGeneralRegistersIntoMemory(value: UInt) {
-        LOG.debug("LD [I], Vx")
+        val x = x(value)
+        val I = memoryManager.I
+
+        for (i in 0..x.toInt()) {
+            val memoryLocation = (I.toInt() + i) % MemoryManager.RAM_MEMORY_SIZE
+
+            memoryManager.ram[memoryLocation] = memoryManager.registers[i]
+        }
+
+        memoryManager.I += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+
+        LOG.debug("LD [I], V${toHex(x)}")
     }
 
     /**
      * Fx65 - LD Vx, [I]
      * Read registers V0 through Vx from memory starting at location I.
      * The interpreter reads values from memory starting at location I into registers V0 through Vx.
-     * TODO
+     * TODO Write tests
      */
     fun readMemoryIntoAllGeneralRegisters(value: UInt) {
-        LOG.debug("LD Vx, [I]")
+        val x = x(value)
+        val I = memoryManager.I
+
+        for (i in 0..x.toInt()) {
+            val memoryLocation = (I.toInt() + i) % MemoryManager.RAM_MEMORY_SIZE
+
+            memoryManager.registers[i] = memoryManager.ram[memoryLocation]
+        }
+
+        memoryManager.I += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+
+        LOG.debug("LD V${toHex(x)}, [I]")
     }
 
     companion object {
         // 500 Hz, calculated as 1000 / 500 = 2.
-        const val FREQUENCY_IN_MILLIS = 17L
+        const val FREQUENCY_IN_MILLIS = 2L
         private val LOG: Logger = LoggerFactory.getLogger(Cpu::class.java)
     }
 }

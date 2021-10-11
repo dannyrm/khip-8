@@ -1,5 +1,7 @@
 package uk.co.dmatthews.khip8.cpu
 
+import uk.co.dmatthews.khip8.input.Chip8InputManager
+import uk.co.dmatthews.khip8.display.Display
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -11,20 +13,17 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.converter.ConvertWith
 import org.junit.jupiter.params.provider.CsvSource
-import strikt.api.expectThat
-import strikt.assertions.isGreaterThanOrEqualTo
-import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
-import uk.co.dmatthews.khip8.memory.DisplayMemory
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
 
 @ExtendWith(MockKExtension::class)
 class CpuUnitTest {
     @InjectMockKs private lateinit var cpu: Cpu
 
+    @MockK(relaxed = true) private lateinit var chip8InputManager: Chip8InputManager
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var instructionDecoder: InstructionDecoder
-    @MockK(relaxed = true) private lateinit var displayMemory: DisplayMemory
+    @MockK(relaxed = true) private lateinit var display: Display
 
     @Test
     fun `ret sets correct value to pc 00EE`() {
@@ -50,12 +49,9 @@ class CpuUnitTest {
 
     @Test
     fun `Clear screen calls the display to clear 00E0`() {
-        val displayMemory = mockk<DisplayMemory>(relaxed = true)
-        every { memoryManager.displayMemory } returns displayMemory
-
         cpu.clearScreen(UNUSED_VALUE)
 
-        verify { displayMemory.clear() }
+        verify { display.clear() }
     }
 
     @Test
@@ -368,6 +364,131 @@ class CpuUnitTest {
         cpu.random(instruction.toUInt())
 
         verify { memoryManager.registers[eq(xRegisterLocation)] = 0u }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["D135,1,3,5,F,FEEE"])
+    fun `Draw DXYN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
+                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
+                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
+                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) iRegisterValue: Int) {
+        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+        every { memoryManager.I } returns iRegisterValue.toUInt()
+
+        val sprite = ubyteArrayOf(0x0u,  // 0000 0000
+                                  0x81u, // 1000 0001
+                                  0x81u, // 1000 0001
+                                  0x81u, // 1000 0001
+                                  0x0u)  // 0000 0000
+
+        every { memoryManager.ram[iRegisterValue] } returns sprite[0]
+        every { memoryManager.ram[iRegisterValue+1] } returns sprite[1]
+        every { memoryManager.ram[iRegisterValue+2] } returns sprite[2]
+        every { memoryManager.ram[iRegisterValue+3] } returns sprite[3]
+        every { memoryManager.ram[iRegisterValue+4] } returns sprite[4]
+
+        cpu.draw(instruction.toUInt())
+
+        verify { display[xRegisterValue, yRegisterValue] = sprite[0] }
+        verify { display[xRegisterValue, yRegisterValue+1] = sprite[1] }
+        verify { display[xRegisterValue, yRegisterValue+2] = sprite[2] }
+        verify { display[xRegisterValue, yRegisterValue+3] = sprite[3] }
+        verify { display[xRegisterValue, yRegisterValue+4] = sprite[4] }
+    }
+
+    @Test
+    fun `Skip if key not pressed and key is not pressed EXA1`() {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns false
+
+        cpu.skipIfKeyNotPressed(0xE4A1u)
+
+        verify { memoryManager.skipNextInstruction() }
+    }
+
+    @Test
+    fun `Skip if key not pressed and key is pressed EXA1`() {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns true
+
+        cpu.skipIfKeyNotPressed(0xE4A1u)
+
+        verify(inverse = true) { memoryManager.skipNextInstruction() }
+    }
+
+    @Test
+    fun `Skip if key pressed and key is not pressed EX9E`() {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns false
+
+        cpu.skipIfKeyPressed(0xE49Eu)
+
+        verify(inverse = true) { memoryManager.skipNextInstruction() }
+    }
+
+    @Test
+    fun `Skip if key pressed and key is pressed EX9E`() {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns true
+
+        cpu.skipIfKeyPressed(0xE49Eu)
+
+        verify { memoryManager.skipNextInstruction() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["FF07,F,33", "F207,2,43"])
+    fun `Set register to delay timer value FX07`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
+                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) delayTimerValue: Int) {
+        every { memoryManager.delayRegister.value } returns delayTimerValue.toUByte()
+
+        cpu.setRegisterToDelayTimerValue(instruction.toUInt())
+
+        verify { memoryManager.registers[xLocation] = delayTimerValue.toUByte() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["FF15,F,33", "F215,2,43"])
+    fun `Set delay timer value to register FX15`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
+                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xValue: Int) {
+        every { memoryManager.registers[xLocation] } returns xValue.toUByte()
+
+        cpu.setDelayTimerRegisterToValueInGeneralRegister(instruction.toUInt())
+
+        verify { memoryManager.delayRegister.value = xValue.toUByte() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["FF18,F,33", "F218,2,43"])
+    fun `Set sound timer value to register FX18`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
+                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xValue: Int) {
+        every { memoryManager.registers[xLocation] } returns xValue.toUByte()
+
+        cpu.setSoundTimerRegisterToValueInGeneralRegister(instruction.toUInt())
+
+        verify { memoryManager.soundRegister.value = xValue.toUByte() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["FF1E,F,33,FF,132", "F21E,2,43,1,44", "F01E,0,5,FFFF,5"])
+    fun `Add general register value to I FX1E`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
+                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xValue: Int,
+                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) originalIValue: Int,
+                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultIValue: Int) {
+        every { memoryManager.registers[xLocation] } returns xValue.toUByte()
+        every { memoryManager.I } returns originalIValue.toUInt()
+
+        cpu.addGeneralRegisterToIRegister(instruction.toUInt())
+
+        verify { memoryManager.I = resultIValue.toUInt() }
     }
 
     companion object {

@@ -1,17 +1,24 @@
 package uk.co.dmatthews.khip8.memory
 
+import uk.co.dmatthews.khip8.display.Display
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
+import uk.co.dmatthews.khip8.display.DisplayMemory
 
+@ExtendWith(MockKExtension::class)
 class DisplayMemoryUnitTest {
+    @MockK private lateinit var display: Display
+    @InjectMockKs private lateinit var displayMemory: DisplayMemory
 
     @Test
     fun `check Display clears correctly`() {
-        val displayMemory = DisplayMemory()
-
         for (i in displayMemory.buffer.indices) {
             displayMemory.buffer[i] = 0xFFu
         }
@@ -25,7 +32,6 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check setting works correctly for non clipping value`() {
-        val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFFu
 
         for (i in 0..4) {
@@ -41,8 +47,18 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check xoring works correctly in simple case`() {
-        val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFFu
+
+        for (i in 0 until 5) {
+            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        }
+
+        expectThat(displayMemory.buffer[5]).isEqualTo(0x07F8000000000000u)
+
+        for (i in 6 until 32) {
+            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        }
+
         displayMemory[5,5] = 0xFFu
 
         for (i in 0 until 32) {
@@ -51,8 +67,37 @@ class DisplayMemoryUnitTest {
     }
 
     @Test
+    fun `Check Set indicates a collision`() {
+        // Initially no collision
+        expectThat(displayMemory.collision).isFalse()
+
+        displayMemory[5,5] = 0xFFu // 1111 1111
+        expectThat(displayMemory.collision).isFalse()
+
+        displayMemory[5,5] = 0xFFu // 1111 1111
+        expectThat(displayMemory.collision).isTrue()
+
+        displayMemory[5,5] = 0x01u // 0000 0001
+        expectThat(displayMemory.collision).isFalse()
+
+        displayMemory[5,5] = 0x01u // 0000 0001
+        expectThat(displayMemory.collision).isTrue()
+
+        displayMemory[5,5] = 0x0Au // 0000 1010
+        expectThat(displayMemory.collision).isFalse()
+
+        displayMemory[5,5] = 0x05u // 0000 0101
+        expectThat(displayMemory.collision).isFalse()
+
+        displayMemory[5,5] = 0x40u // 0100 0000
+        expectThat(displayMemory.collision).isFalse()
+
+        displayMemory[5,5] = 0x04u // 0000 0100
+        expectThat(displayMemory.collision).isTrue()
+    }
+
+    @Test
     fun `Check setting works multiple values works correctly for non clipping value`() {
-        val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFFu
         displayMemory[25,31] = 0xFFu
 
@@ -71,7 +116,6 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check get pixel state works`() {
-        val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFFu
 
         for (y in 0 until MAX_HEIGHT_IN_BITS) {
@@ -87,7 +131,6 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check get multiple pixel state values works correctly for non clipping value`() {
-        val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFFu
         displayMemory[25,31] = 0xFFu
 
@@ -104,7 +147,6 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check setting works correctly for clipped value`() {
-        val displayMemory = DisplayMemory()
         displayMemory[55,5] = 0xFFu
         displayMemory[56,6] = 0xFFu
         displayMemory[57,7] = 0xFFu
@@ -136,7 +178,6 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check complex xor`() {
-        val displayMemory = DisplayMemory()
         displayMemory[55,5] = 0xFFu
         displayMemory[56,6] = 0xFFu
         displayMemory[57,7] = 0xFFu
@@ -160,7 +201,6 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check get multiple pixel state values works correctly for clipped value`() {
-        val displayMemory = DisplayMemory()
         displayMemory[61,31] = 0xFFu
 
         for (y in 0 until MAX_HEIGHT_IN_BITS) {
@@ -176,7 +216,6 @@ class DisplayMemoryUnitTest {
 
     @Test
     fun `Check address wrapping works correctly`() {
-        val displayMemory = DisplayMemory()
         displayMemory[65,5] = 0xFFu // Two greater than the max width. Should wrap to position 1
         // Two greater than the max width. Should wrap to 2. 10 Greater than the max height - should wrap to 10
         displayMemory[66,42] = 0xFFu
@@ -188,8 +227,15 @@ class DisplayMemoryUnitTest {
     }
 
     @Test
+    fun `Check dimensions`() {
+        val (width, height) = displayMemory.dimensions()
+
+        expectThat(width).isEqualTo(64)
+        expectThat(height).isEqualTo(32)
+    }
+
+    @Test
     fun `Check toString`() {
-        val displayMemory = DisplayMemory()
         displayMemory[5,5] = 0xFFu
         displayMemory[25,31] = 0xFFu
         displayMemory[55,5] = 0xFFu

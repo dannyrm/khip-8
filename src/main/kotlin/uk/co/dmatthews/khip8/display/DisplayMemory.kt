@@ -1,13 +1,16 @@
-package uk.co.dmatthews.khip8.memory
+package uk.co.dmatthews.khip8.display
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS) { 0u }) {
+class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS) { 0u },
+                    var collision: Boolean = false) {
 
     fun clear() {
         for (i in 0 until MAX_HEIGHT_IN_BITS) {
             buffer[i] = 0u
         }
     }
+
+    fun dimensions() : IntArray = intArrayOf(MAX_WIDTH_IN_BITS, MAX_HEIGHT_IN_BITS)
 
     operator fun set(x: Int, y: Int, value: UByte) {
         // According to documentation:
@@ -17,13 +20,20 @@ class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS
         val adjustedX = x % MAX_WIDTH_IN_BITS
         val adjustedY = y % MAX_HEIGHT_IN_BITS
 
+        val previousRowValues = buffer[adjustedY]
+        val newRowValues: ULong
+
         if (MAX_WIDTH_IN_BITS - adjustedX <= NUMBER_OF_BITS_IN_BYTE) {
             // Sprites that are drawn partially off-screen will be clipped.
-            buffer[adjustedY] = buffer[adjustedY] xor (value.toULong() shr (NUMBER_OF_BITS_IN_BYTE - (MAX_WIDTH_IN_BITS - x)))
+            newRowValues = (value.toULong() shr (NUMBER_OF_BITS_IN_BYTE - (MAX_WIDTH_IN_BITS - x)))
+            buffer[adjustedY] = buffer[adjustedY] xor newRowValues
         } else {
             // Shifts the byte to the correct position to perform the xor
-            buffer[adjustedY] = buffer[adjustedY] xor (value.toULong() shl (MAX_WIDTH_IN_BITS - adjustedX - NUMBER_OF_BITS_IN_BYTE))
+            newRowValues = (value.toULong() shl (MAX_WIDTH_IN_BITS - adjustedX - NUMBER_OF_BITS_IN_BYTE))
+            buffer[adjustedY] = buffer[adjustedY] xor newRowValues
         }
+
+        collision = (previousRowValues and newRowValues) > 0u
     }
 
     fun getPixelState(x: Int, y: Int): Boolean {
