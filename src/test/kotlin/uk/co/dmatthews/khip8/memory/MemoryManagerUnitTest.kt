@@ -29,19 +29,19 @@ class MemoryManagerUnitTest {
             loadFile("inputs/15-puzzle.ch8")
         )
 
-        expectThat(memoryManager.PC).isEqualTo(0x200u)
+        expectThat(memoryManager.pc).isEqualTo(0x200u)
 
         var instruction = memoryManager.fetchNextInstruction()
         expectThat(instruction).isEqualTo(0x00E0u)
-        expectThat(memoryManager.PC).isEqualTo(0x202u)
+        expectThat(memoryManager.pc).isEqualTo(0x202u)
 
         instruction = memoryManager.fetchNextInstruction()
         expectThat(instruction).isEqualTo(0x6C00u)
-        expectThat(memoryManager.PC).isEqualTo(0x204u)
+        expectThat(memoryManager.pc).isEqualTo(0x204u)
 
         instruction = memoryManager.fetchNextInstruction()
         expectThat(instruction).isEqualTo(0x4C00u)
-        expectThat(memoryManager.PC).isEqualTo(0x206u)
+        expectThat(memoryManager.pc).isEqualTo(0x206u)
     }
 
     @Test
@@ -111,9 +111,9 @@ class MemoryManagerUnitTest {
     @Test
     fun `Check skip next instruction works as expected`() {
         val memoryManager = MemoryManager()
-        expectThat(memoryManager.PC).isEqualTo(0x200u)
+        expectThat(memoryManager.pc).isEqualTo(0x200u)
         memoryManager.skipNextInstruction()
-        expectThat(memoryManager.PC).isEqualTo(0x202u)
+        expectThat(memoryManager.pc).isEqualTo(0x202u)
     }
 
     @Test
@@ -122,7 +122,7 @@ class MemoryManagerUnitTest {
 
         memoryManager.ram[24] = 0x11u
 
-        memoryManager.I = 0x55u
+        memoryManager.i = 0x55u
         memoryManager.delayRegister.value = 0x44u
         memoryManager.soundRegister.value = 0x33u
 

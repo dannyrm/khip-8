@@ -37,14 +37,14 @@ class CpuUnitTest {
 
         // Value popped from the stack set to the PC
         verify { stack.pop() }
-        verify { memoryManager setProperty MemoryManager::PC.name value stackValue }
+        verify { memoryManager setProperty MemoryManager::pc.name value stackValue }
     }
 
     @Test
     fun `jmp sets correct value to pc 1NNN`() {
         cpu.jump(0x1321u)
 
-        verify { memoryManager setProperty MemoryManager::PC.name value 0x321u }
+        verify { memoryManager setProperty MemoryManager::pc.name value 0x321u }
     }
 
     @Test
@@ -153,12 +153,12 @@ class CpuUnitTest {
         val stack = mockk<Stack>()
         every { stack.push(pcValue) } just runs
         every { memoryManager.stack } returns stack
-        every { memoryManager getProperty MemoryManager::PC.name } returns pcValue
+        every { memoryManager getProperty MemoryManager::pc.name } returns pcValue
 
         cpu.call(0x2321u)
 
         verify { stack.push(pcValue) }
-        verify { memoryManager setProperty MemoryManager::PC.name value 0x321u }
+        verify { memoryManager setProperty MemoryManager::pc.name value 0x321u }
     }
 
     @ParameterizedTest
@@ -340,7 +340,7 @@ class CpuUnitTest {
                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) iRegisterValue: Int) {
         cpu.loadMemoryIntoIRegister(instruction.toUInt())
 
-        verify { memoryManager.I = iRegisterValue.toUInt() }
+        verify { memoryManager.i = iRegisterValue.toUInt() }
     }
 
     @ParameterizedTest
@@ -351,7 +351,7 @@ class CpuUnitTest {
         every { memoryManager.registers[0] } returns v0RegisterValue.toUByte()
         cpu.jumpWithOffset(instruction.toUInt())
 
-        verify { memoryManager.PC = pcValue.toUInt() }
+        verify { memoryManager.pc = pcValue.toUInt() }
     }
 
     @ParameterizedTest
@@ -377,7 +377,7 @@ class CpuUnitTest {
         every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
         every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
 
-        every { memoryManager.I } returns iRegisterValue.toUInt()
+        every { memoryManager.i } returns iRegisterValue.toUInt()
 
         val sprite = ubyteArrayOf(0x0u,  // 0000 0000
                                   0x81u, // 1000 0001
@@ -484,11 +484,11 @@ class CpuUnitTest {
                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) originalIValue: Int,
                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultIValue: Int) {
         every { memoryManager.registers[xLocation] } returns xValue.toUByte()
-        every { memoryManager.I } returns originalIValue.toUInt()
+        every { memoryManager.i } returns originalIValue.toUInt()
 
         cpu.addGeneralRegisterToIRegister(instruction.toUInt())
 
-        verify { memoryManager.I = resultIValue.toUInt() }
+        verify { memoryManager.i = resultIValue.toUInt() }
     }
 
     companion object {

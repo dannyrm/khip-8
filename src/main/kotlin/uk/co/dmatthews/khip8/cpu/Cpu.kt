@@ -70,7 +70,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
      */
     fun doReturn(unusedValue: UInt) {
-        memoryManager.PC = memoryManager.stack.pop()
+        memoryManager.pc = memoryManager.stack.pop()
 
         LOG.debug("RET")
     }
@@ -82,7 +82,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     fun jump(value: UInt) {
         val nnn = rightNibbleByte(value)
 
-        memoryManager.PC = nnn
+        memoryManager.pc = nnn
 
         LOG.debug("JP ${nibbleByteHex(nnn)}")
     }
@@ -95,8 +95,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     fun call(value: UInt) {
         val nnn = rightNibbleByte(value)
 
-        memoryManager.stack.push(memoryManager.PC)
-        memoryManager.PC = nnn
+        memoryManager.stack.push(memoryManager.pc)
+        memoryManager.pc = nnn
 
         LOG.debug("CALL ${nibbleByteHex(nnn)}")
     }
@@ -361,7 +361,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     fun loadMemoryIntoIRegister(value: UInt) {
         val value = rightNibbleByte(value)
 
-        memoryManager.I = value
+        memoryManager.i = value
         LOG.debug("LD I, ${wordHex(value)}")
     }
 
@@ -373,7 +373,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     fun jumpWithOffset(value: UInt) {
         val value = rightNibbleByte(value)
 
-        memoryManager.PC = value + memoryManager.registers[0].toUInt()
+        memoryManager.pc = value + memoryManager.registers[0].toUInt()
 
         LOG.debug("JP V0, ${wordHex(value)}")
     }
@@ -415,7 +415,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val yValue = memoryManager.registers[y.toInt()].toInt()
 
         val spriteHeight = rightNibble(value).toInt()
-        val startingAddress = memoryManager.I
+        val startingAddress = memoryManager.i
 
         for (i in 0 until spriteHeight) {
             display[xValue, yValue+i] = memoryManager.ram[startingAddress.toInt()+i]
@@ -515,7 +515,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val x = x(value)
 
         // I is a 16 bit register
-        memoryManager.I = (memoryManager.I + memoryManager.registers[x.toInt()]) % 0xFFFFu
+        memoryManager.i = (memoryManager.i + memoryManager.registers[x.toInt()]) % 0xFFFFu
 
         LOG.debug("ADD I, V${toHex(x)}")
     }
@@ -529,7 +529,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     fun loadIRegisterWithLocationOfSpriteForDigit(value: UInt) {
         val x = x(value)
 
-        memoryManager.I = memoryManager.getLocationOfSpriteDigit(memoryManager.registers[x.toInt()].toUInt())
+        memoryManager.i = memoryManager.getLocationOfSpriteDigit(memoryManager.registers[x.toInt()].toUInt())
 
         LOG.debug("LD F, V${toHex(x)}")
     }
@@ -545,7 +545,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val x = x(value)
         val xValueString = memoryManager.registers[x.toInt()].toString()
 
-        var nextLocation = memoryManager.I
+        var nextLocation = memoryManager.i
 
         for (i in 0 until 3-xValueString.length) {
             memoryManager.ram[nextLocation.toInt()] = 0u
@@ -568,15 +568,15 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      */
     fun loadAllGeneralRegistersIntoMemory(value: UInt) {
         val x = x(value)
-        val I = memoryManager.I
+        val i = memoryManager.i
 
-        for (i in 0..x.toInt()) {
-            val memoryLocation = (I.toInt() + i) % MemoryManager.RAM_MEMORY_SIZE
+        for (j in 0..x.toInt()) {
+            val memoryLocation = (i.toInt() + j) % MemoryManager.RAM_MEMORY_SIZE
 
-            memoryManager.ram[memoryLocation] = memoryManager.registers[i]
+            memoryManager.ram[memoryLocation] = memoryManager.registers[j]
         }
 
-        memoryManager.I += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
 
         LOG.debug("LD [I], V${toHex(x)}")
     }
@@ -589,15 +589,15 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      */
     fun readMemoryIntoAllGeneralRegisters(value: UInt) {
         val x = x(value)
-        val I = memoryManager.I
+        val i = memoryManager.i
 
-        for (i in 0..x.toInt()) {
-            val memoryLocation = (I.toInt() + i) % MemoryManager.RAM_MEMORY_SIZE
+        for (j in 0..x.toInt()) {
+            val memoryLocation = (i.toInt() + j) % MemoryManager.RAM_MEMORY_SIZE
 
-            memoryManager.registers[i] = memoryManager.ram[memoryLocation]
+            memoryManager.registers[j] = memoryManager.ram[memoryLocation]
         }
 
-        memoryManager.I += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
 
         LOG.debug("LD V${toHex(x)}, [I]")
     }

@@ -9,9 +9,9 @@ import java.io.FileInputStream
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
                     var soundRegister: TimerRegister = TimerRegister(),
-                    var I: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
+                    var i: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
                     val stack: Stack = Stack(STACK_SIZE),
-                    var PC: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
+                    var pc: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val ram: ValidatedMemory = ValidatedMemory(RAM_MEMORY_SIZE),
                     val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
                    ) {
@@ -27,9 +27,9 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     }
 
     fun fetchNextInstruction(): UInt {
-        val pc = PC.toInt()
+        val pc = pc.toInt()
         val instruction = createBigEndianWordFromBytes(ram[pc], ram[pc + 1])
-        PC += 2u
+        this.pc += 2u
 
         return instruction
     }
@@ -38,7 +38,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
      * Instructions are 16 bits long
      */
     fun skipNextInstruction() {
-        PC += 2u
+        pc += 2u
     }
 
     fun loadSpriteDigitsIntoMemory() {
@@ -86,7 +86,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
 
         stringBuilder.append(
             "Registers: {$newLine" +
-            "\tI = ${wordHex(I)}, PC = ${wordHex(PC)}, DT = ${toHex(delayRegister.value)}, ST = ${toHex(soundRegister.value)}$newLine" +
+            "\tI = ${wordHex(i)}, PC = ${wordHex(pc)}, DT = ${toHex(delayRegister.value)}, ST = ${toHex(soundRegister.value)}$newLine" +
             "}$newLine" +
             "General Registers: {$newLine" +
             registers +
