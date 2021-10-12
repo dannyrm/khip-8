@@ -27,6 +27,8 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager): Ui,
         this.addWindowListener(windowListener)
 
         add(canvas)
+
+        this.addKeyListener(keyboardManager)
         canvas.addKeyListener(keyboardManager)
     }
 

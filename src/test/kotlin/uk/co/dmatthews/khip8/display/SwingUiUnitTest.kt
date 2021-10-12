@@ -66,8 +66,10 @@ class SwingUiUnitTest {
     }
 
     @Test
-    fun `canvas Has key listener`() {
+    fun `canvas and jframe both Have key listener`() {
         verify { canvas.addKeyListener(keyboardManager) }
+
+        expectThat(swingUi.keyListeners.size).isEqualTo(1)
     }
 
     @Test
