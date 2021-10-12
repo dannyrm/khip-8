@@ -6,9 +6,8 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.awt.image.BufferStrategy
 
-class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager): Ui, Frame() {
-    private lateinit var onCloseSignal: () -> Unit
-
+class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
+              private var onCloseSignal: () -> Unit = {}): Ui, Frame() {
     init {
         title = "Chip 8"
 

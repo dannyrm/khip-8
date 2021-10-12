@@ -6,9 +6,8 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isTrue
-import uk.co.dmatthews.khip8.display.DisplayMemory
-import uk.co.dmatthews.khip8.display.SwingUi
 import uk.co.dmatthews.khip8.input.KeyboardManager
 import java.awt.Canvas
 import java.awt.Color
@@ -73,11 +72,16 @@ class SwingUiUnitTest {
     }
 
     @Test
-    // TODO: Fix check to invoked function
     fun `Halting calls onCloseSignal function`() {
+        val initFunction: () -> Unit = {
+            swingUi.ignoreRepaint = false
+        }
+
+        swingUi.init(initFunction)
         swingUi.halt()
 
-//        verify { ::initFunction.invoke() }
+        // initFunction is called which sets ignoreRepaint to false.
+        expectThat(swingUi.ignoreRepaint).isFalse()
     }
 
     @Test
