@@ -31,14 +31,13 @@ class FileUtilsUnitTest {
     }
 
     @Test
-    // TODO: This fails depending on machine because my Windows box is an hour wrong. Fix this.
     fun `Construct date time based file name`() {
         val dateTime = LocalDateTime.of(2019, 10, 15, 16, 25, 45, 4)
 
         val clock = Clock.fixed(dateTime.toInstant(ZoneOffset.UTC), ZoneId.systemDefault())
 
         val fileName = constructDateTimeFileName("unitTestName", clock)
-        expectThat(fileName).isEqualTo("unitTestName-2019-10-15T16-25-45-000000004")
+        expectThat(fileName).isEqualTo("unitTestName-2019-10-15T17-25-45-000000004")
     }
 
     @Test
