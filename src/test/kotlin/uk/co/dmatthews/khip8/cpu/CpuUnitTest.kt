@@ -13,6 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.converter.ConvertWith
 import org.junit.jupiter.params.provider.CsvSource
+import strikt.api.expectThat
+import strikt.assertions.isContainedIn
+import strikt.assertions.isGreaterThanOrEqualTo
+import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
 
@@ -355,15 +359,32 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["C100,1,0,0"])
-    // TODO Better if this could work with ranges
-    fun `Random with mask CXNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeFrom: Int,
-                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeTo: Int) {
+    @CsvSource(value = ["C100,1,0,0", "C500,5,0,0", "C501,5,0,1", "C503,5,0,3", "C50F,5,0,F"])
+    fun `Random with mask CXNN Ranges`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeFrom: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeTo: Int) {
+        val memoryManager = MemoryManager()
+        val cpu = Cpu(instructionDecoder, display, memoryManager, chip8InputManager)
+
         cpu.random(instruction.toUInt())
 
-        verify { memoryManager.registers[eq(xRegisterLocation)] = 0u }
+        expectThat(memoryManager.registers[xRegisterLocation])
+            .isGreaterThanOrEqualTo(resultRangeFrom.toUByte())
+            .isLessThanOrEqualTo(resultRangeTo.toUByte())
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["C104,1,'0,4'", "C120,1,'0,20'", "C140,1,'0,40'", "C115,1,'0,1,4,5,10,11,14,15'", "C180,1,'0,80'"])
+    fun `Random with mask CXNN Specific Values`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) vararg results: Int) {
+        val memoryManager = MemoryManager()
+        val cpu = Cpu(instructionDecoder, display, memoryManager, chip8InputManager)
+
+        cpu.random(instruction.toUInt())
+
+        expectThat(memoryManager.registers[1]).isContainedIn(results.map { it.toUByte() })
     }
 
     @ParameterizedTest
