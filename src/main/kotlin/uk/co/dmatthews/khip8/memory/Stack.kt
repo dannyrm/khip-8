@@ -11,7 +11,7 @@ data class Stack(private val stackSize: Int,
         if (sp+1 > stackSize) {
             throw IllegalStateException("Attempting to push to a full stack")
         }
-        stack[sp++] = value
+        stack[sp++] = (value % 0x10000u) // 16 bit values
     }
 
     fun pop(): UInt {

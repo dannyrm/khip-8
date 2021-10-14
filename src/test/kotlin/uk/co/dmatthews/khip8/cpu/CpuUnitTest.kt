@@ -52,6 +52,20 @@ class CpuUnitTest {
     }
 
     @Test
+    fun `jmp sets correct value to pc if it overflows by 1 1NNN`() {
+        cpu.jump(0x10000u)
+
+        verify { memoryManager setProperty MemoryManager::pc.name value 0u }
+    }
+
+    @Test
+    fun `jmp sets correct value to pc if it overflows by 200 1NNN`() {
+        cpu.jump(0x10200u)
+
+        verify { memoryManager setProperty MemoryManager::pc.name value 0x200u }
+    }
+
+    @Test
     fun `Clear screen calls the display to clear 00E0`() {
         cpu.clearScreen(UNUSED_VALUE)
 
@@ -348,7 +362,7 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["B123,12,135","BFFF,FF,10FE","B001,01,02"])
+    @CsvSource(value = ["B123,12,135","BFFF,FF,10FE","B001,01,02", "B2FC,04,300"])
     fun `Jump with offset BNNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) v0RegisterValue: Int,
                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) pcValue: Int) {

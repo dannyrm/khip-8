@@ -11,10 +11,11 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
                     var soundRegister: TimerRegister = TimerRegister(),
                     var i: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
                     val stack: Stack = Stack(STACK_SIZE),
-                    var pc: UInt = PROGRAM_START_ADDRESS.toUInt(), // 16 bits, program counter
                     val ram: ValidatedMemory = ValidatedMemory(RAM_MEMORY_SIZE),
                     val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
                    ) {
+    var pc: UInt = PROGRAM_START_ADDRESS.toUInt() // 16 bits, program counter
+        set(value) { field = value % 0x10000u }
 
     fun loadProgram(input: File) {
         val inputStream = FileInputStream(input)

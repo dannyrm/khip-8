@@ -16,6 +16,16 @@ class StackUnitTest {
     }
 
     @Test
+    fun `push and pop with overflow`() {
+        val stack = Stack(4)
+        stack.push(0x10000u)
+        stack.push(0x10200u)
+
+        expectThat(stack.pop()).isEqualTo(0x200u)
+        expectThat(stack.pop()).isEqualTo(0u)
+    }
+
+    @Test
     fun `push and pop multiple times`() {
         val stack = Stack(4)
         stack.push(1u)
