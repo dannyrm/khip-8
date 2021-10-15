@@ -55,7 +55,7 @@ class InstructionDecoder {
             0x3 -> Cpu::xor
             0x4 -> Cpu::addRegisterAndRegister
             0x5 -> Cpu::subtractYRegisterFromXRegister
-            0x6 -> Cpu::shiftRight
+            0x6 -> Cpu::shiftRightXOnlyVariant
             0x7 -> Cpu::subtractXRegisterFromYRegister
             0xE -> Cpu::shiftLeft
             else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")

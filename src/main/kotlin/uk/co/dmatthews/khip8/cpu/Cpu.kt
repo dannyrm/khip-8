@@ -288,6 +288,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Store the value of register VY shifted right one bit in register VX
      * Set register VF to the least significant bit prior to the shift
      * See https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions
+     * TODO: Do we need this anymore?
      */
     fun shiftRight(value: UInt) {
         val x = x(value)
@@ -301,9 +302,28 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     }
 
     /**
+     * Set VX equal to VX bitshifted right 1.
+     * VF is set to the least significant bit of VX prior to the shift.
+     * Originally this opcode meant set VX equal to VY bitshifted right 1 but emulators and software seem to ignore
+     * VY now.
+     * Note: This instruction was originally undocumented but functional due to how the 8XXX instructions were
+     * implemented on the COSMAC VIP.
+     * See https://github.com/trapexit/chip-8_documentation
+     */
+    fun shiftRightXOnlyVariant(value: UInt) {
+        val x = x(value)
+
+        val xValue = memoryManager.registers[x.toInt()]
+        memoryManager.registers[0xF] = xValue and 0x1u
+        memoryManager.registers[x.toInt()] = (xValue.toUInt() shr 1).toUByte()
+
+        LOG.debug("SHR V${toHex(x)}")
+    }
+
+    /**
      * 8xy7 - SUBN Vx, Vy
      * Set Vx = Vy - Vx, set VF = NOT borrow.
-     * If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vy.
+     * If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
      */
     fun subtractXRegisterFromYRegister(value: UInt) {
         val x = x(value)
@@ -315,7 +335,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val result = yValue.toUInt() - xValue.toUInt()
 
         memoryManager.registers[0xF] = if (yValue > xValue) 0x1u else 0x0u
-        memoryManager.registers[y.toInt()] = result.toUByte()
+        memoryManager.registers[x.toInt()] = result.toUByte()
 
         LOG.debug("SUBN V${toHex(x)}, V${toHex(y)}")
     }

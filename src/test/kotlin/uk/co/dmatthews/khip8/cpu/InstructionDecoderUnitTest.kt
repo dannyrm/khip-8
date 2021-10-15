@@ -117,7 +117,7 @@ class InstructionDecoderUnitTest {
     @ParameterizedTest
     @ValueSource(ints = [ 0x8126, 0x8326, 0x8456 ])
     fun `Decode shift right instruction (SHR Vx {, Vy})`(param: Int) {
-        expectThat(instructionDecoder.decode(param.toUInt())).isEqualTo(Cpu::shiftRight)
+        expectThat(instructionDecoder.decode(param.toUInt())).isEqualTo(Cpu::shiftRightXOnlyVariant)
     }
 
     @ParameterizedTest

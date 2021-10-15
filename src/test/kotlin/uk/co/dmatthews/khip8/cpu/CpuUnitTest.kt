@@ -72,26 +72,32 @@ class CpuUnitTest {
         verify { display.clear() }
     }
 
-    @Test
-    fun `Skip if register and byte are equal 3XNN`() {
+    @ParameterizedTest
+    @CsvSource(value = ["69AE,9,AE", "6F45,F,45", "60FF,0,FF", "6000,0,00"])
+    fun `Skip if register and byte are equal 3XNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                   @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
+                                                   @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValue: Int,) {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xAu
+        every { memory[registerLocation] } returns registerValue.toUByte()
 
-        cpu.skipIfRegisterAndMemoryEqual(0x350Au)
+        cpu.skipIfRegisterAndMemoryEqual(instruction.toUInt())
 
         verify { memoryManager.skipNextInstruction() }
     }
 
-    @Test
-    fun `Do not skip if register and byte are not equal 3XNN`() {
+    @ParameterizedTest
+    @CsvSource(value = ["6900,9,AE", "6F81,F,80", "6000,0,01"])
+    fun `Do not Skip if register and byte are not equal 3XNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                              @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
+                                                              @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValue: Int,) {
         val memory = mockk<ValidatedMemory>()
         every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xBu
+        every { memory[registerLocation] } returns registerValue.toUByte()
 
-        cpu.skipIfRegisterAndMemoryEqual(0x350Au)
+        cpu.skipIfRegisterAndMemoryEqual(instruction.toUInt())
 
-        verify(exactly = 0) { memoryManager.skipNextInstruction() }
+        verify(inverse = true) { memoryManager.skipNextInstruction() }
     }
 
     @Test
@@ -180,7 +186,7 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["69AE,9,AE", "6F45,F,45"])
+    @CsvSource(value = ["69AE,9,AE", "6F45,F,45", "60FF,0,FF", "6000,0,00"])
     fun `Load value into register 6XNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) value: Int) {
@@ -190,11 +196,11 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["7510,5,30,40", "7F05,F,F4,F9", "7F05,F,FE,03", "7FFF,F,FF,FE"])
-    fun `Add memory location to register 7XKK`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
-                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValueBefore: Int,
-                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValueAfter: Int) {
+    @CsvSource(value = ["7510,5,30,40", "7F05,F,F4,F9", "7F05,F,FE,03", "7FFF,F,FF,FE", "7E01,E,00,01", "7E03,E,FF,02"])
+    fun `Add value to register 7XKK`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                     @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
+                                     @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValueBefore: Int,
+                                     @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValueAfter: Int) {
         every { memoryManager.registers[registerLocation] } returns registerValueBefore.toUByte()
 
         cpu.addValueToRegister(instruction.toUInt())
@@ -216,7 +222,7 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["8121,1,2,FE,45,FF","8FE1,F,E,FF,FF,FF","8FE1,F,E,01,08,09"])
+    @CsvSource(value = ["8121,1,2,FE,45,FF","8FE1,F,E,FF,FF,FF","8FE1,F,E,01,08,09","8FE1,F,E,0F,F0,FF"])
     fun `or x and y then store in x 8XY1`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
@@ -232,7 +238,7 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["8122,1,2,FE,45,44","8FE2,F,E,FF,FF,FF","8FE2,F,E,01,08,0", "8FE2,F,E,08,08,08"])
+    @CsvSource(value = ["8122,1,2,FE,45,44","8FE2,F,E,FF,FF,FF","8FE2,F,E,01,08,0","8FE2,F,E,08,08,08","8452,4,5,0F,F1,01"])
     fun `and x and y then store in x 8XY2`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
@@ -248,7 +254,7 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["8123,1,2,FE,45,BB","8FE3,F,E,FF,FF,0","8FE3,F,E,01,08,09", "8FE3,F,E,08,08,0"])
+    @CsvSource(value = ["8123,1,2,FE,45,BB","8FE3,F,E,FF,FF,0","8FE3,F,E,01,08,09","8763,7,6,0F,F1,FE"])
     fun `xor x and y then store in x 8XY3`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
@@ -283,8 +289,8 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["8125,1,2,FE,45,B9,1","8FE5,F,E,FF,FF,0,0","8FE5,F,E,09,08,01,1", "8FE5,F,E,08,08,0,0",
-                        "8FE5,F,E,F1,0F,E2,1"])
+    @CsvSource(value = ["8125,1,2,FE,45,B9,1","8FE5,F,E,FF,FF,0,0","8FE5,F,E,09,08,01,1","8FE5,F,E,08,08,0,0",
+                        "8FE5,F,E,F1,0F,E2,1","8855,8,5,FF,F1,0E,1"])
     fun `subtract x and y then store in x 8XY5`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
@@ -318,6 +324,21 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
+    @CsvSource(value = ["8126,1,45,22,1","8356,3,44,22,0","8356,3,FF,7F,1","8566,5,04,02,0","8566,5,05,02,1"])
+    fun `right shift x only variant and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
+                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
+                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
+        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+
+        cpu.shiftRightXOnlyVariant(instruction.toUInt())
+
+        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+    }
+
+    @ParameterizedTest
     @CsvSource(value = ["812E,1,2,45,8A,0","835E,3,5,F5,EA,1","835E,3,5,FF,FE,1"])
     fun `left shift y and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
@@ -335,20 +356,20 @@ class CpuUnitTest {
 
     @ParameterizedTest
     @CsvSource(value = ["8127,1,2,FE,45,47,0","8FE7,F,E,FF,FF,0,0","8FE7,F,E,09,08,FF,0", "8FE7,F,E,08,08,0,0",
-                        "8FE7,F,E,F1,0F,1E,0","8FE7,F,E,0F,F1,E2,1","8127,1,2,45,FE,B9,1"])
+                        "8FE7,F,E,F1,0F,1E,0","8FE7,F,E,0F,F1,E2,1","8127,1,2,45,FE,B9,1","8127,1,2,F0,C3,D3,0"])
     fun `subtract y and x then store in x 8XY7`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterResult: Int,
+                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
         every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
         every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
 
         cpu.subtractXRegisterFromYRegister(instruction.toUInt())
 
-        verify { memoryManager.registers[yRegisterLocation] = yRegisterResult.toUByte() }
+        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
         verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
     }
 
@@ -488,7 +509,7 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["FF15,F,33", "F215,2,43"])
+    @CsvSource(value = ["FF15,F,33", "F215,2,43", "FF15,F,FF"])
     fun `Set delay timer value to register FX15`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                                  @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
                                                  @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xValue: Int) {
