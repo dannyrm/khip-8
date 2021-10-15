@@ -345,6 +345,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Store the value of register VY shifted left one bit in register VX
      * Set register VF to the most significant bit prior to the shift
      * See https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions
+     * TODO: Do we need this anymore?
      */
     fun shiftLeft(value: UInt) {
         val x = x(value)
@@ -355,6 +356,24 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         memoryManager.registers[x.toInt()] = (yValue.toUInt() shl 0x1).toUByte()
 
         LOG.debug("SHL V${toHex(x)}, V${toHex(y)}")
+    }
+
+    /**
+     * Set VX equal to VX bitshifted left 1. VF is set to the most significant bit of VX prior to the shift.
+     * Originally this opcode meant set VX equal to VY bitshifted left 1 but emulators and software seem to ignore
+     * VY now.
+     * Note: This instruction was originally undocumented but functional due to how the 8XXX instructions were
+     * implemented on the COSMAC VIP.
+     * See https://github.com/trapexit/chip-8_documentation
+     */
+    fun shiftLeftXOnlyVariant(value: UInt) {
+        val x = x(value)
+
+        val xValue = memoryManager.registers[x.toInt()]
+        memoryManager.registers[0xF] = ((xValue and 0x80u).toUInt() shr 7).toUByte()
+        memoryManager.registers[x.toInt()] = (xValue.toUInt() shl 0x1).toUByte()
+
+        LOG.debug("SHL V${toHex(x)}")
     }
 
     /**

@@ -355,6 +355,21 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
+    @CsvSource(value = ["812E,1,45,8A,0","835E,3,F5,EA,1","835E,3,FF,FE,1","835E,3,04,08,0","835E,3,84,08,1"])
+    fun `left shift x only variant and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
+                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
+                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
+        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+
+        cpu.shiftLeftXOnlyVariant(instruction.toUInt())
+
+        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+    }
+
+    @ParameterizedTest
     @CsvSource(value = ["8127,1,2,FE,45,47,0","8FE7,F,E,FF,FF,0,0","8FE7,F,E,09,08,FF,0", "8FE7,F,E,08,08,0,0",
                         "8FE7,F,E,F1,0F,1E,0","8FE7,F,E,0F,F1,E2,1","8127,1,2,45,FE,B9,1","8127,1,2,F0,C3,D3,0"])
     fun `subtract y and x then store in x 8XY7`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
