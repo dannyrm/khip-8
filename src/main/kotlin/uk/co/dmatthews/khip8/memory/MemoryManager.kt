@@ -35,6 +35,19 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
         return instruction
     }
 
+    fun resetMemory() {
+        i = 0u
+
+        delayRegister.clear()
+        soundRegister.clear()
+
+        stack.clear()
+        ram.clear()
+        registers.clear()
+
+        pc = PROGRAM_START_ADDRESS.toUInt()
+    }
+
     /**
      * Instructions are 16 bits long
      */

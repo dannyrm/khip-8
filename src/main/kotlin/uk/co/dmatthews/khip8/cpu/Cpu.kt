@@ -602,7 +602,6 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Fx55 - LD [I], Vx
      * Store registers V0 through Vx (inclusive) in memory starting at location I.
      * The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
-     * TODO: Write tests
      */
     fun loadAllGeneralRegistersIntoMemory(value: UInt) {
         val x = x(value)
@@ -614,7 +613,9 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
             memoryManager.ram[memoryLocation] = memoryManager.registers[j]
         }
 
-        memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        // https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions states that I is
+        // set to i + x + 1 after the operation but the test roms suggest that's not the case.
+        //memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
 
         LOG.debug("LD [I], V${toHex(x)}")
     }

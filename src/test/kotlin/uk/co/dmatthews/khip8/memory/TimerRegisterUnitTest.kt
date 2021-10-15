@@ -29,6 +29,16 @@ class TimerRegisterUnitTest: CoroutineTest() {
         }
     }
 
+    @Test
+    fun `Clears timer value`() {
+        timerRegister = TimerRegister()
+        timerRegister.value = 54u
+
+        timerRegister.clear()
+
+        expectThat(timerRegister.value).isEqualTo(0u)
+    }
+
     suspend fun checkDecrement() {
         while (expectedTimerValue >= 0u) {
             delay(16)

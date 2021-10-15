@@ -1,5 +1,7 @@
 package uk.co.dmatthews.khip8.memory
 
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -114,6 +116,27 @@ class MemoryManagerUnitTest {
         expectThat(memoryManager.pc).isEqualTo(0x200u)
         memoryManager.skipNextInstruction()
         expectThat(memoryManager.pc).isEqualTo(0x202u)
+    }
+
+    @Test
+    fun `Reset memory`() {
+        val memoryManager = MemoryManager(delayRegister = mockk(relaxed = true), soundRegister = mockk(relaxed = true),
+                                          stack = mockk(relaxed = true), ram = mockk(relaxed = true),
+                                          registers = mockk(relaxed = true))
+
+        memoryManager.i = 0x50u
+        memoryManager.pc = 0x800u
+
+        memoryManager.resetMemory()
+
+        expectThat(memoryManager.i).isEqualTo(0u)
+        expectThat(memoryManager.pc).isEqualTo(0x200u)
+
+        verify { memoryManager.delayRegister.clear() }
+        verify { memoryManager.soundRegister.clear() }
+        verify { memoryManager.stack.clear() }
+        verify { memoryManager.ram.clear() }
+        verify { memoryManager.registers.clear() }
     }
 
     @Test

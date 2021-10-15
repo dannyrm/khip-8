@@ -21,6 +21,10 @@ class TimerRegister(var value: UByte = 0u, private var halt: Boolean = false) {
         }
     }
 
+    fun clear() {
+        value = 0u
+    }
+
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(TimerRegister::class.java)
         // 60 Hz, calculated as 1000 / 60 = 16.66666666666667 rounded up to 17. This is slightly inaccurate, clocking

@@ -59,6 +59,22 @@ class ValidatedMemoryUnitTest {
     }
 
     @Test
+    fun `Clears memory`() {
+        val validatedMemory = ValidatedMemory(4)
+        validatedMemory[0] = 10u
+        validatedMemory[1] = 15u
+        validatedMemory[2] = 17u
+        validatedMemory[3] = 5u
+
+        validatedMemory.clear()
+
+        expectThat(validatedMemory[0]).isEqualTo(0u)
+        expectThat(validatedMemory[1]).isEqualTo(0u)
+        expectThat(validatedMemory[2]).isEqualTo(0u)
+        expectThat(validatedMemory[3]).isEqualTo(0u)
+    }
+
+    @Test
     fun `Check toString format with all empty memory`() {
         val validatedMemory = ValidatedMemory(45)
 

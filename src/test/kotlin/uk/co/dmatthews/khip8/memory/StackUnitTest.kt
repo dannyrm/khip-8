@@ -59,6 +59,18 @@ class StackUnitTest {
     }
 
     @Test
+    fun `Clear stack`() {
+        val stack = Stack(4)
+        stack.push(1u)
+        stack.push(2u)
+
+        stack.clear()
+
+        expectThat(stack.sp).isEqualTo(0)
+        expectThrows<IllegalStateException> { stack.pop() }
+    }
+
+    @Test
     fun `Check toString correct with elements`() {
         val stack = Stack(4)
         stack.push(1u)
