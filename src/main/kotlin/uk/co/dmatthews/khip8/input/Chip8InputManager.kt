@@ -22,7 +22,7 @@ class Chip8InputManager {
             chip8InputState and key.bitMask.inv()
         }
 
-        LOG.error("Chip 8 key {}: {}. New input state: {}", key, isActive, chip8InputState)
+        LOG.debug("Chip 8 key {}: {}. New input state: {}", key, isActive, chip8InputState)
     }
 
     companion object {

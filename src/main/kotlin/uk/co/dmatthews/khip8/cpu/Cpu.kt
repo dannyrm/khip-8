@@ -2,7 +2,6 @@ package uk.co.dmatthews.khip8.cpu
 
 import uk.co.dmatthews.khip8.input.Chip8InputManager
 import uk.co.dmatthews.khip8.display.Display
-import kotlinx.coroutines.delay
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import nibbleByteHex
 import org.slf4j.Logger
@@ -18,33 +17,20 @@ import y
 class Cpu(private val instructionDecoder: InstructionDecoder,
           private val display: Display,
           private val memoryManager: MemoryManager,
-          private val chip8InputManager: Chip8InputManager,
-          private var halt: Boolean = false) {
+          private val chip8InputManager: Chip8InputManager) {
 
-    suspend fun start() {
-        LOG.debug("Starting CPU...")
+    fun tick() {
+        // Lock inputs so they can't change during the cycle.
+        chip8InputManager.lockInputs()
 
-        while (!halt) {
-            // Lock inputs so they can't change during the cycle.
-            chip8InputManager.lockInputs()
+        // FETCH
+        val instruction = memoryManager.fetchNextInstruction()
 
-            // FETCH
-            val instruction = memoryManager.fetchNextInstruction()
+        // DECODE
+        val decodedInstruction = instructionDecoder.decode(instruction)
 
-            // DECODE
-            val decodedInstruction = instructionDecoder.decode(instruction)
-
-            // EXECUTE
-            decodedInstruction.invoke(this, instruction)
-
-            // Wait until the next instruction should be executed
-            delay(FREQUENCY_IN_MILLIS)
-        }
-    }
-
-    fun halt() {
-        LOG.debug("Halting CPU...")
-        halt = true
+        // EXECUTE
+        decodedInstruction.invoke(this, instruction)
     }
 
     /**
@@ -642,8 +628,6 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     }
 
     companion object {
-        // 500 Hz, calculated as 1000 / 500 = 2.
-        const val FREQUENCY_IN_MILLIS = 2L
         private val LOG: Logger = LoggerFactory.getLogger(Cpu::class.java)
     }
 }

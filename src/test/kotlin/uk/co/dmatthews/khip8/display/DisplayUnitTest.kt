@@ -20,4 +20,19 @@ class DisplayUnitTest {
 
         verify { displayMemory.clear() }
     }
+
+    @Test
+    fun `Tick works correctly`() {
+        display.tick()
+
+        verify { ui.update(displayMemory) }
+    }
+
+    @Test
+    fun `Init works correctly`() {
+        val myFunction = {}
+        display.init(myFunction)
+
+        verify { ui.init(myFunction) }
+    }
 }

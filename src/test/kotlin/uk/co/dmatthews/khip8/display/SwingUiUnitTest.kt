@@ -39,7 +39,7 @@ class SwingUiUnitTest {
 
     @Test
     fun `title is correct`() {
-        expectThat(swingUi.title).isEqualTo("Chip 8")
+        expectThat(swingUi.title).isEqualTo("Khip 8")
     }
 
     @Test
@@ -111,6 +111,24 @@ class SwingUiUnitTest {
 
         // Paints to the canvas after populating it
         verify { bufferStrategy.show() }
+    }
+
+    @Test
+    fun `Update does nothing if frame is not visible`() {
+        val displayMemory = DisplayMemory()
+
+        val bufferStrategy = mockk<BufferStrategy>(relaxed = true)
+        val graphics2D = mockk<Graphics2D>(relaxed = true)
+
+        every { canvas.bufferStrategy } returns bufferStrategy
+        every { bufferStrategy.drawGraphics } returns graphics2D
+
+        swingUi.isVisible = false
+        swingUi.update(displayMemory)
+
+        verify(inverse = true) { graphics2D.color = Color.BLACK }
+        verify(inverse = true) { graphics2D.clearRect(0, 0, 1024, 768) }
+        verify(inverse = true) { bufferStrategy.show() }
     }
 
     @Test

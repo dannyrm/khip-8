@@ -9,7 +9,7 @@ import java.awt.image.BufferStrategy
 class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
               private var onCloseSignal: () -> Unit = {}): Ui, Frame() {
     init {
-        title = "Chip 8"
+        title = "Khip 8"
 
         size = Dimension(1024, 768)
 
@@ -37,6 +37,8 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
     }
 
     override fun update(displayMemory: DisplayMemory) {
+        if (!isVisible) return
+
         val graphics = startNewFrame()
 
         graphics.color = Color.BLACK
