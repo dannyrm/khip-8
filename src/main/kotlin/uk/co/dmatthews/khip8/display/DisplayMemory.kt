@@ -1,6 +1,5 @@
 package uk.co.dmatthews.khip8.display
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class DisplayMemory(internal var buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS) { 0u },
                     var collision: Boolean = false) {
 

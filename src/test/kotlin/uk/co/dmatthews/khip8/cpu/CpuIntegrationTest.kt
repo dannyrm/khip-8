@@ -1,7 +1,6 @@
 package uk.co.dmatthews.khip8.cpu
 
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.converter.ConvertWith
@@ -12,6 +11,40 @@ import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
 import uk.co.dmatthews.khip8.memory.MemoryManager
 
 class CpuIntegrationTest {
+
+    @Test
+    fun `syscall works correctly`() {
+        val memoryManager = MemoryManager()
+
+        // Jp to memory instruction
+        memoryManager.ram[0x200] = 0x05u
+        memoryManager.ram[0x201] = 0x55u
+
+        val instructionDecoder = InstructionDecoder()
+
+        val cpu = Cpu(instructionDecoder, mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+
+        cpu.tick()
+
+        expectThat(memoryManager.pc).isEqualTo(0x202u)
+    }
+
+    @Test
+    fun `jump to memory location works correctly`() {
+        val memoryManager = MemoryManager()
+
+        // Jp to memory instruction
+        memoryManager.ram[0x200] = 0x15u
+        memoryManager.ram[0x201] = 0x55u
+
+        val instructionDecoder = InstructionDecoder()
+
+        val cpu = Cpu(instructionDecoder, mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+
+        cpu.tick()
+
+        expectThat(memoryManager.pc).isEqualTo(0x555u)
+    }
 
     @Test
     fun `Add value to register sequence 7XKK`() {

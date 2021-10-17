@@ -32,18 +32,17 @@ class CpuUnitTest {
 
     @Test
     fun `tick works correctly`() {
-        cpu.tick()
-
         val nextInstruction: UInt = 0xE654u
         val nextInstructionFunction: KFunction2<Cpu, UInt, Unit> = Cpu::sysCall
 
         every { memoryManager.fetchNextInstruction() } returns nextInstruction
         every { instructionDecoder.decode(nextInstruction) } returns nextInstructionFunction
 
+        cpu.tick()
+
         verify { chip8InputManager.lockInputs() }
         verify { memoryManager.fetchNextInstruction() }
         verify { instructionDecoder.decode(nextInstruction) }
-        verify { nextInstructionFunction.invoke(cpu, nextInstruction) }
     }
 
     @Test
