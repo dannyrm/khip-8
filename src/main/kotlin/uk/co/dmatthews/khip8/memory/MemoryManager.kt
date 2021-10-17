@@ -6,6 +6,7 @@ import wordHex
 import java.io.File
 import java.io.FileInputStream
 
+@OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
                     var soundRegister: TimerRegister = TimerRegister(),
                     var i: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used

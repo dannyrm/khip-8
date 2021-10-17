@@ -3,6 +3,7 @@ package uk.co.dmatthews.khip8.memory
 import toHex
 import wordHex
 
+@OptIn(ExperimentalUnsignedTypes::class)
 data class Stack(private val stackSize: Int,
                  var sp: Int = 0, // 8 bits, stack pointer, represented as an int for simplicity
                  private val stack: UIntArray = UIntArray(stackSize)) {
