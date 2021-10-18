@@ -7,6 +7,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.io.File
 
+@OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManagerUnitTest {
 
     @Test
@@ -16,7 +17,7 @@ class MemoryManagerUnitTest {
             loadFile("inputs/15-puzzle.ch8")
         )
 
-        val expectedOutput = hexToByteArray("outputs/15-puzzle.hex")
+        val expectedOutput = hexToByteArray("inputs/15-puzzle.hex")
 
         // Program starts at 0x200 in memory.
         expectedOutput.forEachIndexed { index, byte ->
@@ -157,7 +158,7 @@ class MemoryManagerUnitTest {
         memoryManager.stack.push(0x88u)
         memoryManager.stack.push(0x99u)
 
-        var newLine = System.lineSeparator()
+        val newLine = System.lineSeparator()
 
         expectThat(memoryManager.toString()).isEqualTo(
             "Registers: {$newLine" +

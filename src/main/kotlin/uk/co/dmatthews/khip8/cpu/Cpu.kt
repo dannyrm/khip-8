@@ -423,7 +423,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
 
     /**
      * Dxyn - DRW Vx, Vy, nibble
-     * uk.co.dmatthews.khip8.display.Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+     * Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
      * The interpreter reads n bytes from memory, starting at the address stored in I.
      * These bytes are then displayed as sprites on screen at coordinates (Vx, Vy).
      * Sprites are XORed onto the existing screen.
@@ -442,9 +442,16 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val spriteHeight = rightNibble(value).toInt()
         val startingAddress = memoryManager.i
 
+        var collisionValue = 0u
+
         for (i in 0 until spriteHeight) {
             display[xValue, yValue+i] = memoryManager.ram[startingAddress.toInt()+i]
+            if (display.hasCollision()) {
+                collisionValue = 1u
+            }
         }
+
+        memoryManager.registers[0xF] = collisionValue.toUByte()
 
         LOG.debug("DRW V${toHex(x)}, V${toHex(y)}, ${toHex(spriteHeight.toUByte())}")
     }

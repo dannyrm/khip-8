@@ -19,6 +19,14 @@ class Display(private val displayMemory: DisplayMemory,
         displayMemory.clear()
     }
 
+    // TODO: Write tests around collisions
+    fun hasCollision(): Boolean {
+        val hasCollision = displayMemory.collision
+        displayMemory.collision = false
+
+        return hasCollision
+    }
+
     override fun toString(): String {
         return "Display Memory {${System.lineSeparator()}$displayMemory}"
     }

@@ -7,7 +7,7 @@ class TimerRegister(var value: UByte = 0u) {
 
     fun tick() {
         if (value > 0u) {
-            LOG.info("Decrementing timer register. Current value: $value")
+            LOG.debug("Decrementing timer register. Current value: $value")
             value--
         }
     }
