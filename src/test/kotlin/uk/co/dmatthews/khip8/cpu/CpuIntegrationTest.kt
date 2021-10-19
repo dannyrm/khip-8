@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.converter.ConvertWith
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.EnumSource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
 import uk.co.dmatthews.khip8.memory.MemoryManager
+import uk.co.dmatthews.khip8.util.SystemMode
+import uk.co.dmatthews.khip8.util.FeatureManager
 
 class CpuIntegrationTest {
 
@@ -190,5 +193,142 @@ class CpuIntegrationTest {
         expectThat(memoryManager.ram[0x502]).isEqualTo(2u)
         expectThat(memoryManager.ram[0x503]).isEqualTo(3u)
         expectThat(memoryManager.ram[0x504]).isEqualTo(4u)
+
+        expectThat(memoryManager.i).isEqualTo(0x500u)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SystemMode::class, names = ["CHIP_8_MODE", "CHIP_48_MODE"])
+    fun `Load general registers into memory in Chip8 or Chip 48 Mode FX55`(systemMode: SystemMode) {
+        val memoryManager = MemoryManager()
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+
+        try {
+            FeatureManager.systemMode = systemMode
+
+            memoryManager.registers[0x0] = 0u
+            memoryManager.registers[0x1] = 1u
+            memoryManager.registers[0x2] = 2u
+            memoryManager.registers[0x3] = 3u
+            memoryManager.registers[0x4] = 4u
+
+            memoryManager.i = 0x500u
+
+            cpu.loadAllGeneralRegistersIntoMemory(0xF455u)
+
+            expectThat(memoryManager.ram[0x500]).isEqualTo(0u)
+            expectThat(memoryManager.ram[0x501]).isEqualTo(1u)
+            expectThat(memoryManager.ram[0x502]).isEqualTo(2u)
+            expectThat(memoryManager.ram[0x503]).isEqualTo(3u)
+            expectThat(memoryManager.ram[0x504]).isEqualTo(4u)
+
+            expectThat(memoryManager.i).isEqualTo(0x505u)
+        } finally {
+            FeatureManager.systemMode = SystemMode.SUPER_CHIP_MODE
+        }
+    }
+
+    @Test
+    fun `Load memory into general registers FX65`() {
+        val memoryManager = MemoryManager()
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+
+        memoryManager.registers[0x0] = 9u
+        memoryManager.registers[0x1] = 9u
+        memoryManager.registers[0x2] = 9u
+        memoryManager.registers[0x3] = 9u
+        memoryManager.registers[0x4] = 9u
+        memoryManager.registers[0x5] = 9u
+        memoryManager.registers[0x6] = 9u
+        memoryManager.registers[0x7] = 9u
+        memoryManager.registers[0x8] = 9u
+        memoryManager.registers[0x9] = 9u
+        memoryManager.registers[0xA] = 9u
+
+        memoryManager.i = 0x500u
+
+        memoryManager.ram[0x500] = 10u
+        memoryManager.ram[0x501] = 11u
+        memoryManager.ram[0x502] = 12u
+        memoryManager.ram[0x503] = 13u
+        memoryManager.ram[0x504] = 14u
+        memoryManager.ram[0x505] = 15u
+        memoryManager.ram[0x506] = 16u
+        memoryManager.ram[0x507] = 17u
+        memoryManager.ram[0x508] = 18u
+        memoryManager.ram[0x509] = 19u
+        memoryManager.ram[0x50A] = 20u
+
+        cpu.readMemoryIntoAllGeneralRegisters(0xF965u)
+
+        expectThat(memoryManager.registers[0x0]).isEqualTo(10u)
+        expectThat(memoryManager.registers[0x1]).isEqualTo(11u)
+        expectThat(memoryManager.registers[0x2]).isEqualTo(12u)
+        expectThat(memoryManager.registers[0x3]).isEqualTo(13u)
+        expectThat(memoryManager.registers[0x4]).isEqualTo(14u)
+        expectThat(memoryManager.registers[0x5]).isEqualTo(15u)
+        expectThat(memoryManager.registers[0x6]).isEqualTo(16u)
+        expectThat(memoryManager.registers[0x7]).isEqualTo(17u)
+        expectThat(memoryManager.registers[0x8]).isEqualTo(18u)
+        expectThat(memoryManager.registers[0x9]).isEqualTo(19u)
+        expectThat(memoryManager.registers[0xA]).isEqualTo(9u)
+
+        expectThat(memoryManager.i).isEqualTo(0x500u)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SystemMode::class, names = ["CHIP_8_MODE", "CHIP_48_MODE"])
+    fun `Load memory into general registers in chip 8 or chip 48 mode FX65`(systemMode: SystemMode) {
+        val memoryManager = MemoryManager()
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+
+        try {
+            FeatureManager.systemMode = systemMode
+
+            memoryManager.registers[0x0] = 9u
+            memoryManager.registers[0x1] = 9u
+            memoryManager.registers[0x2] = 9u
+            memoryManager.registers[0x3] = 9u
+            memoryManager.registers[0x4] = 9u
+            memoryManager.registers[0x5] = 9u
+            memoryManager.registers[0x6] = 9u
+            memoryManager.registers[0x7] = 9u
+            memoryManager.registers[0x8] = 9u
+            memoryManager.registers[0x9] = 9u
+            memoryManager.registers[0xA] = 9u
+
+            memoryManager.i = 0x500u
+
+            memoryManager.ram[0x500] = 10u
+            memoryManager.ram[0x501] = 11u
+            memoryManager.ram[0x502] = 12u
+            memoryManager.ram[0x503] = 13u
+            memoryManager.ram[0x504] = 14u
+            memoryManager.ram[0x505] = 15u
+            memoryManager.ram[0x506] = 16u
+            memoryManager.ram[0x507] = 17u
+            memoryManager.ram[0x508] = 18u
+            memoryManager.ram[0x509] = 19u
+            memoryManager.ram[0x50A] = 20u
+
+            cpu.readMemoryIntoAllGeneralRegisters(0xF965u)
+
+            expectThat(memoryManager.registers[0x0]).isEqualTo(10u)
+            expectThat(memoryManager.registers[0x1]).isEqualTo(11u)
+            expectThat(memoryManager.registers[0x2]).isEqualTo(12u)
+            expectThat(memoryManager.registers[0x3]).isEqualTo(13u)
+            expectThat(memoryManager.registers[0x4]).isEqualTo(14u)
+            expectThat(memoryManager.registers[0x5]).isEqualTo(15u)
+            expectThat(memoryManager.registers[0x6]).isEqualTo(16u)
+            expectThat(memoryManager.registers[0x7]).isEqualTo(17u)
+            expectThat(memoryManager.registers[0x8]).isEqualTo(18u)
+            expectThat(memoryManager.registers[0x9]).isEqualTo(19u)
+            expectThat(memoryManager.registers[0xA]).isEqualTo(9u)
+
+            expectThat(memoryManager.i).isEqualTo(0x50Au)
+        } finally {
+            FeatureManager.systemMode = SystemMode.SUPER_CHIP_MODE
+        }
+
     }
 }

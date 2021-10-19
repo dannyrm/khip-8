@@ -10,6 +10,10 @@ import rightByte
 import rightNibble
 import rightNibbleByte
 import toHex
+import uk.co.dmatthews.khip8.util.SystemMode.CHIP_48_MODE
+import uk.co.dmatthews.khip8.util.SystemMode.CHIP_8_MODE
+import uk.co.dmatthews.khip8.util.FeatureManager
+import uk.co.dmatthews.khip8.util.InstructionFeature
 import wordHex
 import x
 import y
@@ -608,7 +612,12 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
 
         // https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions states that I is
         // set to i + x + 1 after the operation but the test roms suggest that's not the case.
-        //memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        // Also, The Wikipedia says this:
+        // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this instruction had been executed. In SCHIP, I is left unmodified."
+
+        if (FeatureManager.isEnabled(InstructionFeature.FX55_I_INCREMENT)) {
+            memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        }
 
         LOG.debug("LD [I], V${toHex(x)}")
     }
@@ -617,7 +626,6 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Fx65 - LD Vx, [I]
      * Read registers V0 through Vx from memory starting at location I.
      * The interpreter reads values from memory starting at location I into registers V0 through Vx.
-     * TODO Write tests
      */
     fun readMemoryIntoAllGeneralRegisters(value: UInt) {
         val x = x(value)
@@ -629,7 +637,15 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
             memoryManager.registers[j] = memoryManager.ram[memoryLocation]
         }
 
-        memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        // https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions states that I is
+        // set to i + x + 1 after the operation.
+        // The Wikipedia says this:
+        // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this
+        // instruction had been executed. In SCHIP, I is left unmodified."
+
+        if (FeatureManager.isEnabled(InstructionFeature.FX65_I_INCREMENT)) {
+            memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        }
 
         LOG.debug("LD V${toHex(x)}, [I]")
     }
