@@ -3,7 +3,6 @@ package uk.co.dmatthews.khip8.display
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -41,17 +40,6 @@ class SwingUiUnitTest {
     @Test
     fun `title is correct`() {
         expectThat(swingUi.title).isEqualTo("Khip 8")
-    }
-
-    @Test
-    fun `width and height are correct`() {
-        canvas = Canvas()
-        keyboardManager = mockk(relaxed = true)
-
-        swingUi = SwingUi(canvas, keyboardManager)
-
-        expectThat(swingUi.width).isEqualTo(528)
-        expectThat(swingUi.height).isEqualTo(335)
     }
 
     @Test
@@ -110,7 +98,7 @@ class SwingUiUnitTest {
         verify { graphics2D.color = Color.BLACK }
 
         // Cleans the canvas before drawing
-        verify { graphics2D.clearRect(0, 0, 512, 296) }
+        verify { graphics2D.clearRect(0, 0, swingUi.windowSize.width, swingUi.windowSize.height) }
 
         // No pixels populated so shouldn't draw anything
         verify(inverse = true) { graphics2D.drawRect(any(), any(), any(), any()) }
@@ -133,7 +121,7 @@ class SwingUiUnitTest {
         swingUi.update(displayMemory)
 
         verify(inverse = true) { graphics2D.color = Color.BLACK }
-        verify(inverse = true) { graphics2D.clearRect(0, 0, 1024, 768) }
+        verify(inverse = true) { graphics2D.clearRect(0, 0, swingUi.windowSize.width, swingUi.windowSize.height) }
         verify(inverse = true) { bufferStrategy.show() }
     }
 
@@ -153,7 +141,7 @@ class SwingUiUnitTest {
         verify { graphics2D.color = Color.BLACK }
 
         // Cleans the canvas before drawing
-        verify { graphics2D.clearRect(0, 0, 512, 296) }
+        verify { graphics2D.clearRect(0, 0, swingUi.windowSize.width, swingUi.windowSize.height) }
 
         val pixelWidth = 8
         val pixelHeight = 9

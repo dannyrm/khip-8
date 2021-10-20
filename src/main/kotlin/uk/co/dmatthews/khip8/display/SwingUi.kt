@@ -9,7 +9,7 @@ import kotlin.math.floor
 
 class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
               private var onCloseSignal: () -> Unit = {}): Ui, Frame() {
-    private val windowSize: Dimension
+    internal val windowSize: Dimension
 
     init {
         title = "Khip 8"
