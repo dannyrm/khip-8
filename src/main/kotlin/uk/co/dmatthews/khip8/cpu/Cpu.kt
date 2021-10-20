@@ -2,7 +2,6 @@ package uk.co.dmatthews.khip8.cpu
 
 import uk.co.dmatthews.khip8.input.Chip8InputManager
 import uk.co.dmatthews.khip8.display.Display
-import kotlinx.coroutines.delay
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import nibbleByteHex
 import org.slf4j.Logger
@@ -11,6 +10,10 @@ import rightByte
 import rightNibble
 import rightNibbleByte
 import toHex
+import uk.co.dmatthews.khip8.util.SystemMode.CHIP_48_MODE
+import uk.co.dmatthews.khip8.util.SystemMode.CHIP_8_MODE
+import uk.co.dmatthews.khip8.util.FeatureManager
+import uk.co.dmatthews.khip8.util.InstructionFeature
 import wordHex
 import x
 import y
@@ -18,33 +21,20 @@ import y
 class Cpu(private val instructionDecoder: InstructionDecoder,
           private val display: Display,
           private val memoryManager: MemoryManager,
-          private val chip8InputManager: Chip8InputManager,
-          private var halt: Boolean = false) {
+          private val chip8InputManager: Chip8InputManager) {
 
-    suspend fun start() {
-        LOG.debug("Starting CPU...")
+    fun tick() {
+        // Lock inputs so they can't change during the cycle.
+        chip8InputManager.lockInputs()
 
-        while (!halt) {
-            // Lock inputs so they can't change during the cycle.
-            chip8InputManager.lockInputs()
+        // FETCH
+        val instruction = memoryManager.fetchNextInstruction()
 
-            // FETCH
-            val instruction = memoryManager.fetchNextInstruction()
+        // DECODE
+        val decodedInstruction = instructionDecoder.decode(instruction)
 
-            // DECODE
-            val decodedInstruction = instructionDecoder.decode(instruction)
-
-            // EXECUTE
-            decodedInstruction.invoke(this, instruction)
-
-            // Wait until the next instruction should be executed
-            delay(FREQUENCY_IN_MILLIS)
-        }
-    }
-
-    fun halt() {
-        LOG.debug("Halting CPU...")
-        halt = true
+        // EXECUTE
+        decodedInstruction.invoke(this, instruction)
     }
 
     /**
@@ -437,7 +427,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
 
     /**
      * Dxyn - DRW Vx, Vy, nibble
-     * uk.co.dmatthews.khip8.display.Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+     * Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
      * The interpreter reads n bytes from memory, starting at the address stored in I.
      * These bytes are then displayed as sprites on screen at coordinates (Vx, Vy).
      * Sprites are XORed onto the existing screen.
@@ -456,9 +446,16 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val spriteHeight = rightNibble(value).toInt()
         val startingAddress = memoryManager.i
 
+        var collisionValue = 0u
+
         for (i in 0 until spriteHeight) {
             display[xValue, yValue+i] = memoryManager.ram[startingAddress.toInt()+i]
+            if (display.hasCollision()) {
+                collisionValue = 1u
+            }
         }
+
+        memoryManager.registers[0xF] = collisionValue.toUByte()
 
         LOG.debug("DRW V${toHex(x)}, V${toHex(y)}, ${toHex(spriteHeight.toUByte())}")
     }
@@ -563,7 +560,6 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Fx29 - LD F, Vx
      * Set I = location of sprite for digit Vx.
      * The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
-     * TODO write tests
      */
     fun loadIRegisterWithLocationOfSpriteForDigit(value: UInt) {
         val x = x(value)
@@ -603,7 +599,6 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Fx55 - LD [I], Vx
      * Store registers V0 through Vx (inclusive) in memory starting at location I.
      * The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
-     * TODO: Write tests
      */
     fun loadAllGeneralRegistersIntoMemory(value: UInt) {
         val x = x(value)
@@ -615,7 +610,14 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
             memoryManager.ram[memoryLocation] = memoryManager.registers[j]
         }
 
-        memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        // https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions states that I is
+        // set to i + x + 1 after the operation but the test roms suggest that's not the case.
+        // Also, The Wikipedia says this:
+        // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this instruction had been executed. In SCHIP, I is left unmodified."
+
+        if (FeatureManager.isEnabled(InstructionFeature.FX55_I_INCREMENT)) {
+            memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        }
 
         LOG.debug("LD [I], V${toHex(x)}")
     }
@@ -624,7 +626,6 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Fx65 - LD Vx, [I]
      * Read registers V0 through Vx from memory starting at location I.
      * The interpreter reads values from memory starting at location I into registers V0 through Vx.
-     * TODO Write tests
      */
     fun readMemoryIntoAllGeneralRegisters(value: UInt) {
         val x = x(value)
@@ -636,14 +637,20 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
             memoryManager.registers[j] = memoryManager.ram[memoryLocation]
         }
 
-        memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        // https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions states that I is
+        // set to i + x + 1 after the operation.
+        // The Wikipedia says this:
+        // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this
+        // instruction had been executed. In SCHIP, I is left unmodified."
+
+        if (FeatureManager.isEnabled(InstructionFeature.FX65_I_INCREMENT)) {
+            memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+        }
 
         LOG.debug("LD V${toHex(x)}, [I]")
     }
 
     companion object {
-        // 500 Hz, calculated as 1000 / 500 = 2.
-        const val FREQUENCY_IN_MILLIS = 2L
         private val LOG: Logger = LoggerFactory.getLogger(Cpu::class.java)
     }
 }

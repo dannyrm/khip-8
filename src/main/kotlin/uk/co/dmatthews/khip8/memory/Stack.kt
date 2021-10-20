@@ -21,6 +21,14 @@ data class Stack(private val stackSize: Int,
         return stack[--sp]
     }
 
+    fun clear() {
+        sp = 0
+
+        for (i in stack.indices) {
+            stack[i] = 0u
+        }
+    }
+
     override fun toString(): String {
         val stringBuilder = StringBuilder()
 

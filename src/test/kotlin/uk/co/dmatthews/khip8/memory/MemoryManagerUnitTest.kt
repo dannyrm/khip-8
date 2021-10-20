@@ -1,10 +1,13 @@
 package uk.co.dmatthews.khip8.memory
 
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.io.File
 
+@OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManagerUnitTest {
 
     @Test
@@ -14,7 +17,7 @@ class MemoryManagerUnitTest {
             loadFile("inputs/15-puzzle.ch8")
         )
 
-        val expectedOutput = hexToByteArray("outputs/15-puzzle.hex")
+        val expectedOutput = hexToByteArray("inputs/15-puzzle.hex")
 
         // Program starts at 0x200 in memory.
         expectedOutput.forEachIndexed { index, byte ->
@@ -117,6 +120,27 @@ class MemoryManagerUnitTest {
     }
 
     @Test
+    fun `Reset memory`() {
+        val memoryManager = MemoryManager(delayRegister = mockk(relaxed = true), soundRegister = mockk(relaxed = true),
+                                          stack = mockk(relaxed = true), ram = mockk(relaxed = true),
+                                          registers = mockk(relaxed = true))
+
+        memoryManager.i = 0x50u
+        memoryManager.pc = 0x800u
+
+        memoryManager.resetMemory()
+
+        expectThat(memoryManager.i).isEqualTo(0u)
+        expectThat(memoryManager.pc).isEqualTo(0x200u)
+
+        verify { memoryManager.delayRegister.clear() }
+        verify { memoryManager.soundRegister.clear() }
+        verify { memoryManager.stack.clear() }
+        verify { memoryManager.ram.clear() }
+        verify { memoryManager.registers.clear() }
+    }
+
+    @Test
     fun `check toString format`() {
         val memoryManager = MemoryManager(ram = ValidatedMemory(42))
 
@@ -134,7 +158,7 @@ class MemoryManagerUnitTest {
         memoryManager.stack.push(0x88u)
         memoryManager.stack.push(0x99u)
 
-        var newLine = System.lineSeparator()
+        val newLine = System.lineSeparator()
 
         expectThat(memoryManager.toString()).isEqualTo(
             "Registers: {$newLine" +

@@ -19,6 +19,7 @@ import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
+import kotlin.reflect.KFunction2
 
 @ExtendWith(MockKExtension::class)
 class CpuUnitTest {
@@ -28,6 +29,21 @@ class CpuUnitTest {
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var instructionDecoder: InstructionDecoder
     @MockK(relaxed = true) private lateinit var display: Display
+
+    @Test
+    fun `tick works correctly`() {
+        val nextInstruction: UInt = 0xE654u
+        val nextInstructionFunction: KFunction2<Cpu, UInt, Unit> = Cpu::sysCall
+
+        every { memoryManager.fetchNextInstruction() } returns nextInstruction
+        every { instructionDecoder.decode(nextInstruction) } returns nextInstructionFunction
+
+        cpu.tick()
+
+        verify { chip8InputManager.lockInputs() }
+        verify { memoryManager.fetchNextInstruction() }
+        verify { instructionDecoder.decode(nextInstruction) }
+    }
 
     @Test
     fun `ret sets correct value to pc 00EE`() {

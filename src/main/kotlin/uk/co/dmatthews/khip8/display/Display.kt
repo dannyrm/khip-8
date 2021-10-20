@@ -1,45 +1,33 @@
 package uk.co.dmatthews.khip8.display
 
-import kotlinx.coroutines.delay
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
 class Display(private val displayMemory: DisplayMemory,
-              private val ui: Ui, private var halt: Boolean = false) {
+              private val ui: Ui) {
 
     operator fun set(x: Int, y: Int, value: UByte) {
         displayMemory[x,y] = value
     }
 
-    suspend fun start(onCloseSignal: () -> Unit) {
+    fun init(onCloseSignal: () -> Unit) {
         ui.init(onCloseSignal)
-        update()
     }
 
-    fun halt() {
-        LOG.info("Halting display...")
-        halt = true
-    }
-
-    suspend fun update() {
-        while (!halt) {
-            ui.update(displayMemory)
-            delay(FREQUENCY_IN_MILLIS)
-        }
+    fun tick() {
+        ui.update(displayMemory)
     }
 
     fun clear() {
         displayMemory.clear()
     }
 
-    override fun toString(): String {
-        return "Display Memory {${System.lineSeparator()}$displayMemory}"
+    // TODO: Write tests around collisions
+    fun hasCollision(): Boolean {
+        val hasCollision = displayMemory.collision
+        displayMemory.collision = false
+
+        return hasCollision
     }
 
-    companion object {
-        // 60 Hz, calculated as 1000 / 60 = 16.66666666666667 rounded up to 17. This is slightly inaccurate, clocking
-        // in at 1020 millis every 60 ticks
-        const val FREQUENCY_IN_MILLIS = 17L
-        private val LOG: Logger = LoggerFactory.getLogger(Display::class.java)
+    override fun toString(): String {
+        return "Display Memory {${System.lineSeparator()}$displayMemory}"
     }
 }

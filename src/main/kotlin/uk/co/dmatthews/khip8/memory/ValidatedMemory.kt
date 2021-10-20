@@ -20,6 +20,12 @@ class ValidatedMemory(private val memorySize: Int) {
         return memory[address]
     }
 
+    fun clear() {
+        for (i in memory.indices) {
+            memory[i] = 0u
+        }
+    }
+
     private fun checkRange(address: Int, maxValue: Int) {
         if (address !in 0 until maxValue) {
             throw IllegalArgumentException("Invalid address specified ($address). Must be in range (0..$maxValue)")

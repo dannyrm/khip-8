@@ -3,6 +3,7 @@ package uk.co.dmatthews.khip8.display
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -39,13 +40,18 @@ class SwingUiUnitTest {
 
     @Test
     fun `title is correct`() {
-        expectThat(swingUi.title).isEqualTo("Chip 8")
+        expectThat(swingUi.title).isEqualTo("Khip 8")
     }
 
     @Test
     fun `width and height are correct`() {
-        expectThat(swingUi.width).isEqualTo(1024)
-        expectThat(swingUi.height).isEqualTo(768)
+        canvas = Canvas()
+        keyboardManager = mockk(relaxed = true)
+
+        swingUi = SwingUi(canvas, keyboardManager)
+
+        expectThat(swingUi.width).isEqualTo(528)
+        expectThat(swingUi.height).isEqualTo(335)
     }
 
     @Test
@@ -104,13 +110,31 @@ class SwingUiUnitTest {
         verify { graphics2D.color = Color.BLACK }
 
         // Cleans the canvas before drawing
-        verify { graphics2D.clearRect(0, 0, 1024, 768) }
+        verify { graphics2D.clearRect(0, 0, 512, 296) }
 
         // No pixels populated so shouldn't draw anything
         verify(inverse = true) { graphics2D.drawRect(any(), any(), any(), any()) }
 
         // Paints to the canvas after populating it
         verify { bufferStrategy.show() }
+    }
+
+    @Test
+    fun `Update does nothing if frame is not visible`() {
+        val displayMemory = DisplayMemory()
+
+        val bufferStrategy = mockk<BufferStrategy>(relaxed = true)
+        val graphics2D = mockk<Graphics2D>(relaxed = true)
+
+        every { canvas.bufferStrategy } returns bufferStrategy
+        every { bufferStrategy.drawGraphics } returns graphics2D
+
+        swingUi.isVisible = false
+        swingUi.update(displayMemory)
+
+        verify(inverse = true) { graphics2D.color = Color.BLACK }
+        verify(inverse = true) { graphics2D.clearRect(0, 0, 1024, 768) }
+        verify(inverse = true) { bufferStrategy.show() }
     }
 
     @Test
@@ -129,17 +153,23 @@ class SwingUiUnitTest {
         verify { graphics2D.color = Color.BLACK }
 
         // Cleans the canvas before drawing
-        verify { graphics2D.clearRect(0, 0, 1024, 768) }
+        verify { graphics2D.clearRect(0, 0, 512, 296) }
+
+        val pixelWidth = 8
+        val pixelHeight = 9
+
+        val yPos = pixelHeight*10
+        val xPosBase = pixelWidth*10
 
         // Draws all of the populated pixels
-        verify { graphics2D.fillRect(160, 240, 16, 24) }
-        verify { graphics2D.fillRect(176, 240, 16, 24) }
-        verify { graphics2D.fillRect(192, 240, 16, 24) }
-        verify { graphics2D.fillRect(208, 240, 16, 24) }
-        verify { graphics2D.fillRect(224, 240, 16, 24) }
-        verify { graphics2D.fillRect(240, 240, 16, 24) }
-        verify { graphics2D.fillRect(256, 240, 16, 24) }
-        verify { graphics2D.fillRect(272, 240, 16, 24) }
+        verify { graphics2D.fillRect(xPosBase, yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase+(pixelWidth), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase+(pixelWidth*2), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase+(pixelWidth*3), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase+(pixelWidth*4), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase+(pixelWidth*5), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase+(pixelWidth*6), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase+(pixelWidth*7), yPos, pixelWidth, pixelHeight) }
 
         // Paints to the canvas after populating it
         verify { bufferStrategy.show() }
@@ -150,6 +180,6 @@ class SwingUiUnitTest {
         val displayMemory = mockk<DisplayMemory>()
         every { displayMemory.dimensions() } returns intArrayOf(64, 32)
 
-        expectThat(swingUi.calculatePixelSize(displayMemory)).isEqualTo(intArrayOf(16, 24))
+        expectThat(swingUi.calculatePixelSize(displayMemory)).isEqualTo(intArrayOf(8, 9))
     }
 }

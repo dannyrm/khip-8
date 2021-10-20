@@ -5,30 +5,40 @@ import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.awt.image.BufferStrategy
+import kotlin.math.floor
 
 class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
               private var onCloseSignal: () -> Unit = {}): Ui, Frame() {
-    init {
-        title = "Chip 8"
+    private val windowSize: Dimension
 
-        size = Dimension(1024, 768)
+    init {
+        title = "Khip 8"
 
         // Setup Graphics
         ignoreRepaint = true
+        isResizable = false
+
+        windowSize = getAdjustedDimension(512, 256)
+
+        canvas.size = windowSize
+        size = windowSize
 
         // Halt the Khip8 system and dispose of the window. The program is exited after it has been fully halted.
         val windowListener = object: WindowAdapter() {
             override fun windowClosing(event: WindowEvent) {
+                super.windowClosing(event)
                 halt()
             }
         }
 
         this.addWindowListener(windowListener)
 
-        add(canvas)
-
         this.addKeyListener(keyboardManager)
         canvas.addKeyListener(keyboardManager)
+
+        this.add(canvas)
+
+        pack()
     }
 
     override fun init(onCloseSignal: () -> Unit) {
@@ -37,6 +47,8 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
     }
 
     override fun update(displayMemory: DisplayMemory) {
+        if (!isVisible) return
+
         val graphics = startNewFrame()
 
         graphics.color = Color.BLACK
@@ -76,10 +88,13 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
 
     internal fun calculatePixelSize(displayMemory: DisplayMemory): IntArray {
         val (displayMemoryWidth, displayMemoryHeight) = displayMemory.dimensions()
-        val frameWidth = size.width
-        val frameHeight = size.height
+        val frameWidth = windowSize.width.toDouble()
+        val frameHeight = windowSize.height.toDouble()
 
-        return intArrayOf(frameWidth / displayMemoryWidth, frameHeight / displayMemoryHeight)
+        val adjustedXPixelSize = floor(frameWidth / displayMemoryWidth).toInt()
+        val adjustedYPixelSize = floor(frameHeight / displayMemoryHeight).toInt()
+
+        return intArrayOf(adjustedXPixelSize, adjustedYPixelSize)
     }
 
     /**
@@ -87,7 +102,7 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
      */
     private fun startNewFrame(): Graphics2D {
         val graphics = obtainBufferStrategy().drawGraphics as Graphics2D
-        graphics.clearRect(0, 0, width, height)
+        graphics.clearRect(0, 0, windowSize.width, windowSize.height)
         return graphics
     }
 
@@ -96,5 +111,14 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
             canvas.createBufferStrategy(2)
         }
         return canvas.bufferStrategy
+    }
+
+    private fun getAdjustedDimension(width: Int, height: Int): Dimension {
+        val screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(graphicsConfiguration)
+
+        val widthInsetValue = screenInsets.left + screenInsets.right
+        val heightInsetValue = screenInsets.top + screenInsets.bottom
+
+        return Dimension(width+widthInsetValue, height+heightInsetValue)
     }
 }
