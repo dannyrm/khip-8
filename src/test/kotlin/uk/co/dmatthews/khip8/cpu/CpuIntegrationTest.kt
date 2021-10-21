@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
+import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import uk.co.dmatthews.khip8.util.SystemMode
 import uk.co.dmatthews.khip8.util.FeatureManager
@@ -25,7 +26,7 @@ class CpuIntegrationTest {
 
         val instructionDecoder = InstructionDecoder()
 
-        val cpu = Cpu(instructionDecoder, mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(instructionDecoder, mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         cpu.tick()
 
@@ -41,8 +42,10 @@ class CpuIntegrationTest {
         memoryManager.ram[0x201] = 0x55u
 
         val instructionDecoder = InstructionDecoder()
+        val cpuInstructionExecutor = CpuInstructionExecutor()
 
-        val cpu = Cpu(instructionDecoder, mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        cpuInstructionExecutor.init(cpu)
 
         cpu.tick()
 
@@ -52,7 +55,7 @@ class CpuIntegrationTest {
     @Test
     fun `Add value to register sequence 7XKK`() {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         val instruction1 = 0x7510
         val instruction2 = 0x7F05
@@ -81,7 +84,7 @@ class CpuIntegrationTest {
     @Test
     fun `Add value with wrapping 7XKK`() {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         val instruction1 = 0x7503
         val addFFInstruction = 0x75FF
@@ -114,7 +117,7 @@ class CpuIntegrationTest {
     @Test
     fun `Load register to register sequence 8XK0`() {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         val instruction0 = 0x7510u
         val instruction01 = 0x79FFu
@@ -164,7 +167,7 @@ class CpuIntegrationTest {
                                             @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValue: Int,
                                             @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) memoryLocation: Int) {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         memoryManager.registers[registerNumber] = registerValue.toUByte()
 
@@ -176,7 +179,7 @@ class CpuIntegrationTest {
     @Test
     fun `Load general registers into memory FX55`() {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         memoryManager.registers[0x0] = 0u
         memoryManager.registers[0x1] = 1u
@@ -201,7 +204,7 @@ class CpuIntegrationTest {
     @EnumSource(value = SystemMode::class, names = ["CHIP_8_MODE", "CHIP_48_MODE"])
     fun `Load general registers into memory in Chip8 or Chip 48 Mode FX55`(systemMode: SystemMode) {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         try {
             FeatureManager.systemMode = systemMode
@@ -231,7 +234,7 @@ class CpuIntegrationTest {
     @Test
     fun `Load memory into general registers FX65`() {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         memoryManager.registers[0x0] = 9u
         memoryManager.registers[0x1] = 9u
@@ -280,7 +283,7 @@ class CpuIntegrationTest {
     @EnumSource(value = SystemMode::class, names = ["CHIP_8_MODE", "CHIP_48_MODE"])
     fun `Load memory into general registers in chip 8 or chip 48 mode FX65`(systemMode: SystemMode) {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
+        val cpu = Cpu(mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), memoryManager, mockk(relaxed = true))
 
         try {
             FeatureManager.systemMode = systemMode

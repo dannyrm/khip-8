@@ -10,8 +10,7 @@ import rightByte
 import rightNibble
 import rightNibbleByte
 import toHex
-import uk.co.dmatthews.khip8.util.SystemMode.CHIP_48_MODE
-import uk.co.dmatthews.khip8.util.SystemMode.CHIP_8_MODE
+import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.util.FeatureManager
 import uk.co.dmatthews.khip8.util.InstructionFeature
 import wordHex
@@ -19,9 +18,13 @@ import x
 import y
 
 class Cpu(private val instructionDecoder: InstructionDecoder,
+          private val cpuInstructionExecutor: CpuInstructionExecutor,
           private val display: Display,
           private val memoryManager: MemoryManager,
           private val chip8InputManager: Chip8InputManager) {
+    init {
+        cpuInstructionExecutor.init(this)
+    }
 
     fun tick() {
         // Lock inputs so they can't change during the cycle.
@@ -30,11 +33,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         // FETCH
         val instruction = memoryManager.fetchNextInstruction()
 
-        // DECODE
-        val decodedInstruction = instructionDecoder.decode(instruction)
-
-        // EXECUTE
-        decodedInstruction.invoke(this, instruction)
+        // DECODE & EXECUTE
+        val decodedInstruction = instructionDecoder.decode(instruction, cpuInstructionExecutor)
     }
 
     /**
@@ -513,6 +513,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * TODO
      */
     fun waitForKeyPress(value: UInt) {
+//        chip8InputManager.waitForInput()
         LOG.debug("LD Vx, K")
     }
 

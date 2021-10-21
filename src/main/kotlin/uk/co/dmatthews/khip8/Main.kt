@@ -10,6 +10,7 @@ import uk.co.dmatthews.khip8.cpu.InstructionDecoder
 import uk.co.dmatthews.khip8.display.DisplayMemory
 import uk.co.dmatthews.khip8.display.SwingUi
 import uk.co.dmatthews.khip8.display.Ui
+import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.input.SystemActionInputManager
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import java.awt.Canvas
@@ -19,7 +20,7 @@ fun main(args: Array<String>) {
     val dependencies = module {
         single { DisplayMemory() }
         single { InstructionDecoder() }
-        single { Cpu(get(), get(), get(), get()) }
+        single { Cpu(get(), get(), get(), get(), get()) }
         single { Display(get(), get()) }
         single { MemoryManager() }
         single { SystemActionInputManager() }
@@ -27,6 +28,7 @@ fun main(args: Array<String>) {
         single { Canvas() }
         single { KeyboardManager(get(), get()) }
         single { Chip8InputManager() }
+        single { CpuInstructionExecutor() }
         single<Ui> { SwingUi(get(), get()) }
     }
 

@@ -23,7 +23,7 @@ fun toHex(value: UInt, paddedLength: Int): String {
     var baseHexValue = value.toString(16).uppercase()
 
     for (i in baseHexValue.length until paddedLength) {
-        baseHexValue = "0" + baseHexValue
+        baseHexValue = "0$baseHexValue"
     }
 
     return "0x${baseHexValue}"
@@ -33,3 +33,5 @@ fun toHex(value: UByte): String = toHex(value.toUInt(), 2)
 fun wordHex(value: Int) = wordHex(value.toUInt())
 fun wordHex(value: UInt) = toHex(value, 4)
 fun nibbleByteHex(value: UInt) = toHex(value, 3)
+
+fun toHexMinimal(value: UInt) = value.toString(16).uppercase()

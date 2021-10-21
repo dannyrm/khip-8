@@ -10,6 +10,7 @@ import rightNibbleByte
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import toHex
+import toHexMinimal
 import wordHex
 import x
 import y
@@ -128,5 +129,15 @@ class BitManipulationUnitTest {
     @Test
     fun `nibbleByteHex does not cut off if value is larger`() {
         expectThat(nibbleByteHex(0x12345u)).isEqualTo("0x12345")
+    }
+
+    @Test
+    fun `toHex minimal works correctly for two digit value=`() {
+        expectThat(toHexMinimal(0xEFu)).isEqualTo("EF")
+    }
+
+    @Test
+    fun `toHex minimal works correctly for five digit value=`() {
+        expectThat(toHexMinimal(0xEF12Au)).isEqualTo("EF12A")
     }
 }

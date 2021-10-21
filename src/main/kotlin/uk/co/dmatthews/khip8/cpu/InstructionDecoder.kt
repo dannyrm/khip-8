@@ -5,90 +5,91 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rightByte
 import rightNibble
+import uk.co.dmatthews.khip8.executors.InstructionExecutor
 import wordHex
 import kotlin.reflect.KFunction2
 
 class InstructionDecoder {
-    fun decode(instruction: UInt): KFunction2<Cpu, UInt, Unit> {
+    fun decode(instruction: UInt, instructionExecutor: InstructionExecutor) {
         LOG.trace("Decoding instruction: ${wordHex(instruction)}")
 
-        return when (instruction.toInt()) {
-            0x00E0 -> Cpu::clearScreen
-            0x00EE -> Cpu::doReturn
+        when (instruction.toInt()) {
+            0x00E0 -> instructionExecutor.clearScreen(instruction)
+            0x00EE -> instructionExecutor.doReturn(instruction)
             else -> {
-                return when (leftNibble(instruction).toInt()) {
-                    0x0 -> Cpu::sysCall
-                    0x1 -> Cpu::jump
-                    0x2 -> Cpu::call
-                    0x3 -> Cpu::skipIfRegisterAndMemoryEqual
-                    0x4 -> Cpu::skipIfRegisterAndMemoryNotEqual
-                    0x5 -> return decode0x5Instruction(instruction)
-                    0x6 -> Cpu::loadMemoryIntoRegister
-                    0x7 -> Cpu::addValueToRegister
-                    0x8 -> return decode0x8Instruction(instruction)
-                    0x9 -> return decode0x9Instruction(instruction)
-                    0xA -> Cpu::loadMemoryIntoIRegister
-                    0xB -> Cpu::jumpWithOffset
-                    0xC -> Cpu::random
-                    0xD -> Cpu::draw
-                    0xE -> return decode0xEInstruction(instruction)
-                    0xF -> return decode0xFInstruction(instruction)
+                when (leftNibble(instruction).toInt()) {
+                    0x0 -> instructionExecutor.sysCall(instruction)
+                    0x1 -> instructionExecutor.jump(instruction)
+                    0x2 -> instructionExecutor.call(instruction)
+                    0x3 -> instructionExecutor.skipIfRegisterAndMemoryEqual(instruction)
+                    0x4 -> instructionExecutor.skipIfRegisterAndMemoryNotEqual(instruction)
+                    0x5 -> decode0x5Instruction(instruction, instructionExecutor)
+                    0x6 -> instructionExecutor.loadMemoryIntoRegister(instruction)
+                    0x7 -> instructionExecutor.addValueToRegister(instruction)
+                    0x8 -> decode0x8Instruction(instruction, instructionExecutor)
+                    0x9 -> decode0x9Instruction(instruction, instructionExecutor)
+                    0xA -> instructionExecutor.loadMemoryIntoIRegister(instruction)
+                    0xB -> instructionExecutor.jumpWithOffset(instruction)
+                    0xC -> instructionExecutor.random(instruction)
+                    0xD -> instructionExecutor.draw(instruction)
+                    0xE -> decode0xEInstruction(instruction, instructionExecutor)
+                    0xF -> decode0xFInstruction(instruction, instructionExecutor)
                     else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
                 }
             }
         }
     }
 
-    private fun decode0x5Instruction(instruction: UInt): KFunction2<Cpu, UInt, Unit> {
+    private fun decode0x5Instruction(instruction: UInt, instructionExecutor: InstructionExecutor) {
         if (rightNibble(instruction).toInt() == 0) {
-            return Cpu::skipIfRegisterAndRegisterEqual
+            instructionExecutor.skipIfRegisterAndRegisterEqual(instruction)
         } else {
             throw throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
         }
     }
 
-    private fun decode0x8Instruction(instruction: UInt): KFunction2<Cpu, UInt, Unit> {
-        return when (rightNibble(instruction).toInt()) {
-            0x0 -> Cpu::loadRegisterIntoRegister
-            0x1 -> Cpu::or
-            0x2 -> Cpu::and
-            0x3 -> Cpu::xor
-            0x4 -> Cpu::addRegisterAndRegister
-            0x5 -> Cpu::subtractYRegisterFromXRegister
-            0x6 -> Cpu::shiftRightXOnlyVariant
-            0x7 -> Cpu::subtractXRegisterFromYRegister
-            0xE -> Cpu::shiftLeftXOnlyVariant
+    private fun decode0x8Instruction(instruction: UInt, instructionExecutor: InstructionExecutor) {
+        when (rightNibble(instruction).toInt()) {
+            0x0 -> instructionExecutor.loadRegisterIntoRegister(instruction)
+            0x1 -> instructionExecutor.or(instruction)
+            0x2 -> instructionExecutor.and(instruction)
+            0x3 -> instructionExecutor.xor(instruction)
+            0x4 -> instructionExecutor.addRegisterAndRegister(instruction)
+            0x5 -> instructionExecutor.subtractYRegisterFromXRegister(instruction)
+            0x6 -> instructionExecutor.shiftRightXOnlyVariant(instruction)
+            0x7 -> instructionExecutor.subtractXRegisterFromYRegister(instruction)
+            0xE -> instructionExecutor.shiftLeftXOnlyVariant(instruction)
             else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
         }
     }
 
-    private fun decode0x9Instruction(instruction: UInt): KFunction2<Cpu, UInt, Unit> {
+    private fun decode0x9Instruction(instruction: UInt, instructionExecutor: InstructionExecutor) {
         if (rightNibble(instruction).toInt() == 0) {
-            return Cpu::skipIfRegisterAndRegisterNotEqual
+            instructionExecutor.skipIfRegisterAndRegisterNotEqual(instruction)
         } else {
             throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
         }
     }
 
-    private fun decode0xEInstruction(instruction: UInt): KFunction2<Cpu, UInt, Unit> {
-        return when(rightByte(instruction).toInt()) {
-            0x9E -> Cpu::skipIfKeyPressed
-            0xA1 -> Cpu::skipIfKeyNotPressed
+    private fun decode0xEInstruction(instruction: UInt, instructionExecutor: InstructionExecutor) {
+        when(rightByte(instruction).toInt()) {
+            0x9E -> instructionExecutor.skipIfKeyPressed(instruction)
+            0xA1 -> instructionExecutor.skipIfKeyNotPressed(instruction)
             else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
         }
     }
 
-    private fun decode0xFInstruction(instruction: UInt): KFunction2<Cpu, UInt, Unit> {
-        return when(rightByte(instruction).toInt()) {
-            0x07 -> Cpu::setRegisterToDelayTimerValue
-            0x0A -> Cpu::waitForKeyPress
-            0x15 -> Cpu::setDelayTimerRegisterToValueInGeneralRegister
-            0x18 -> Cpu::setSoundTimerRegisterToValueInGeneralRegister
-            0x1E -> Cpu::addGeneralRegisterToIRegister
-            0x29 -> Cpu::loadIRegisterWithLocationOfSpriteForDigit
-            0x33 -> Cpu::storeBCDRepresentation
-            0x55 -> Cpu::loadAllGeneralRegistersIntoMemory
-            0x65 -> Cpu::readMemoryIntoAllGeneralRegisters
+    private fun decode0xFInstruction(instruction: UInt, instructionExecutor: InstructionExecutor) {
+        when(rightByte(instruction).toInt()) {
+            0x07 -> instructionExecutor.setRegisterToDelayTimerValue(instruction)
+            0x0A -> instructionExecutor.waitForKeyPress(instruction)
+            0x15 -> instructionExecutor.setDelayTimerRegisterToValueInGeneralRegister(instruction)
+            0x18 -> instructionExecutor.setSoundTimerRegisterToValueInGeneralRegister(instruction)
+            0x1E -> instructionExecutor.addGeneralRegisterToIRegister(instruction)
+            0x29 -> instructionExecutor.loadIRegisterWithLocationOfSpriteForDigit(instruction)
+            0x33 -> instructionExecutor.storeBCDRepresentation(instruction)
+            0x55 -> instructionExecutor.loadAllGeneralRegistersIntoMemory(instruction)
+            0x65 -> instructionExecutor.readMemoryIntoAllGeneralRegisters(instruction)
             else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
         }
     }

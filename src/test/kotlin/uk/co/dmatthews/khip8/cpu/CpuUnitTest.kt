@@ -18,6 +18,8 @@ import strikt.assertions.isContainedIn
 import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
+import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
+import uk.co.dmatthews.khip8.executors.InstructionExecutor
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
 import kotlin.reflect.KFunction2
 
@@ -29,20 +31,19 @@ class CpuUnitTest {
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var instructionDecoder: InstructionDecoder
     @MockK(relaxed = true) private lateinit var display: Display
+    @MockK(relaxed = true) private lateinit var cpuInstructionExecutor: CpuInstructionExecutor
 
     @Test
     fun `tick works correctly`() {
         val nextInstruction: UInt = 0xE654u
-        val nextInstructionFunction: KFunction2<Cpu, UInt, Unit> = Cpu::sysCall
 
         every { memoryManager.fetchNextInstruction() } returns nextInstruction
-        every { instructionDecoder.decode(nextInstruction) } returns nextInstructionFunction
 
         cpu.tick()
 
         verify { chip8InputManager.lockInputs() }
         verify { memoryManager.fetchNextInstruction() }
-        verify { instructionDecoder.decode(nextInstruction) }
+        verify { instructionDecoder.decode(nextInstruction, cpuInstructionExecutor) }
     }
 
     @Test
@@ -431,7 +432,7 @@ class CpuUnitTest {
                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeFrom: Int,
                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeTo: Int) {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(instructionDecoder, display, memoryManager, chip8InputManager)
+        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, display, memoryManager, chip8InputManager)
 
         cpu.random(instruction.toUInt())
 
@@ -446,7 +447,7 @@ class CpuUnitTest {
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) vararg results: Int) {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(instructionDecoder, display, memoryManager, chip8InputManager)
+        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, display, memoryManager, chip8InputManager)
 
         cpu.random(instruction.toUInt())
 
