@@ -43,7 +43,7 @@ class CpuUnitTest {
 
         verify { chip8InputManager.lockInputs() }
         verify { memoryManager.fetchNextInstruction() }
-        verify { instructionDecoder.decode(nextInstruction, cpuInstructionExecutor) }
+        verify { instructionDecoder.decode(nextInstruction, listOf(cpuInstructionExecutor)) }
     }
 
     @Test
