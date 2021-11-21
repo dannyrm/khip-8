@@ -11,23 +11,23 @@ class FeatureManagerUnitTest {
     fun `Super chip mode instruction features`() {
         FeatureManager.systemMode = SystemMode.SUPER_CHIP_MODE
 
-        expectThat(FeatureManager.isEnabled(InstructionFeature.FX55_I_INCREMENT)).isFalse()
-        expectThat(FeatureManager.isEnabled(InstructionFeature.FX65_I_INCREMENT)).isFalse()
+        expectThat(FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX55)).isFalse()
+        expectThat(FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX65)).isFalse()
     }
 
     @Test
     fun `Chip 8 mode instruction features`() {
         FeatureManager.systemMode = SystemMode.CHIP_8_MODE
 
-        expectThat(FeatureManager.isEnabled(InstructionFeature.FX55_I_INCREMENT)).isTrue()
-        expectThat(FeatureManager.isEnabled(InstructionFeature.FX65_I_INCREMENT)).isTrue()
+        expectThat(FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX55)).isTrue()
+        expectThat(FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX65)).isTrue()
     }
 
     @Test
     fun `Chip 48 mode instruction features`() {
         FeatureManager.systemMode = SystemMode.CHIP_48_MODE
 
-        expectThat(FeatureManager.isEnabled(InstructionFeature.FX55_I_INCREMENT)).isTrue()
-        expectThat(FeatureManager.isEnabled(InstructionFeature.FX65_I_INCREMENT)).isTrue()
+        expectThat(FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX55)).isTrue()
+        expectThat(FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX65)).isTrue()
     }
 }

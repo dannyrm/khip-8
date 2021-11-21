@@ -1,7 +1,7 @@
 package uk.co.dmatthews.khip8.cpu
 
 import uk.co.dmatthews.khip8.input.Chip8InputManager
-import uk.co.dmatthews.khip8.display.Display
+import uk.co.dmatthews.khip8.display.model.Display
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import nibbleByteHex
 import org.slf4j.Logger
@@ -12,7 +12,7 @@ import rightNibbleByte
 import toHex
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.util.FeatureManager
-import uk.co.dmatthews.khip8.util.InstructionFeature
+import uk.co.dmatthews.khip8.util.SystemDependentInstructionFeature
 import wordHex
 import x
 import y
@@ -292,6 +292,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     }
 
     /**
+     * 8xy6
      * Set VX equal to VX bitshifted right 1.
      * VF is set to the least significant bit of VX prior to the shift.
      * Originally this opcode meant set VX equal to VY bitshifted right 1 but emulators and software seem to ignore
@@ -299,6 +300,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Note: This instruction was originally undocumented but functional due to how the 8XXX instructions were
      * implemented on the COSMAC VIP.
      * See https://github.com/trapexit/chip-8_documentation
+     * // TODO: Should the original version be handled in Chip 8 mode and in the disassembler?
      */
     fun shiftRightXOnlyVariant(value: UInt) {
         val x = x(value)
@@ -355,6 +357,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Note: This instruction was originally undocumented but functional due to how the 8XXX instructions were
      * implemented on the COSMAC VIP.
      * See https://github.com/trapexit/chip-8_documentation
+     * // TODO: Should the original version be handled in Chip 8 mode and in the disassembler?
      */
     fun shiftLeftXOnlyVariant(value: UInt) {
         val x = x(value)
@@ -616,7 +619,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         // Also, The Wikipedia says this:
         // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this instruction had been executed. In SCHIP, I is left unmodified."
 
-        if (FeatureManager.isEnabled(InstructionFeature.FX55_I_INCREMENT)) {
+        if (FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX55)) {
             memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
         }
 
@@ -644,7 +647,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this
         // instruction had been executed. In SCHIP, I is left unmodified."
 
-        if (FeatureManager.isEnabled(InstructionFeature.FX65_I_INCREMENT)) {
+        if (FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX65)) {
             memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
         }
 

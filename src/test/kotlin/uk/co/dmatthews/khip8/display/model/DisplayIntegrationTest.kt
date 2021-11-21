@@ -1,9 +1,11 @@
-package uk.co.dmatthews.khip8.display
+package uk.co.dmatthews.khip8.display.model
 
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import uk.co.dmatthews.khip8.display.model.Display
+import uk.co.dmatthews.khip8.display.model.DisplayMemory
 
 class DisplayIntegrationTest {
 

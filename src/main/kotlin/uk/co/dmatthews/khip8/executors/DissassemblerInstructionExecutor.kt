@@ -1,147 +1,88 @@
 package uk.co.dmatthews.khip8.executors
 
+import rightByte
+import rightNibble
 import rightNibbleByte
 import toHexMinimal
+import x
+import y
 
 class DissassemblerInstructionExecutor(val codeListing: MutableList<String> = mutableListOf()): InstructionExecutor {
 
-    override fun sysCall(value: UInt) {
-        codeListing.add("SYS ${toHexMinimal(rightNibbleByte(value))}")
+    private fun xKKInstruction(mnemonic: String, value: UInt) {
+        codeListing.add("$mnemonic V${toHexMinimal(x(value))}, ${toHexMinimal(rightByte(value))}")
     }
 
-    override fun clearScreen(value: UInt) {
-        TODO("Not yet implemented")
+    private fun nNNInstruction(mnemonic: String, value: UInt) {
+        codeListing.add("$mnemonic ${toHexMinimal(rightNibbleByte(value))}")
     }
 
-    override fun doReturn(value: UInt) {
-        TODO("Not yet implemented")
+    private fun mnemonicOnlyInstruction(mnemonic: String) {
+        codeListing.add(mnemonic)
     }
 
-    override fun jump(value: UInt) {
-        TODO("Not yet implemented")
+    private fun xyNInstruction(mnemonic: String, value: UInt) {
+        codeListing.add("$mnemonic V${toHexMinimal(x(value))}, V${toHexMinimal(y(value))}, ${toHexMinimal(rightNibble(value))}")
     }
 
-    override fun call(value: UInt) {
-        TODO("Not yet implemented")
+    private fun xYInstruction(mnemonic: String, value: UInt) {
+        codeListing.add("$mnemonic V${toHexMinimal(x(value))}, V${toHexMinimal(y(value))}")
     }
 
-    override fun skipIfRegisterAndMemoryEqual(value: UInt) {
-        TODO("Not yet implemented")
+    private fun xInstruction(mnemonic: String, value: UInt) {
+        codeListing.add("$mnemonic V${toHexMinimal(x(value))}")
     }
 
-    override fun skipIfRegisterAndMemoryNotEqual(value: UInt) {
-        TODO("Not yet implemented")
+    private fun wrappedXInstruction(mnemonic: String, value: UInt, suffix: String) {
+        codeListing.add("$mnemonic V${toHexMinimal(x(value))}, $suffix")
     }
 
-    override fun loadMemoryIntoRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
+    // mnemonic only Instructions
+    override fun clearScreen(value: UInt) = mnemonicOnlyInstruction("CLS")
+    override fun doReturn(value: UInt) = mnemonicOnlyInstruction("RET")
 
-    override fun addValueToRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
+    // nnn instructions
+    override fun sysCall(value: UInt) = nNNInstruction("SYS", value)
+    override fun jump(value: UInt) = nNNInstruction("JP", value)
+    override fun call(value: UInt) = nNNInstruction("CALL", value)
+    override fun loadMemoryIntoIRegister(value: UInt) = nNNInstruction("LD I,", value)
+    override fun jumpWithOffset(value: UInt) = nNNInstruction("JP V0,", value)
 
-    override fun loadMemoryIntoIRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
+    // x, kk instructions
+    override fun skipIfRegisterAndMemoryEqual(value: UInt) = xKKInstruction("SE", value)
+    override fun skipIfRegisterAndMemoryNotEqual(value: UInt) = xKKInstruction("SNE", value)
+    override fun loadMemoryIntoRegister(value: UInt) = xKKInstruction("LD", value)
+    override fun addValueToRegister(value: UInt) = xKKInstruction("ADD", value)
+    override fun random(value: UInt) = xKKInstruction("RND", value)
 
-    override fun jumpWithOffset(value: UInt) {
-        TODO("Not yet implemented")
-    }
+    // x, y, n instructions
+    override fun draw(value: UInt) = xyNInstruction("DRW", value)
 
-    override fun random(value: UInt) {
-        TODO("Not yet implemented")
-    }
+    // x, y instructions
+    override fun skipIfRegisterAndRegisterEqual(value: UInt) = xYInstruction("SE", value)
+    override fun loadRegisterIntoRegister(value: UInt) = xYInstruction("LD", value)
+    override fun or(value: UInt) = xYInstruction("OR", value)
+    override fun and(value: UInt) = xYInstruction("AND", value)
+    override fun xor(value: UInt) = xYInstruction("XOR", value)
+    override fun addRegisterAndRegister(value: UInt) = xYInstruction("ADD", value)
+    override fun subtractYRegisterFromXRegister(value: UInt) = xYInstruction("SUB", value)
+    override fun subtractXRegisterFromYRegister(value: UInt) = xYInstruction("SUBN", value)
+    override fun skipIfRegisterAndRegisterNotEqual(value: UInt) = xYInstruction("SNE", value)
 
-    override fun draw(value: UInt) {
-        TODO("Not yet implemented")
-    }
+    // x instructions
+    override fun shiftRightXOnlyVariant(value: UInt) = xInstruction("SHR", value)
+    override fun shiftLeftXOnlyVariant(value: UInt) = xInstruction("SHL", value)
+    override fun skipIfKeyPressed(value: UInt) = xInstruction("SKP", value)
+    override fun skipIfKeyNotPressed(value: UInt) = xInstruction("SKNP", value)
+    override fun setDelayTimerRegisterToValueInGeneralRegister(value: UInt) = xInstruction("LD DT,", value)
+    override fun setSoundTimerRegisterToValueInGeneralRegister(value: UInt) = xInstruction("LD ST,", value)
+    override fun addGeneralRegisterToIRegister(value: UInt) = xInstruction("ADD I,", value)
+    override fun loadIRegisterWithLocationOfSpriteForDigit(value: UInt) = xInstruction("LD F,", value)
+    override fun storeBCDRepresentation(value: UInt) = xInstruction("LD B,", value)
+    override fun loadAllGeneralRegistersIntoMemory(value: UInt) = xInstruction("LD [I],", value)
 
-    override fun skipIfRegisterAndRegisterEqual(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun loadRegisterIntoRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun or(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun and(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun xor(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun addRegisterAndRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun subtractYRegisterFromXRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun shiftRightXOnlyVariant(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun subtractXRegisterFromYRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun shiftLeftXOnlyVariant(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun skipIfRegisterAndRegisterNotEqual(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun skipIfKeyPressed(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun skipIfKeyNotPressed(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setRegisterToDelayTimerValue(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun waitForKeyPress(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setDelayTimerRegisterToValueInGeneralRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun setSoundTimerRegisterToValueInGeneralRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun addGeneralRegisterToIRegister(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun loadIRegisterWithLocationOfSpriteForDigit(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun storeBCDRepresentation(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun loadAllGeneralRegistersIntoMemory(value: UInt) {
-        TODO("Not yet implemented")
-    }
-
-    override fun readMemoryIntoAllGeneralRegisters(value: UInt) {
-        TODO("Not yet implemented")
-    }
+    // Wrapped x instructions
+    override fun setRegisterToDelayTimerValue(value: UInt) = wrappedXInstruction("LD", value, "DT")
+    override fun waitForKeyPress(value: UInt) = wrappedXInstruction("LD", value, "K")
+    override fun readMemoryIntoAllGeneralRegisters(value: UInt) = wrappedXInstruction("LD", value, "[I]")
 }

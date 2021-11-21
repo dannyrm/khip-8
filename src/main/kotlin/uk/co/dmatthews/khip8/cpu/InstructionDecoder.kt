@@ -33,7 +33,6 @@ class InstructionDecoder {
                     0xD -> instructionExecutors.forEach { it.draw(instruction) }
                     0xE -> decode0xEInstruction(instruction, instructionExecutors)
                     0xF -> decode0xFInstruction(instruction, instructionExecutors)
-                    else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
                 }
             }
         }
@@ -43,7 +42,7 @@ class InstructionDecoder {
         if (rightNibble(instruction).toInt() == 0) {
             instructionExecutors.forEach { it.skipIfRegisterAndRegisterEqual(instruction) }
         } else {
-            throw throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
+            throwException(instruction)
         }
     }
 
@@ -58,7 +57,7 @@ class InstructionDecoder {
             0x6 -> instructionExecutors.forEach { it.shiftRightXOnlyVariant(instruction) }
             0x7 -> instructionExecutors.forEach { it.subtractXRegisterFromYRegister(instruction) }
             0xE -> instructionExecutors.forEach { it.shiftLeftXOnlyVariant(instruction) }
-            else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
+            else -> throwException(instruction)
         }
     }
 
@@ -66,7 +65,7 @@ class InstructionDecoder {
         if (rightNibble(instruction).toInt() == 0) {
             instructionExecutors.forEach { it.skipIfRegisterAndRegisterNotEqual(instruction) }
         } else {
-            throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
+            throwException(instruction)
         }
     }
 
@@ -74,7 +73,7 @@ class InstructionDecoder {
         when(rightByte(instruction).toInt()) {
             0x9E -> instructionExecutors.forEach { it.skipIfKeyPressed(instruction) }
             0xA1 -> instructionExecutors.forEach { it.skipIfKeyNotPressed(instruction) }
-            else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
+            else -> throwException(instruction)
         }
     }
 
@@ -89,9 +88,11 @@ class InstructionDecoder {
             0x33 -> instructionExecutors.forEach { it.storeBCDRepresentation(instruction) }
             0x55 -> instructionExecutors.forEach { it.loadAllGeneralRegistersIntoMemory(instruction) }
             0x65 -> instructionExecutors.forEach { it.readMemoryIntoAllGeneralRegisters(instruction) }
-            else -> throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
+            else -> throwException(instruction)
         }
     }
+
+    private fun throwException(instruction: UInt): Unit = throw IllegalArgumentException("Unrecognised opcode: ${instruction.toString(16)}")
 
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(InstructionDecoder::class.java)

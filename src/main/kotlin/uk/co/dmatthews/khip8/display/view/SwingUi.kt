@@ -1,5 +1,6 @@
-package uk.co.dmatthews.khip8.display
+package uk.co.dmatthews.khip8.display.view
 
+import uk.co.dmatthews.khip8.display.model.DisplayMemory
 import uk.co.dmatthews.khip8.input.KeyboardManager
 import java.awt.*
 import java.awt.event.WindowAdapter

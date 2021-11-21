@@ -1,7 +1,7 @@
 package uk.co.dmatthews.khip8
 
 import io.mockk.*
-import uk.co.dmatthews.khip8.display.Display
+import uk.co.dmatthews.khip8.display.model.Display
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension

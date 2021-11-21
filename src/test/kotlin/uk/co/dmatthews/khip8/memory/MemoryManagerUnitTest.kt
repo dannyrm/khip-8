@@ -5,7 +5,8 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import java.io.File
+import uk.co.dmatthews.khip8.TestFileUtils
+import uk.co.dmatthews.khip8.TestFileUtils.loadFile
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManagerUnitTest {
@@ -29,7 +30,7 @@ class MemoryManagerUnitTest {
     fun `Fetch next instruction`() {
         val memoryManager = MemoryManager()
         memoryManager.loadProgram(
-            loadFile("inputs/15-puzzle.ch8")
+            TestFileUtils.loadFile("inputs/15-puzzle.ch8")
         )
 
         expectThat(memoryManager.pc).isEqualTo(0x200u)
@@ -181,10 +182,6 @@ class MemoryManagerUnitTest {
                     "\t0x0028 | 0x00 0x00$newLine" +
                     "}$newLine"
         )
-    }
-
-    private fun loadFile(fileName: String): File {
-        return File(this.javaClass.classLoader.getResource(fileName).toURI())
     }
 
     /**

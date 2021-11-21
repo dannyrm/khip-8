@@ -139,5 +139,11 @@
             <version>1.12.0</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.insert-koin</groupId>
+            <artifactId>koin-test-junit5</artifactId>
+            <version>3.1.2</version>
+        </dependency>
     </dependencies>
 </project>

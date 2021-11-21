@@ -1,6 +1,6 @@
 package uk.co.dmatthews.khip8.memory
 
-import uk.co.dmatthews.khip8.display.Display
+import uk.co.dmatthews.khip8.display.model.Display
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -10,7 +10,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
-import uk.co.dmatthews.khip8.display.DisplayMemory
+import uk.co.dmatthews.khip8.display.model.DisplayMemory
 
 @ExtendWith(MockKExtension::class)
 class DisplayMemoryUnitTest {

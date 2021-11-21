@@ -1,7 +1,7 @@
 package uk.co.dmatthews.khip8.cpu
 
 import uk.co.dmatthews.khip8.input.Chip8InputManager
-import uk.co.dmatthews.khip8.display.Display
+import uk.co.dmatthews.khip8.display.model.Display
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -19,9 +19,7 @@ import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
-import uk.co.dmatthews.khip8.executors.InstructionExecutor
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
-import kotlin.reflect.KFunction2
 
 @ExtendWith(MockKExtension::class)
 class CpuUnitTest {
@@ -59,6 +57,17 @@ class CpuUnitTest {
         // Value popped from the stack set to the PC
         verify { stack.pop() }
         verify { memoryManager setProperty MemoryManager::pc.name value stackValue }
+    }
+
+    @Test
+    fun `sys call does nothing 0nnn`() {
+
+        cpu.sysCall(UNUSED_VALUE)
+
+        verify { cpuInstructionExecutor.init(cpu) }
+
+        verify { listOf(chip8InputManager, memoryManager, instructionDecoder, display) wasNot Called }
+        confirmVerified(chip8InputManager, memoryManager, instructionDecoder, display)
     }
 
     @Test

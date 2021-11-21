@@ -35,3 +35,4 @@ fun wordHex(value: UInt) = toHex(value, 4)
 fun nibbleByteHex(value: UInt) = toHex(value, 3)
 
 fun toHexMinimal(value: UInt) = value.toString(16).uppercase()
+fun toHexMinimal(value: UByte) = value.toString(16).uppercase()

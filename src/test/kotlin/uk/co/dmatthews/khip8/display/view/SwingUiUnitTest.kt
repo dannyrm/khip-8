@@ -1,4 +1,4 @@
-package uk.co.dmatthews.khip8.display
+package uk.co.dmatthews.khip8.display.view
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,6 +8,8 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
+import uk.co.dmatthews.khip8.display.model.DisplayMemory
+import uk.co.dmatthews.khip8.display.view.SwingUi
 import uk.co.dmatthews.khip8.input.KeyboardManager
 import java.awt.Canvas
 import java.awt.Color
@@ -151,13 +153,13 @@ class SwingUiUnitTest {
 
         // Draws all of the populated pixels
         verify { graphics2D.fillRect(xPosBase, yPos, pixelWidth, pixelHeight) }
-        verify { graphics2D.fillRect(xPosBase+(pixelWidth), yPos, pixelWidth, pixelHeight) }
-        verify { graphics2D.fillRect(xPosBase+(pixelWidth*2), yPos, pixelWidth, pixelHeight) }
-        verify { graphics2D.fillRect(xPosBase+(pixelWidth*3), yPos, pixelWidth, pixelHeight) }
-        verify { graphics2D.fillRect(xPosBase+(pixelWidth*4), yPos, pixelWidth, pixelHeight) }
-        verify { graphics2D.fillRect(xPosBase+(pixelWidth*5), yPos, pixelWidth, pixelHeight) }
-        verify { graphics2D.fillRect(xPosBase+(pixelWidth*6), yPos, pixelWidth, pixelHeight) }
-        verify { graphics2D.fillRect(xPosBase+(pixelWidth*7), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase + (pixelWidth), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase + (pixelWidth * 2), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase + (pixelWidth * 3), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase + (pixelWidth * 4), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase + (pixelWidth * 5), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase + (pixelWidth * 6), yPos, pixelWidth, pixelHeight) }
+        verify { graphics2D.fillRect(xPosBase + (pixelWidth * 7), yPos, pixelWidth, pixelHeight) }
 
         // Paints to the canvas after populating it
         verify { bufferStrategy.show() }
