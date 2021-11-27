@@ -34,7 +34,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val instruction = memoryManager.fetchNextInstruction()
 
         // DECODE & EXECUTE
-        val decodedInstruction = instructionDecoder.decode(instruction, listOf(cpuInstructionExecutor))
+        instructionDecoder.decode(instruction, listOf(cpuInstructionExecutor))
     }
 
     /**
@@ -43,14 +43,14 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
      */
     fun sysCall(value: UInt) {
-        LOG.debug("SYS addr")
+        LOG.debug("SYS ${rightNibbleByte(value)}")
     }
 
     /**
      * 00E0 - CLS
      * Clear the display.
      */
-    fun clearScreen(unusedValue: UInt) {
+    fun clearScreen(@Suppress("UNUSED_PARAMETER") unusedValue: UInt) {
         display.clear()
         LOG.debug("CLS")
     }
@@ -59,7 +59,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * 00EE - RET
      * Sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
      */
-    fun doReturn(unusedValue: UInt) {
+    fun doReturn(@Suppress("UNUSED_PARAMETER") unusedValue: UInt) {
         memoryManager.pc = memoryManager.stack.pop()
 
         LOG.debug("RET")
@@ -390,8 +390,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Set I = nnn.
      * The value of register I is set to nnn.
      */
-    fun loadMemoryIntoIRegister(value: UInt) {
-        val value = rightNibbleByte(value)
+    fun loadMemoryIntoIRegister(instruction: UInt) {
+        val value = rightNibbleByte(instruction)
 
         memoryManager.i = value
         LOG.debug("LD I, ${wordHex(value)}")
@@ -402,8 +402,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Jump to location nnn + V0.
      * The program counter is set to nnn plus the value of V0.
      */
-    fun jumpWithOffset(value: UInt) {
-        val value = rightNibbleByte(value)
+    fun jumpWithOffset(instruction: UInt) {
+        val value = rightNibbleByte(instruction)
 
         memoryManager.pc = value + memoryManager.registers[0].toUInt()
 
@@ -517,7 +517,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      */
     fun waitForKeyPress(value: UInt) {
 //        chip8InputManager.waitForInput()
-        LOG.debug("LD Vx, K")
+        LOG.debug("LD V${x(value)}, K")
     }
 
     /**
@@ -578,7 +578,6 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Store BCD representation of Vx in memory locations I, I+1, and I+2.
      * The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I,
      * the tens digit at location I+1, and the ones digit at location I+2.
-     * TODO write tests
      */
     fun storeBCDRepresentation(value: UInt) {
         val x = x(value)
@@ -600,7 +599,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     }
 
     /**
-     * Fx55 - LD [I], Vx
+     * Fx55 - LD \[I], Vx
      * Store registers V0 through Vx (inclusive) in memory starting at location I.
      * The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
      */
@@ -627,7 +626,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
     }
 
     /**
-     * Fx65 - LD Vx, [I]
+     * Fx65 - LD Vx, \[I]
      * Read registers V0 through Vx from memory starting at location I.
      * The interpreter reads values from memory starting at location I into registers V0 through Vx.
      */

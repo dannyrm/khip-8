@@ -12,15 +12,18 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.converter.ConvertWith
+import org.junit.jupiter.params.converter.DefaultArgumentConverter
 import org.junit.jupiter.params.provider.CsvSource
 import strikt.api.expectThat
 import strikt.assertions.isContainedIn
+import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
 
+@ExperimentalUnsignedTypes
 @ExtendWith(MockKExtension::class)
 class CpuUnitTest {
     @InjectMockKs private lateinit var cpu: Cpu
@@ -124,6 +127,31 @@ class CpuUnitTest {
         cpu.skipIfRegisterAndMemoryEqual(instruction.toUInt())
 
         verify(inverse = true) { memoryManager.skipNextInstruction() }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = ["F533,5,AE,203,174", "FA33,A,0,205,0", "FA33,A,F,210,15", "FA33,A,3,210,3"])
+    fun `Store BCD representation FX33`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
+                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValue: Int,
+                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) iValue: Int,
+                                        @ConvertWith(DefaultArgumentConverter::class) expectedResult: Int) {
+        val memory = mockk<ValidatedMemory>()
+        every { memoryManager.registers } returns memory
+        every { memory[registerLocation] } returns registerValue.toUByte()
+
+        every { memoryManager.i } returns iValue.toUInt()
+
+        val ram = ValidatedMemory(4096)
+        every { memoryManager.ram } returns ram
+
+        cpu.storeBCDRepresentation(instruction.toUInt())
+
+        verify { memoryManager.i }
+
+        val value = ram[iValue].toString() + ram[iValue+1].toString() + ram[iValue+2].toString()
+
+        expectThat(value.toInt()).isEqualTo(expectedResult)
     }
 
     @Test
@@ -465,12 +493,12 @@ class CpuUnitTest {
 
     @ParameterizedTest
     @CsvSource(value = ["D135,1,3,5,F,FEEE"])
-    fun `Draw DXYN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-                    @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) iRegisterValue: Int) {
+    fun `Draw without collisions DXYN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
+                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) iRegisterValue: Int) {
         every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
         every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
 
@@ -495,6 +523,47 @@ class CpuUnitTest {
         verify { display[xRegisterValue, yRegisterValue+2] = sprite[2] }
         verify { display[xRegisterValue, yRegisterValue+3] = sprite[3] }
         verify { display[xRegisterValue, yRegisterValue+4] = sprite[4] }
+
+        verify { memoryManager.registers[0xF] = 0x0u }
+    }
+
+    @Test
+    fun `Draw with collisions DXYN`() {
+        val xRegisterLocation = 0x1
+        val yRegisterLocation = 0x3
+        val xRegisterValue = 0x5
+        val yRegisterValue = 0xF
+        val instruction = 0xD135
+        val iRegisterValue = 0xFEEE
+
+        every { display.hasCollision() } returns true
+
+        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+        every { memoryManager.i } returns iRegisterValue.toUInt()
+
+        val sprite = ubyteArrayOf(0x0u,  // 0000 0000
+            0x81u, // 1000 0001
+            0x81u, // 1000 0001
+            0x81u, // 1000 0001
+            0x0u)  // 0000 0000
+
+        every { memoryManager.ram[iRegisterValue] } returns sprite[0]
+        every { memoryManager.ram[iRegisterValue+1] } returns sprite[1]
+        every { memoryManager.ram[iRegisterValue+2] } returns sprite[2]
+        every { memoryManager.ram[iRegisterValue+3] } returns sprite[3]
+        every { memoryManager.ram[iRegisterValue+4] } returns sprite[4]
+
+        cpu.draw(instruction.toUInt())
+
+        verify { display[xRegisterValue, yRegisterValue] = sprite[0] }
+        verify { display[xRegisterValue, yRegisterValue+1] = sprite[1] }
+        verify { display[xRegisterValue, yRegisterValue+2] = sprite[2] }
+        verify { display[xRegisterValue, yRegisterValue+3] = sprite[3] }
+        verify { display[xRegisterValue, yRegisterValue+4] = sprite[4] }
+
+        verify { memoryManager.registers[0xF] = 0x1u }
     }
 
     @Test
@@ -505,6 +574,14 @@ class CpuUnitTest {
         cpu.skipIfKeyNotPressed(0xE4A1u)
 
         verify { memoryManager.skipNextInstruction() }
+    }
+
+    @Test
+    fun `Wait for key press FX0A`() {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns false
+
+        cpu.waitForKeyPress(0xF40Au)
     }
 
     @Test

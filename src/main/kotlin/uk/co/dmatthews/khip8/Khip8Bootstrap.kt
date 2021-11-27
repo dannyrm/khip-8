@@ -53,8 +53,9 @@ object Khip8Bootstrap: KoinComponent {
             }
         }
     }
-}
 
-fun main(args: Array<String>) {
-    Khip8Bootstrap.boot(File(args[0]))
+    @JvmStatic
+    fun main(args: Array<String>) {
+        boot(File(args[0]))
+    }
 }
