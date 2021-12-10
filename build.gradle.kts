@@ -22,16 +22,21 @@ dependencies {
     testImplementation("io.strikt:strikt-core:0.32.0")
 }
 
-tasks.create<Jar>("fatJar") {
-    duplicatesStrategy = DuplicatesStrategy.FAIL
+tasks.test {
+    useJUnitPlatform()
+}
 
+val fatJar = task("fatJar", type = Jar::class) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     manifest {
-        attributes(mapOf("Main-Class" to "uk.co.dmatthews.khip8.Khip8Bootstrap"))
+        attributes["Main-Class"] = "uk.co.dmatthews.khip8.Khip8Bootstrap"
     }
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    with(tasks.jar.get() as CopySpec)
+}
 
-    configurations.runtimeClasspath.get().filter {
-        it.name.endsWith(".jar")
-    }.forEach { jar ->
-        from(zipTree(jar))
+tasks {
+    "build" {
+        dependsOn(fatJar)
     }
 }

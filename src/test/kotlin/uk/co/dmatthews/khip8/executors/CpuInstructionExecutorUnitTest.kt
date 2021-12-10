@@ -3,10 +3,10 @@ package uk.co.dmatthews.khip8.executors
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import uk.co.dmatthews.khip8.cpu.Cpu
-import kotlin.test.BeforeTest
 
 @ExtendWith(MockKExtension::class)
 class CpuInstructionExecutorUnitTest {
@@ -14,7 +14,7 @@ class CpuInstructionExecutorUnitTest {
 
     @MockK(relaxed = true) private lateinit var cpu: Cpu
 
-    @BeforeTest
+    @BeforeEach
     fun `Setup instruction executor`() {
         instructionExecutor = CpuInstructionExecutor()
         instructionExecutor.init(cpu)

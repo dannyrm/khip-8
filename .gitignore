@@ -3,6 +3,7 @@
 
 .idea
 target
+/build
 .run
 /.gradle
 /gradle

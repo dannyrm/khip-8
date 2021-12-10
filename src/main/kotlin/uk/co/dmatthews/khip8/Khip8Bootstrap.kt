@@ -19,6 +19,7 @@ import uk.co.dmatthews.khip8.memory.MemoryManager
 import uk.co.dmatthews.khip8.util.memoryDump
 import java.awt.Canvas
 import java.io.File
+import kotlin.system.exitProcess
 
 object Khip8Bootstrap: KoinComponent {
     val khip8 by inject<Khip8>()
@@ -64,6 +65,10 @@ object Khip8Bootstrap: KoinComponent {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        if (args.isEmpty()) {
+            println("ERROR: ROM file expected as parameter")
+            exitProcess(1)
+        }
         boot(File(args[0]))
     }
 }

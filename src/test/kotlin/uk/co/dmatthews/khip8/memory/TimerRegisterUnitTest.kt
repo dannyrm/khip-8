@@ -1,8 +1,8 @@
 package uk.co.dmatthews.khip8.memory
 
+import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import kotlin.test.Test
 
 class TimerRegisterUnitTest {
     private lateinit var timerRegister: TimerRegister

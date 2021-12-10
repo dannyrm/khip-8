@@ -3,6 +3,8 @@ package uk.co.dmatthews.khip8.display.view
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -23,12 +25,12 @@ class SwingUiUnitTest {
     private lateinit var canvas: Canvas
     private lateinit var keyboardManager: KeyboardManager
 
-    @AfterTest
+    @AfterEach
     fun afterTest() {
         swingUi.dispose()
     }
 
-    @BeforeTest
+    @BeforeEach
     fun beforeTest() {
         canvas = mockk(relaxed = true)
         keyboardManager = mockk(relaxed = true)
