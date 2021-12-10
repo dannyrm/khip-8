@@ -5,24 +5,18 @@ import uk.co.dmatthews.khip8.cpu.Cpu
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import uk.co.dmatthews.khip8.input.SystemActionInputManager
-import uk.co.dmatthews.khip8.util.memoryDump
 import uk.co.dmatthews.khip8.util.waitFor
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager,
-            private val display: Display, systemActionInputManager: SystemActionInputManager,
+            private val display: Display,
             private var halt: Boolean = false) {
 
     init {
         memoryManager.loadSpriteDigitsIntoMemory()
         LOG.info("Loaded sprite digits into memory...")
-
-        systemActionInputManager.memoryDumpFunction = {
-            memoryDump(memoryManager.toString() + display.toString())
-        }
     }
 
     fun load(rom: File) {

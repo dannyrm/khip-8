@@ -16,11 +16,11 @@ import uk.co.dmatthews.khip8.input.Chip8InputManager
 import uk.co.dmatthews.khip8.input.KeyboardManager
 import uk.co.dmatthews.khip8.input.SystemActionInputManager
 import uk.co.dmatthews.khip8.memory.MemoryManager
+import uk.co.dmatthews.khip8.util.memoryDump
 import java.awt.Canvas
 import java.io.File
 
 object Khip8Bootstrap: KoinComponent {
-
     val khip8 by inject<Khip8>()
 
     fun boot(file: File, overrideModule: Module? = null) {
@@ -35,21 +35,29 @@ object Khip8Bootstrap: KoinComponent {
             single { DisplayMemory() }
             single { InstructionDecoder() }
             single { Cpu(get(), get(), get(), get(), get()) }
-            single { Display(get(), get()) }
             single { MemoryManager() }
-            single { SystemActionInputManager() }
-            single { Khip8(get(), get(), get(), get()) }
+            single { Khip8(get(), get(), get()) }
             single { Canvas() }
-            single { KeyboardManager(get(), get()) }
             single { Chip8InputManager() }
             single { CpuInstructionExecutor() }
+            single { SystemActionInputManager() }
             single<Ui> { SwingUi(get(), get()) }
+            single { KeyboardManager(get(), get()) }
+            single { Display(get(), get()) }
         }
 
         startKoin {
             modules(dependencies)
             overrideModule?.apply {
                 modules(overrideModule)
+            }
+
+            val memoryManager = koin.get<MemoryManager>()
+            val display = koin.get<Display>()
+            val systemActionInputManager = koin.get<SystemActionInputManager>()
+
+            systemActionInputManager.memoryDumpFunction = {
+                memoryDump(memoryManager.toString() + display.toString())
             }
         }
     }

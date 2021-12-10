@@ -10,6 +10,7 @@ import rightByte
 import rightNibble
 import rightNibbleByte
 import toHex
+import uk.co.dmatthews.khip8.display.model.DisplayMemory
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.util.FeatureManager
 import uk.co.dmatthews.khip8.util.SystemDependentInstructionFeature
@@ -19,7 +20,7 @@ import y
 
 class Cpu(private val instructionDecoder: InstructionDecoder,
           private val cpuInstructionExecutor: CpuInstructionExecutor,
-          private val display: Display,
+          private val displayMemory: DisplayMemory,
           private val memoryManager: MemoryManager,
           private val chip8InputManager: Chip8InputManager) {
     init {
@@ -51,7 +52,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Clear the display.
      */
     fun clearScreen(@Suppress("UNUSED_PARAMETER") unusedValue: UInt) {
-        display.clear()
+        displayMemory.clear()
         LOG.debug("CLS")
     }
 
@@ -452,8 +453,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         var collisionValue = 0u
 
         for (i in 0 until spriteHeight) {
-            display[xValue, yValue+i] = memoryManager.ram[startingAddress.toInt()+i]
-            if (display.hasCollision()) {
+            displayMemory[xValue, yValue+i] = memoryManager.ram[startingAddress.toInt()+i]
+            if (displayMemory.collision) {
                 collisionValue = 1u
             }
         }

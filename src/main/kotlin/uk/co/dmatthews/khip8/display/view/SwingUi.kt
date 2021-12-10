@@ -59,7 +59,7 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
 
         for (x in 0 until width) {
             for (y in 0 until height) {
-                if (displayMemory.getPixelState(x, y)) {
+                if (displayMemory[x, y]) {
                     graphics.fillRect(x*xPixelSize, y*yPixelSize, xPixelSize, yPixelSize)
                 }
             }

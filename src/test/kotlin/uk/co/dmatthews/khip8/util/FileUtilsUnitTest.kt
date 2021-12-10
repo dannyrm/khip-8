@@ -41,6 +41,12 @@ class FileUtilsUnitTest {
     }
 
     @Test
+    fun `Construct date time based file name with default time`() {
+        val fileName = constructDateTimeFileName("unitTestName")
+        expectThat(fileName).startsWith("unitTestName-")
+    }
+
+    @Test
     fun `Current directory`() {
         expectThat(currentDirectory().isDirectory()).isTrue()
     }

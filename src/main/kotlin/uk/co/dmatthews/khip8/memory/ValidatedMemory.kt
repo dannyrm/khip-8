@@ -33,42 +33,29 @@ class ValidatedMemory(private val memorySize: Int) {
     }
 
     override fun toString(): String {
-        val bytesPerLine = 20
-        val chunkedMemory = memory.chunked(bytesPerLine)
-
         val stringBuilder = StringBuilder()
 
-        chunkedMemory.forEachIndexed { index, chunk ->
-            printMemoryChunk(chunk, stringBuilder, bytesPerLine, index)
+        val bytesPerLine = 20
+        val emptyChunk = "     "
+
+        memory.chunked(bytesPerLine).forEachIndexed { chunkNumber, chunk ->
+            // Prefix containing memory start position followed by the memory in hex
+            stringBuilder.append("\t${wordHex(chunkNumber * bytesPerLine)} |")
+
+            chunk.forEach { stringBuilder.append(" ${toHex(it)}") }
+
+            val containsNonZeroData = chunk.any { it != 0.toUByte() }
+
+            if (containsNonZeroData) {
+                // Fill in any unused slots in the chunk so that the * always appears at the end of the line
+                val numberOfMissingChunks = bytesPerLine - chunk.size
+
+                stringBuilder.append(emptyChunk.repeat(numberOfMissingChunks), "  *")
+            }
+
+            stringBuilder.append(System.lineSeparator())
         }
 
         return stringBuilder.toString()
-    }
-
-    private fun printMemoryChunk(memory: List<UByte>, stringBuilder: StringBuilder, chunkSize: Int, chunkNumber: Int) {
-        stringBuilder.append("\t${wordHex(chunkNumber*chunkSize)} |")
-
-        var containsNonZeroData = false
-
-        for (byte in memory) {
-            if (byte != 0.toUByte()) {
-                containsNonZeroData = true
-            }
-
-            stringBuilder.append(" ${toHex(byte)}")
-        }
-
-        if (containsNonZeroData) {
-            // Fill in any unused slots in the chunk so that the * always appears at the end of the line
-            val numberOfMissingChunks = chunkSize - memory.size
-            val emptyChunk = "     "
-            for (i in 0 until numberOfMissingChunks) {
-                stringBuilder.append(emptyChunk)
-            }
-
-            stringBuilder.append("  *")
-        }
-
-        stringBuilder.append(System.lineSeparator())
     }
 }

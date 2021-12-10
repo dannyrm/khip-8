@@ -18,15 +18,63 @@ class DisplayMemoryUnitTest {
     @InjectMockKs private lateinit var displayMemory: DisplayMemory
 
     @Test
+    fun `Check setting of the four corners of the display`() {
+        displayMemory[0,0] = 128u
+        displayMemory[63,0] = 128u
+        displayMemory[0,31] = 128u
+        displayMemory[63,31] = 128u
+
+        val (width, height) = displayMemory.dimensions()
+
+        for (i in 0 until width) {
+            for (j in 0 until height) {
+                if ((i==0 && j==0) || (i==63 && j==0) || (i==0 && j==31) || (i==63 && j==31)) {
+                    expectThat(displayMemory[i, j]).isEqualTo(true)
+                } else {
+                    expectThat(displayMemory[i, j]).isEqualTo(false)
+                }
+            }
+        }
+    }
+
+    @Test
     fun `check Display clears correctly`() {
-        for (i in displayMemory.buffer.indices) {
-            displayMemory.buffer[i] = 0xFFu
+        val (width, height) = displayMemory.dimensions()
+
+        for (i in 0 until width) {
+            for (j in 0 until height) {
+                displayMemory[i, j] = 0x1u
+            }
         }
 
         displayMemory.clear()
 
-        for (i in displayMemory.buffer.indices) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+        for (i in 0 until width) {
+            for (j in 0 until height) {
+                expectThat(displayMemory[i, j]).isEqualTo(false)
+            }
+        }
+    }
+
+    @Test
+    fun `Check memory is fully populated correctly`() {
+        val (width, height) = displayMemory.dimensions()
+
+        // Populate all but the last 8 pixels of each line
+        for (i in 0 until width) {
+            for (j in 0 until height) {
+                displayMemory[i, j] = 0x1u
+            }
+        }
+
+        for (i in 0 until height) {
+            displayMemory[0, i] = 0xFEu
+        }
+
+        for (i in 0 until width) {
+            for (j in 0 until height) {
+                expectThat(displayMemory[i, j]).isEqualTo(true)
+            }
         }
     }
 
@@ -35,13 +83,13 @@ class DisplayMemoryUnitTest {
         displayMemory[5,5] = 0xFFu
 
         for (i in 0..4) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
 
-        expectThat(displayMemory.buffer[5]).isEqualTo(0x7F8000000000000u)
+        expectThat(displayMemory.getRow(5)).isEqualTo(0x7F8000000000000u)
 
         for (i in 6 until 32) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
     }
 
@@ -50,19 +98,19 @@ class DisplayMemoryUnitTest {
         displayMemory[5,5] = 0xFFu
 
         for (i in 0 until 5) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
 
-        expectThat(displayMemory.buffer[5]).isEqualTo(0x07F8000000000000u)
+        expectThat(displayMemory.getRow(5)).isEqualTo(0x07F8000000000000u)
 
         for (i in 6 until 32) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
 
         displayMemory[5,5] = 0xFFu
 
         for (i in 0 until 32) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
     }
 
@@ -102,16 +150,16 @@ class DisplayMemoryUnitTest {
         displayMemory[25,31] = 0xFFu
 
         for (i in 0..4) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
 
-        expectThat(displayMemory.buffer[5]).isEqualTo(0x7F8000000000000u)
+        expectThat(displayMemory.getRow(5)).isEqualTo(0x7F8000000000000u)
 
         for (i in 6 until 31) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
 
-        expectThat(displayMemory.buffer[31]).isEqualTo(0x7f80000000u)
+        expectThat(displayMemory.getRow(31)).isEqualTo(0x7f80000000u)
     }
 
     @Test
@@ -121,9 +169,9 @@ class DisplayMemoryUnitTest {
         for (y in 0 until MAX_HEIGHT_IN_BITS) {
             for (x in 0 until MAX_WIDTH_IN_BITS) {
                 if (x in 5..12 && y == 5) {
-                    expectThat(displayMemory.getPixelState(x, y)).isTrue()
+                    expectThat(displayMemory[x, y]).isTrue()
                 } else {
-                    expectThat(displayMemory.getPixelState(x, y)).isFalse()
+                    expectThat(displayMemory[x, y]).isFalse()
                 }
             }
         }
@@ -137,9 +185,9 @@ class DisplayMemoryUnitTest {
         for (y in 0 until MAX_HEIGHT_IN_BITS) {
             for (x in 0 until MAX_WIDTH_IN_BITS) {
                 if ((x in 5..12 && y == 5) || (x in 25..32 && y == 31)) {
-                    expectThat(displayMemory.getPixelState(x, y)).isTrue()
+                    expectThat(displayMemory[x, y]).isTrue()
                 } else {
-                    expectThat(displayMemory.getPixelState(x, y)).isFalse()
+                    expectThat(displayMemory[x, y]).isFalse()
                 }
             }
         }
@@ -158,21 +206,21 @@ class DisplayMemoryUnitTest {
         displayMemory[63,13] = 0xFFu
 
         for (i in 0..4) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
 
-        expectThat(displayMemory.buffer[5]).isEqualTo(0x1FEu)
-        expectThat(displayMemory.buffer[6]).isEqualTo(0xFFu)
-        expectThat(displayMemory.buffer[7]).isEqualTo(0x7Fu)
-        expectThat(displayMemory.buffer[8]).isEqualTo(0x3Fu)
-        expectThat(displayMemory.buffer[9]).isEqualTo(0x1Fu)
-        expectThat(displayMemory.buffer[10]).isEqualTo(0xFu)
-        expectThat(displayMemory.buffer[11]).isEqualTo(0x7u)
-        expectThat(displayMemory.buffer[12]).isEqualTo(0x3u)
-        expectThat(displayMemory.buffer[13]).isEqualTo(0x1u)
+        expectThat(displayMemory.getRow(5)).isEqualTo(0x1FEu)
+        expectThat(displayMemory.getRow(6)).isEqualTo(0xFFu)
+        expectThat(displayMemory.getRow(7)).isEqualTo(0x7Fu)
+        expectThat(displayMemory.getRow(8)).isEqualTo(0x3Fu)
+        expectThat(displayMemory.getRow(9)).isEqualTo(0x1Fu)
+        expectThat(displayMemory.getRow(10)).isEqualTo(0xFu)
+        expectThat(displayMemory.getRow(11)).isEqualTo(0x7u)
+        expectThat(displayMemory.getRow(12)).isEqualTo(0x3u)
+        expectThat(displayMemory.getRow(13)).isEqualTo(0x1u)
 
         for (i in 14 until 32) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
     }
 
@@ -187,15 +235,15 @@ class DisplayMemoryUnitTest {
         displayMemory[10,7] = 0xFu
 
         for (i in 0..4) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
 
-        expectThat(displayMemory.buffer[5]).isEqualTo(0x1AEu)
-        expectThat(displayMemory.buffer[6]).isEqualTo(0x101u)
-        expectThat(displayMemory.buffer[7]).isEqualTo(0x3C0000000007Fu)
+        expectThat(displayMemory.getRow(5)).isEqualTo(0x1AEu)
+        expectThat(displayMemory.getRow(6)).isEqualTo(0x101u)
+        expectThat(displayMemory.getRow(7)).isEqualTo(0x3C0000000007Fu)
 
         for (i in 8 until 32) {
-            expectThat(displayMemory.buffer[i]).isEqualTo(ZERO)
+            expectThat(displayMemory.getRow(i)).isEqualTo(ZERO)
         }
     }
 
@@ -206,9 +254,9 @@ class DisplayMemoryUnitTest {
         for (y in 0 until MAX_HEIGHT_IN_BITS) {
             for (x in 0 until MAX_WIDTH_IN_BITS) {
                 if ((x in 61..63 && y == 31)) {
-                    expectThat(displayMemory.getPixelState(x, y)).isTrue()
+                    expectThat(displayMemory[x, y]).isTrue()
                 } else {
-                    expectThat(displayMemory.getPixelState(x, y)).isFalse()
+                    expectThat(displayMemory[x, y]).isFalse()
                 }
             }
         }
@@ -222,8 +270,8 @@ class DisplayMemoryUnitTest {
 
         println(displayMemory)
 
-        expectThat(displayMemory.buffer[5]).isEqualTo(0x7F80000000000000u)
-        expectThat(displayMemory.buffer[10]).isEqualTo(0x3FC0000000000000u)
+        expectThat(displayMemory.getRow(5)).isEqualTo(0x7F80000000000000u)
+        expectThat(displayMemory.getRow(10)).isEqualTo(0x3FC0000000000000u)
     }
 
     @Test

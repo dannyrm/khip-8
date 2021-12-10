@@ -1,5 +1,5 @@
 package uk.co.dmatthews.khip8.input
 
-class SystemActionInputManager {
+class SystemActionInputManager() {
     var memoryDumpFunction: () -> Unit = {}
 }

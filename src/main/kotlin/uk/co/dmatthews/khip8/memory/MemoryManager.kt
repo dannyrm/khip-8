@@ -18,10 +18,8 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
         set(value) { field = value % 0x10000u }
 
     fun loadProgram(input: File) {
-        val inputStream = FileInputStream(input)
-
-        inputStream.use {
-            inputStream.readAllBytes().toUByteArray().forEachIndexed { index, byte ->
+        FileInputStream(input).use {
+            it.readAllBytes().toUByteArray().forEachIndexed { index, byte ->
                 ram[PROGRAM_START_ADDRESS + index] = byte
             }
         }
@@ -86,10 +84,8 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     private fun populateRam(startLocation: UInt, arrays: Array<UByteArray>) {
         var currentLocation = startLocation.toInt()
 
-        for (array in arrays) {
-            for (element in array) {
-                ram[currentLocation++] = element
-            }
+        arrays.forEach { array ->
+            array.forEach { element -> ram[currentLocation++] = element }
         }
     }
 

@@ -20,6 +20,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
+import uk.co.dmatthews.khip8.display.model.DisplayMemory
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
 
@@ -31,7 +32,7 @@ class CpuUnitTest {
     @MockK(relaxed = true) private lateinit var chip8InputManager: Chip8InputManager
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var instructionDecoder: InstructionDecoder
-    @MockK(relaxed = true) private lateinit var display: Display
+    @MockK(relaxed = true) private lateinit var displayMemory: DisplayMemory
     @MockK(relaxed = true) private lateinit var cpuInstructionExecutor: CpuInstructionExecutor
 
     @Test
@@ -69,8 +70,8 @@ class CpuUnitTest {
 
         verify { cpuInstructionExecutor.init(cpu) }
 
-        verify { listOf(chip8InputManager, memoryManager, instructionDecoder, display) wasNot Called }
-        confirmVerified(chip8InputManager, memoryManager, instructionDecoder, display)
+        verify { listOf(chip8InputManager, memoryManager, instructionDecoder, displayMemory) wasNot Called }
+        confirmVerified(chip8InputManager, memoryManager, instructionDecoder, displayMemory)
     }
 
     @Test
@@ -98,7 +99,7 @@ class CpuUnitTest {
     fun `Clear screen calls the display to clear 00E0`() {
         cpu.clearScreen(UNUSED_VALUE)
 
-        verify { display.clear() }
+        verify { displayMemory.clear() }
     }
 
     @ParameterizedTest
@@ -469,7 +470,7 @@ class CpuUnitTest {
                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeFrom: Int,
                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeTo: Int) {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, display, memoryManager, chip8InputManager)
+        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager)
 
         cpu.random(instruction.toUInt())
 
@@ -484,7 +485,7 @@ class CpuUnitTest {
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) vararg results: Int) {
         val memoryManager = MemoryManager()
-        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, display, memoryManager, chip8InputManager)
+        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager)
 
         cpu.random(instruction.toUInt())
 
@@ -518,11 +519,11 @@ class CpuUnitTest {
 
         cpu.draw(instruction.toUInt())
 
-        verify { display[xRegisterValue, yRegisterValue] = sprite[0] }
-        verify { display[xRegisterValue, yRegisterValue+1] = sprite[1] }
-        verify { display[xRegisterValue, yRegisterValue+2] = sprite[2] }
-        verify { display[xRegisterValue, yRegisterValue+3] = sprite[3] }
-        verify { display[xRegisterValue, yRegisterValue+4] = sprite[4] }
+        verify { displayMemory[xRegisterValue, yRegisterValue] = sprite[0] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+1] = sprite[1] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+2] = sprite[2] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+3] = sprite[3] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+4] = sprite[4] }
 
         verify { memoryManager.registers[0xF] = 0x0u }
     }
@@ -536,7 +537,7 @@ class CpuUnitTest {
         val instruction = 0xD135
         val iRegisterValue = 0xFEEE
 
-        every { display.hasCollision() } returns true
+        every { displayMemory.collision } returns true
 
         every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
         every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
@@ -557,11 +558,11 @@ class CpuUnitTest {
 
         cpu.draw(instruction.toUInt())
 
-        verify { display[xRegisterValue, yRegisterValue] = sprite[0] }
-        verify { display[xRegisterValue, yRegisterValue+1] = sprite[1] }
-        verify { display[xRegisterValue, yRegisterValue+2] = sprite[2] }
-        verify { display[xRegisterValue, yRegisterValue+3] = sprite[3] }
-        verify { display[xRegisterValue, yRegisterValue+4] = sprite[4] }
+        verify { displayMemory[xRegisterValue, yRegisterValue] = sprite[0] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+1] = sprite[1] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+2] = sprite[2] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+3] = sprite[3] }
+        verify { displayMemory[xRegisterValue, yRegisterValue+4] = sprite[4] }
 
         verify { memoryManager.registers[0xF] = 0x1u }
     }
