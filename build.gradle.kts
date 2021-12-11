@@ -16,6 +16,8 @@ dependencies {
 
 plugins {
     kotlin("jvm") version "1.6.10-RC"
+    id("name.remal.sonarlint") version "1.0.189"
+    id("jacoco")
 }
 
 repositories {
@@ -26,9 +28,9 @@ tasks.wrapper {
     gradleVersion = "7.3.1"
 }
 
-tasks.build {
-    dependsOn(fatJar)
-}
+//tasks.build {
+//    dependsOn(fatJar)
+//}
 
 tasks.compileKotlin {
     kotlinOptions {
@@ -50,6 +52,14 @@ tasks.test {
     useJUnitPlatform()
     // Removes "Sharing is only supported for boot loader classes because bootstrap classpath has been appended" warning
     jvmArgs = listOf("-Xshare:off")
+}
+
+//tasks.check {
+//    dep
+//}
+
+tasks.sonarlintMain {
+    excludedMessages.add("kotlin:S1135") // Do not alert for TODOs
 }
 
 val fatJar = task("fatJar", type = Jar::class) {

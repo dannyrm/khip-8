@@ -1,7 +1,6 @@
 package uk.co.dmatthews.khip8.cpu
 
 import uk.co.dmatthews.khip8.input.Chip8InputManager
-import uk.co.dmatthews.khip8.display.model.Display
 import uk.co.dmatthews.khip8.memory.MemoryManager
 import nibbleByteHex
 import org.slf4j.Logger
