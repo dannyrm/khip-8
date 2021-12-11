@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThrows
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.executors.DissassemblerInstructionExecutor
-import java.lang.IllegalArgumentException
+import kotlin.IllegalArgumentException
 
 @ExtendWith(MockKExtension::class)
 class InstructionDecoderUnitTest {
@@ -281,9 +281,9 @@ class InstructionDecoderUnitTest {
 
     @ParameterizedTest
     @ValueSource(ints = [
-        0x5123, // Requires the last byte to be zero (SE Vx, Vy)
+        0x5121, 0x5122, 0x5123, 0x5124, 0x5125, 0x5126, 0x5127, 0x5128, 0x5129, // Requires the last byte to be zero (SE Vx, Vy)
         0x8128, 0x8129, 0x812A, 0x812B, 0x812C, 0x812D, 0x812F, // Unsupported 8 Prefix instructions
-        0x9123, // Requires the last byte to be zero (SNE Vx, Vy)
+        0x9121, 0x9122, 0x9123, 0x9124, 0x9125, 0x9126, 0x9127, 0x9128, 0x9129, // Requires the last byte to be zero (SNE Vx, Vy)
         0xE11F, 0xE14F, 0xE1FF, 0xE1F1, 0xE1F4, 0xE1EF, 0xE1A2, 0xE1A5, // Some unsupported E Prefix instructions
         0xF108, 0xF106, 0xF10B, 0xF109, 0xF114, 0xF116, 0xF117, 0xF119, // Some unsupported F Prefix instructions
         0xF11D, 0xF11F, 0xF128, 0xF130, 0xF132, 0xF134, 0xF154, 0xF156, // Some more unsupported F Prefix instructions

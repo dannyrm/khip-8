@@ -6,6 +6,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import strikt.api.expectThrows
 import uk.co.dmatthews.khip8.cpu.Cpu
 
 @ExtendWith(MockKExtension::class)
@@ -18,6 +19,12 @@ class CpuInstructionExecutorUnitTest {
     fun `Setup instruction executor`() {
         instructionExecutor = CpuInstructionExecutor()
         instructionExecutor.init(cpu)
+    }
+
+    @Test
+    fun `Executor fails if Cpu not specified`() {
+        instructionExecutor = CpuInstructionExecutor()
+        expectThrows<UninitializedPropertyAccessException> { instructionExecutor.clearScreen(UNUSED_VALUE) }
     }
 
     @Test
