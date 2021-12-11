@@ -7,7 +7,6 @@ dependencies {
     implementation("io.insert-koin:koin-core:3.1.4")
     implementation("io.insert-koin:koin-ktor:3.1.4")
 
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
     testImplementation("io.mockk:mockk:1.12.1")
     testImplementation("io.insert-koin:koin-test-junit5:3.1.4")
@@ -28,9 +27,25 @@ tasks.wrapper {
     gradleVersion = "7.3.1"
 }
 
-//tasks.build {
-//    dependsOn(fatJar)
-//}
+val fatJar = task("fatJar", type = Jar::class) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    manifest {
+        attributes["Main-Class"] = "uk.co.dmatthews.khip8.Khip8Bootstrap"
+    }
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    with(tasks.jar.get() as CopySpec)
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(false)
+        csv.required.set(false)
+    }
+}
+
+tasks.build {
+    dependsOn(fatJar)
+}
 
 tasks.compileKotlin {
     kotlinOptions {
@@ -48,25 +63,20 @@ tasks.compileTestKotlin {
     }
 }
 
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+}
+
 tasks.test {
     useJUnitPlatform()
     // Removes "Sharing is only supported for boot loader classes because bootstrap classpath has been appended" warning
     jvmArgs = listOf("-Xshare:off")
-}
 
-//tasks.check {
-//    dep
-//}
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
 
 tasks.sonarlintMain {
     excludedMessages.add("kotlin:S1135") // Do not alert for TODOs
 }
 
-val fatJar = task("fatJar", type = Jar::class) {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    manifest {
-        attributes["Main-Class"] = "uk.co.dmatthews.khip8.Khip8Bootstrap"
-    }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    with(tasks.jar.get() as CopySpec)
-}
+
