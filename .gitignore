@@ -6,7 +6,3 @@ target
 /build
 .run
 /.gradle
-/gradle
-
-gradlew
-gradlew.bat

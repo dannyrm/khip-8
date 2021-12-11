@@ -1,7 +1,6 @@
 package uk.co.dmatthews.khip8.cpu
 
 import uk.co.dmatthews.khip8.input.Chip8InputManager
-import uk.co.dmatthews.khip8.display.model.Display
 import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -480,7 +479,7 @@ class CpuUnitTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = ["C104,1,'0,4'", "C120,1,'0,20'", "C140,1,'0,40'", "C115,1,'0,1,4,5,10,11,14,15'", "C180,1,'0,80'"])
+    @CsvSource(value = ["C104,1,'0,4'", "C120,1,'0,20'", "C140,1,'0,40'", "CA15,A,'0,1,4,5,10,11,14,15'", "C380,3,'0,80'"])
     fun `Random with mask CXNN Specific Values`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) vararg results: Int) {
@@ -489,7 +488,7 @@ class CpuUnitTest {
 
         cpu.random(instruction.toUInt())
 
-        expectThat(memoryManager.registers[1]).isContainedIn(results.map { it.toUByte() })
+        expectThat(memoryManager.registers[xRegisterLocation]).isContainedIn(results.map { it.toUByte() })
     }
 
     @ParameterizedTest
