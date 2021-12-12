@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "uk.co.dmatthews.khip8"
 version = "1.0-SNAPSHOT"
 
@@ -36,29 +38,15 @@ val fatJar = task("fatJar", type = Jar::class) {
     with(tasks.jar.get() as CopySpec)
 }
 
-tasks.jacocoTestReport {
-    reports {
-        xml.required.set(false)
-        csv.required.set(false)
-    }
-}
-
 tasks.build {
     dependsOn(fatJar)
 }
 
-tasks.compileKotlin {
+tasks.withType<KotlinCompile> {
     kotlinOptions {
         apiVersion = "1.6"
         languageVersion = "1.6"
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
-    }
-}
-
-tasks.compileTestKotlin {
-    kotlinOptions {
-        apiVersion = "1.6"
-        languageVersion = "1.6"
+        jvmTarget = "17"
         freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
     }
 }
@@ -78,5 +66,3 @@ tasks.test {
 tasks.sonarlintMain {
     excludedMessages.add("kotlin:S1135") // Do not alert for TODOs
 }
-
-
