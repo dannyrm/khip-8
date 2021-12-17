@@ -53,9 +53,19 @@ object Khip8Bootstrap: KoinComponent {
                 modules(overrideModule)
             }
 
+            val cpu = koin.get<Cpu>()
+            val chip8InputManager = koin.get<Chip8InputManager>()
+            val cpuInstructionExecutor = koin.get<CpuInstructionExecutor>()
+            val khip8 = koin.get<Khip8>()
+            val ui = koin.get<Ui>()
+
             val memoryManager = koin.get<MemoryManager>()
             val display = koin.get<Display>()
             val systemActionInputManager = koin.get<SystemActionInputManager>()
+
+            chip8InputManager.init(cpu)
+            cpuInstructionExecutor.init(cpu)
+            ui.init(khip8::halt)
 
             systemActionInputManager.memoryDumpFunction = {
                 memoryDump(memoryManager.toString() + display.toString())

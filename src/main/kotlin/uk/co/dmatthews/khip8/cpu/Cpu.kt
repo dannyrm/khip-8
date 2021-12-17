@@ -21,20 +21,20 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
           private val cpuInstructionExecutor: CpuInstructionExecutor,
           private val displayMemory: DisplayMemory,
           private val memoryManager: MemoryManager,
-          private val chip8InputManager: Chip8InputManager) {
-    init {
-        cpuInstructionExecutor.init(this)
-    }
+          private val chip8InputManager: Chip8InputManager,
+          var cpuState: CpuState = CpuState.RUNNING) {
 
     fun tick() {
-        // Lock inputs so they can't change during the cycle.
+        // Lock inputs, so they can't change during the cycle.
         chip8InputManager.lockInputs()
 
-        // FETCH
-        val instruction = memoryManager.fetchNextInstruction()
+        if (CpuState.RUNNING == cpuState) {
+            // FETCH
+            val instruction = memoryManager.fetchNextInstruction()
 
-        // DECODE & EXECUTE
-        instructionDecoder.decode(instruction, listOf(cpuInstructionExecutor))
+            // DECODE & EXECUTE
+            instructionDecoder.decode(instruction, listOf(cpuInstructionExecutor))
+        }
     }
 
     /**
@@ -513,10 +513,13 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
      * Fx0A - LD Vx, K
      * Wait for a key press, store the value of the key in Vx.
      * All execution stops until a key is pressed, then the value of that key is stored in Vx.
-     * TODO
+     * 
+     * Pause the CPU until a key is pressed. The Chip8InputManager deals with un-pausing the CPU once a key is pressed.
      */
     fun waitForKeyPress(value: UInt) {
-//        chip8InputManager.waitForInput()
+        cpuState = CpuState.PAUSED
+
+        LOG.debug("Pausing CPU")
         LOG.debug("LD V${x(value)}, K")
     }
 
@@ -616,8 +619,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         // https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#chip-8-instructions states that I is
         // set to i + x + 1 after the operation but the test roms suggest that's not the case.
         // Also, The Wikipedia says this:
-        // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this instruction had been executed. In SCHIP, I is left unmodified."
-
+        // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this instruction
+        // had been executed. In SCHIP, I is left unmodified."
         if (FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX55)) {
             memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
         }

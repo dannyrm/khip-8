@@ -29,8 +29,6 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager,
         LOG.debug(memoryManager.toString())
         LOG.debug(display.toString())
 
-        display.init(::halt)
-
         val cpuTicksPerPeripheralTick = numberOfCpuTicksPerPeripheralTick()
 
         val (delayInMillis, delayInNanos) = delayBetweenCycles()

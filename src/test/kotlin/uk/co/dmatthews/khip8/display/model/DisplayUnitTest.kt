@@ -30,12 +30,4 @@ class DisplayUnitTest {
 
         verify { ui.update(displayMemory) }
     }
-
-    @Test
-    fun `Init works correctly`() {
-        val myFunction = {}
-        display.init(myFunction)
-
-        verify { ui.init(myFunction) }
-    }
 }

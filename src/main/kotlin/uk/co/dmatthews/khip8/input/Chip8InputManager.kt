@@ -2,13 +2,19 @@ package uk.co.dmatthews.khip8.input
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import uk.co.dmatthews.khip8.cpu.Cpu
+import uk.co.dmatthews.khip8.cpu.CpuState
 import uk.co.dmatthews.khip8.util.waitFor
 
-class Chip8InputManager {
+class Chip8InputManager() {
     private var chip8InputState: UInt = 0u
     private var chip8LockedInputState: UInt = 0u
 
-    private var waitingForInput: Boolean = false
+    private lateinit var cpu: Cpu
+
+    fun init(cpu: Cpu) {
+        this.cpu = cpu
+    }
 
     fun lockInputs() {
         chip8LockedInputState = chip8InputState
@@ -18,20 +24,17 @@ class Chip8InputManager {
         return (chip8LockedInputState and Chip8Inputs.values()[keyNumber].bitMask) > 0u
     }
 
-    // TODO: Write tests around this functionality
-    fun waitForInput() {
-        waitingForInput = true
-
-        while (waitingForInput) { waitFor(WAIT_FOR_INPUT_DELAY_MILLIS, 0) }
-    }
-
     operator fun set(key: Chip8Inputs, isActive: Boolean) {
-        waitingForInput = false
-
         chip8InputState = if (isActive) {
             chip8InputState or key.bitMask
         } else {
             chip8InputState and key.bitMask.inv()
+        }
+
+        if (isActive) {
+            // It might be that the CPU was paused waiting for input, so we set the CPU to "running" to account
+            // for this.
+            cpu.cpuState = CpuState.RUNNING
         }
 
         LOG.debug("Chip 8 key {}: {}. New input state: {}", key, isActive, chip8InputState)
@@ -39,7 +42,6 @@ class Chip8InputManager {
 
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(Chip8InputManager::class.java)
-        const val WAIT_FOR_INPUT_DELAY_MILLIS = 200L
     }
 }
 

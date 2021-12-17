@@ -67,8 +67,6 @@ class CpuUnitTest {
 
         cpu.sysCall(UNUSED_VALUE)
 
-        verify { cpuInstructionExecutor.init(cpu) }
-
         verify { listOf(chip8InputManager, memoryManager, instructionDecoder, displayMemory) wasNot Called }
         confirmVerified(chip8InputManager, memoryManager, instructionDecoder, displayMemory)
     }

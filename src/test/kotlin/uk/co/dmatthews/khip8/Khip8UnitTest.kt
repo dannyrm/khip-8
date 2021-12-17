@@ -48,15 +48,6 @@ class Khip8UnitTest {
     }
 
     @Test
-    fun `Start initialises display`() {
-        khip8.halt()
-
-        khip8.start()
-
-        verify { display.init(khip8::halt) }
-    }
-
-    @Test
     fun `Check number of Cpu ticks per peripheral tick`() {
         expectThat(khip8.numberOfCpuTicksPerPeripheralTick()).isEqualTo(9)
     }
