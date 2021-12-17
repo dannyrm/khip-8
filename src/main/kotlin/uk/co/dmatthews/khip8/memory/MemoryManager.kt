@@ -2,13 +2,14 @@ package uk.co.dmatthews.khip8.memory
 
 import createBigEndianWordFromBytes
 import toHex
+import uk.co.dmatthews.khip8.sound.SoundTimerRegister
 import wordHex
 import java.io.File
 import java.io.FileInputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
-                    var soundRegister: TimerRegister = TimerRegister(),
+                    var soundRegister: TimerRegister = SoundTimerRegister(),
                     var i: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
                     val stack: Stack = Stack(STACK_SIZE),
                     val ram: ValidatedMemory = ValidatedMemory(RAM_MEMORY_SIZE),
