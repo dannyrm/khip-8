@@ -2,13 +2,12 @@ package uk.co.dmatthews.khip8.sound
 
 import uk.co.dmatthews.khip8.memory.TimerRegister
 
-// TODO: Write tests for all the sound stuff
-class SoundTimerRegister(value: UByte = 0u,
-                         private val soundGenerator: SoundGenerator = SoundGenerator()): TimerRegister(value) {
+class SoundTimerRegister(private val soundGenerator: SoundGenerator = SoundGenerator()): TimerRegister() {
 
-    override var value = value
+    override var value
+        get() = super.value
         set (value) {
-            field = value
+            super.value = value
 
             if (value > 0u) {
                 soundGenerator.start()

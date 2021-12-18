@@ -4,16 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.sound.midi.*
 
 class SoundGeneratorUnitTest {
-
-    @BeforeEach
-    fun setup() {
-
-    }
 
     @Test
     fun `Check sound generator initialised correctly`() {

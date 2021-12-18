@@ -5,15 +5,12 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
 class TimerRegisterUnitTest {
-    private lateinit var timerRegister: TimerRegister
-    private var expectedTimerValue: UByte = 0u
-
     @Test
     fun `Check decrements correctly`() {
-        expectedTimerValue = 5u
+        val expectedTimerValue = 5u
 
-        timerRegister = TimerRegister()
-        timerRegister.value = expectedTimerValue
+        val timerRegister = TimerRegister()
+        timerRegister.value = expectedTimerValue.toUByte()
 
         expectThat(timerRegister.value).isEqualTo(5u)
         timerRegister.tick()
@@ -34,7 +31,7 @@ class TimerRegisterUnitTest {
 
     @Test
     fun `Clears timer value`() {
-        timerRegister = TimerRegister()
+        val timerRegister = TimerRegister()
         timerRegister.value = 54u
 
         timerRegister.clear()

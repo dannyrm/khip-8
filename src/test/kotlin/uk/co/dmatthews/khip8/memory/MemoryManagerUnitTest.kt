@@ -7,6 +7,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import uk.co.dmatthews.khip8.TestFileUtils
 import uk.co.dmatthews.khip8.TestFileUtils.loadFile
+import uk.co.dmatthews.khip8.sound.SoundTimerRegister
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManagerUnitTest {
@@ -30,7 +31,7 @@ class MemoryManagerUnitTest {
     fun `Fetch next instruction`() {
         val memoryManager = MemoryManager()
         memoryManager.loadProgram(
-            TestFileUtils.loadFile("inputs/15-puzzle.ch8")
+            loadFile("inputs/15-puzzle.ch8")
         )
 
         expectThat(memoryManager.pc).isEqualTo(0x200u)
@@ -143,7 +144,9 @@ class MemoryManagerUnitTest {
 
     @Test
     fun `check toString format`() {
-        val memoryManager = MemoryManager(ram = ValidatedMemory(42))
+        val soundTimerRegister = SoundTimerRegister(mockk(relaxed = true))
+
+        val memoryManager = MemoryManager(ram = ValidatedMemory(42), soundRegister = soundTimerRegister)
 
         memoryManager.ram[24] = 0x11u
 
