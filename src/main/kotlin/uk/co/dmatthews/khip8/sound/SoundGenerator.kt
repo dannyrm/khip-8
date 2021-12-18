@@ -7,17 +7,17 @@ import javax.sound.midi.MidiSystem
  * Thanks go to this answer on StackOverflow for helping tremendously:
  * https://stackoverflow.com/a/36466737
  */
-class SoundGenerator() {
+class SoundGenerator {
     private val midiChannel: MidiChannel
 
     init {
-        val midiSynth = MidiSystem.getSynthesizer()
-        midiSynth.open()
+        val midiSynthesizer = MidiSystem.getSynthesizer()
+        midiSynthesizer.open()
 
-        val instruments = midiSynth.defaultSoundbank.instruments
-        midiChannel = midiSynth.channels[0]
+        val instruments = midiSynthesizer.defaultSoundbank.instruments
+        midiChannel = midiSynthesizer.channels[0]
 
-        midiSynth.loadInstrument(instruments[MIDI_INSTRUMENT_NUMBER])
+        midiSynthesizer.loadInstrument(instruments[MIDI_INSTRUMENT_NUMBER])
     }
 
     fun start() {
