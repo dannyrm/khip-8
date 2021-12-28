@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import uk.co.dmatthews.khip8.config.SoundConfig
 import javax.sound.midi.*
 
 class SoundGeneratorUnitTest {
@@ -22,7 +23,7 @@ class SoundGeneratorUnitTest {
         every { midiSynthesiser.defaultSoundbank } returns soundbank
         every { soundbank.instruments } returns arrayOf(instrument)
 
-        SoundGenerator()
+        SoundGenerator(soundConfig)
 
         verify { midiSynthesiser.open() }
         verify { midiSynthesiser.loadInstrument(instrument) }
@@ -41,7 +42,7 @@ class SoundGeneratorUnitTest {
         every { midiSynthesiser.defaultSoundbank } returns soundbank
         every { soundbank.instruments } returns arrayOf(instrument)
 
-        val soundGenerator = SoundGenerator()
+        val soundGenerator = SoundGenerator(soundConfig)
 
         soundGenerator.start()
 
@@ -62,11 +63,15 @@ class SoundGeneratorUnitTest {
         every { midiSynthesiser.defaultSoundbank } returns soundbank
         every { soundbank.instruments } returns arrayOf(instrument)
 
-        val soundGenerator = SoundGenerator()
+        val soundGenerator = SoundGenerator(soundConfig)
 
         soundGenerator.stop()
 
         verify { midiChannel.noteOff(60) }
         verify(inverse = true) { midiChannel.noteOn(any(), any()) }
+    }
+
+    companion object {
+        private val soundConfig = SoundConfig(midiInstrumentNumber = 0, midiNoteNumber = 60, midiNoteVelocity = 100)
     }
 }

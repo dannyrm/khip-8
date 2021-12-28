@@ -19,6 +19,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
 import uk.co.dmatthews.khip8.HexToIntegerCsvSourceArgumentConverter
+import uk.co.dmatthews.khip8.config.MemoryConfig
 import uk.co.dmatthews.khip8.display.model.DisplayMemory
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.memory.ValidatedMemory
@@ -33,6 +34,7 @@ class CpuUnitTest {
     @MockK(relaxed = true) private lateinit var instructionDecoder: InstructionDecoder
     @MockK(relaxed = true) private lateinit var displayMemory: DisplayMemory
     @MockK(relaxed = true) private lateinit var cpuInstructionExecutor: CpuInstructionExecutor
+    private val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
 
     @Test
     fun `tick works correctly`() {
@@ -466,8 +468,8 @@ class CpuUnitTest {
                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeFrom: Int,
                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeTo: Int) {
-        val memoryManager = MemoryManager()
-        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager)
+        val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200))
+        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
 
         cpu.random(instruction.toUInt())
 
@@ -481,8 +483,9 @@ class CpuUnitTest {
     fun `Random with mask CXNN Specific Values`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) vararg results: Int) {
-        val memoryManager = MemoryManager()
-        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager)
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
+        val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
 
         cpu.random(instruction.toUInt())
 

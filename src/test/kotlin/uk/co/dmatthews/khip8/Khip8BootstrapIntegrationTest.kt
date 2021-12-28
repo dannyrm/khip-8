@@ -5,7 +5,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import strikt.api.expectThat
 import uk.co.dmatthews.khip8.TestFileUtils.loadResource
 import java.io.File
 

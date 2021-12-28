@@ -1,5 +1,6 @@
 package uk.co.dmatthews.khip8.sound
 
+import uk.co.dmatthews.khip8.config.SoundConfig
 import javax.sound.midi.MidiChannel
 import javax.sound.midi.MidiSystem
 
@@ -7,7 +8,7 @@ import javax.sound.midi.MidiSystem
  * Thanks go to this answer on StackOverflow for helping tremendously:
  * https://stackoverflow.com/a/36466737
  */
-class SoundGenerator {
+class SoundGenerator(private val soundConfig: SoundConfig) {
     private val midiChannel: MidiChannel
 
     init {
@@ -17,20 +18,14 @@ class SoundGenerator {
         val instruments = midiSynthesizer.defaultSoundbank.instruments
         midiChannel = midiSynthesizer.channels[0]
 
-        midiSynthesizer.loadInstrument(instruments[MIDI_INSTRUMENT_NUMBER])
+        midiSynthesizer.loadInstrument(instruments[soundConfig.midiInstrumentNumber])
     }
 
     fun start() {
-        midiChannel.noteOn(MIDI_NOTE_NUMBER, MIDI_NOTE_VELOCITY)
+        midiChannel.noteOn(soundConfig.midiNoteNumber, soundConfig.midiNoteVelocity)
     }
 
     fun stop() {
-        midiChannel.noteOff(MIDI_NOTE_NUMBER)
-    }
-
-    companion object {
-        private const val MIDI_INSTRUMENT_NUMBER = 0
-        private const val MIDI_NOTE_NUMBER = 60
-        private const val MIDI_NOTE_VELOCITY = 100
+        midiChannel.noteOff(soundConfig.midiNoteNumber)
     }
 }

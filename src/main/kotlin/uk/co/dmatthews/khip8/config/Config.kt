@@ -1,3 +1,8 @@
 package uk.co.dmatthews.khip8.config
 
-data class Config(val cpuSpeed: Int, val timerSpeed: Int, val displayRefreshRate: Int)
+import uk.co.dmatthews.khip8.util.SystemMode
+
+data class Config(val systemSpeedConfig: SystemSpeedConfig,
+                  val soundConfig: SoundConfig,
+                  val memoryConfig: MemoryConfig,
+                  val systemMode: SystemMode)

@@ -3,7 +3,7 @@
   "systemSpeedConfig": {
     "cpuSpeed": 540,
     "timerSpeed": 60,
-    "displayRefreshRate": 60
+    "displayRefreshRate": 30
   },
   "soundConfig": {
     "midiInstrumentNumber": 0,

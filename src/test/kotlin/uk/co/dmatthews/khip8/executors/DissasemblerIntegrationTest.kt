@@ -1,9 +1,11 @@
 package uk.co.dmatthews.khip8.executors
 
+import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import uk.co.dmatthews.khip8.TestFileUtils
+import uk.co.dmatthews.khip8.config.MemoryConfig
 import uk.co.dmatthews.khip8.cpu.InstructionDecoder
 import uk.co.dmatthews.khip8.memory.MemoryManager
 
@@ -11,7 +13,8 @@ class DissasemblerIntegrationTest {
 
     @Test
     fun `Check dissasembly of 15 puzzle`() {
-        val memoryManager = MemoryManager()
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
 
         memoryManager.loadProgram(
             TestFileUtils.loadFile("inputs/15-puzzle.ch8")

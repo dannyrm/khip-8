@@ -1,20 +1,24 @@
 package uk.co.dmatthews.khip8.memory
 
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import uk.co.dmatthews.khip8.TestFileUtils
 import uk.co.dmatthews.khip8.TestFileUtils.loadFile
+import uk.co.dmatthews.khip8.config.MemoryConfig
 import uk.co.dmatthews.khip8.sound.SoundTimerRegister
 
 @OptIn(ExperimentalUnsignedTypes::class)
+@ExtendWith(MockKExtension::class)
 class MemoryManagerUnitTest {
 
     @Test
     fun `Load Program Into Memory`() {
-        val memoryManager = MemoryManager()
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadProgram(
             loadFile("inputs/15-puzzle.ch8")
         )
@@ -29,7 +33,8 @@ class MemoryManagerUnitTest {
 
     @Test
     fun `Fetch next instruction`() {
-        val memoryManager = MemoryManager()
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadProgram(
             loadFile("inputs/15-puzzle.ch8")
         )
@@ -51,7 +56,8 @@ class MemoryManagerUnitTest {
 
     @Test
     fun `Check correct values after loading sprite data`() {
-        val memoryManager = MemoryManager()
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadSpriteDigitsIntoMemory()
 
         val expectedValues = ubyteArrayOf(
@@ -80,7 +86,8 @@ class MemoryManagerUnitTest {
 
     @Test
     fun `Check correct data for each sprite digit`() {
-        val memoryManager = MemoryManager()
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadSpriteDigitsIntoMemory()
 
         val expectedValues = arrayOf(
@@ -115,7 +122,8 @@ class MemoryManagerUnitTest {
 
     @Test
     fun `Check skip next instruction works as expected`() {
-        val memoryManager = MemoryManager()
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         expectThat(memoryManager.pc).isEqualTo(0x200u)
         memoryManager.skipNextInstruction()
         expectThat(memoryManager.pc).isEqualTo(0x202u)
@@ -123,10 +131,13 @@ class MemoryManagerUnitTest {
 
     @Test
     fun `Reset memory`() {
-        val memoryManager = MemoryManager(delayRegister = mockk(relaxed = true), soundRegister = mockk(relaxed = true),
-                                          stack = mockk(relaxed = true), ram = mockk(relaxed = true),
-                                          registers = mockk(relaxed = true))
-
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(delayRegister = mockk(relaxed = true),
+                                          soundRegister = mockk(relaxed = true),
+                                          stack = mockk(relaxed = true),
+                                          ram = mockk(relaxed = true),
+                                          registers = mockk(relaxed = true),
+                                          memoryConfig = memoryConfig)
         memoryManager.i = 0x50u
         memoryManager.pc = 0x800u
 
@@ -145,8 +156,8 @@ class MemoryManagerUnitTest {
     @Test
     fun `check toString format`() {
         val soundTimerRegister = SoundTimerRegister(mockk(relaxed = true))
-
-        val memoryManager = MemoryManager(ram = ValidatedMemory(42), soundRegister = soundTimerRegister)
+        val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(ram = ValidatedMemory(42), soundRegister = soundTimerRegister, memoryConfig = memoryConfig, stack = Stack(16))
 
         memoryManager.ram[24] = 0x11u
 

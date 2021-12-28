@@ -9,6 +9,7 @@ import rightByte
 import rightNibble
 import rightNibbleByte
 import toHex
+import uk.co.dmatthews.khip8.config.MemoryConfig
 import uk.co.dmatthews.khip8.display.model.DisplayMemory
 import uk.co.dmatthews.khip8.executors.CpuInstructionExecutor
 import uk.co.dmatthews.khip8.util.FeatureManager
@@ -17,11 +18,9 @@ import wordHex
 import x
 import y
 
-class Cpu(private val instructionDecoder: InstructionDecoder,
-          private val cpuInstructionExecutor: CpuInstructionExecutor,
-          private val displayMemory: DisplayMemory,
-          private val memoryManager: MemoryManager,
-          private val chip8InputManager: Chip8InputManager,
+class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuInstructionExecutor: CpuInstructionExecutor,
+          private val displayMemory: DisplayMemory, private val memoryManager: MemoryManager,
+          private val chip8InputManager: Chip8InputManager, private val memoryConfig: MemoryConfig,
           var cpuState: CpuState = CpuState.RUNNING) {
 
     fun tick() {
@@ -165,9 +164,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val x = x(value)
         val byte = rightByte(value)
 
-        val currentValue = memoryManager.registers[x.toInt()]
-
-        memoryManager.registers[x.toInt()] = (currentValue + byte).toUByte()
+        memoryManager.registers[x.toInt()] = (memoryManager.registers[x.toInt()] + byte).toUByte()
 
         LOG.debug("ADD V${toHex(x)}, ${toHex(byte)}")
     }
@@ -195,8 +192,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val x = x(value)
         val y = y(value)
 
-        val result = memoryManager.registers[x.toInt()] or memoryManager.registers[y.toInt()]
-        memoryManager.registers[x.toInt()] = result
+        memoryManager.registers[x.toInt()] = memoryManager.registers[x.toInt()] or memoryManager.registers[y.toInt()]
 
         LOG.debug("OR V${toHex(x)}, V${toHex(y)}")
     }
@@ -210,8 +206,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val x = x(value)
         val y = y(value)
 
-        val result = memoryManager.registers[x.toInt()] and memoryManager.registers[y.toInt()]
-        memoryManager.registers[x.toInt()] = result
+        memoryManager.registers[x.toInt()] = memoryManager.registers[x.toInt()] and memoryManager.registers[y.toInt()]
 
         LOG.debug("AND V${toHex(x)}, V${toHex(y)}")
     }
@@ -225,8 +220,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val x = x(value)
         val y = y(value)
 
-        val result = memoryManager.registers[x.toInt()] xor memoryManager.registers[y.toInt()]
-        memoryManager.registers[x.toInt()] = result
+        memoryManager.registers[x.toInt()] = memoryManager.registers[x.toInt()] xor memoryManager.registers[y.toInt()]
 
         LOG.debug("XOR V${toHex(x)}, V${toHex(y)}")
     }
@@ -265,10 +259,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val xValue = memoryManager.registers[x.toInt()]
         val yValue = memoryManager.registers[y.toInt()]
 
-        val result = xValue.toUInt() - yValue.toUInt()
-
         memoryManager.registers[0xF] = if (xValue > yValue) 0x1u else 0x0u
-        memoryManager.registers[x.toInt()] = result.toUByte()
+        memoryManager.registers[x.toInt()] = (xValue.toUInt() - yValue.toUInt()).toUByte()
 
         LOG.debug("SUB V${toHex(x)}, V${toHex(y)}")
     }
@@ -324,10 +316,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val xValue = memoryManager.registers[x.toInt()]
         val yValue = memoryManager.registers[y.toInt()]
 
-        val result = yValue.toUInt() - xValue.toUInt()
-
         memoryManager.registers[0xF] = if (yValue > xValue) 0x1u else 0x0u
-        memoryManager.registers[x.toInt()] = result.toUByte()
+        memoryManager.registers[x.toInt()] = (yValue.toUInt() - xValue.toUInt()).toUByte()
 
         LOG.debug("SUBN V${toHex(x)}, V${toHex(y)}")
     }
@@ -611,7 +601,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val i = memoryManager.i
 
         for (j in 0..x.toInt()) {
-            val memoryLocation = (i.toInt() + j) % MemoryManager.RAM_MEMORY_SIZE
+            // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
+            val memoryLocation = (i.toInt() + j) % memoryConfig.memorySize
 
             memoryManager.ram[memoryLocation] = memoryManager.registers[j]
         }
@@ -622,7 +613,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         // "In the original CHIP-8 implementation, and also in CHIP-48, I is left incremented after this instruction
         // had been executed. In SCHIP, I is left unmodified."
         if (FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX55)) {
-            memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+            // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
+            memoryManager.i += ((x + 1u) % memoryConfig.memorySize.toUInt())
         }
 
         LOG.debug("LD [I], V${toHex(x)}")
@@ -638,7 +630,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         val i = memoryManager.i
 
         for (j in 0..x.toInt()) {
-            val memoryLocation = (i.toInt() + j) % MemoryManager.RAM_MEMORY_SIZE
+            // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
+            val memoryLocation = (i.toInt() + j) % memoryConfig.memorySize
 
             memoryManager.registers[j] = memoryManager.ram[memoryLocation]
         }
@@ -650,7 +643,8 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         // instruction had been executed. In SCHIP, I is left unmodified."
 
         if (FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX65)) {
-            memoryManager.i += ((x + 1u) % MemoryManager.RAM_MEMORY_SIZE.toUInt())
+            // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
+            memoryManager.i += ((x + 1u) % memoryConfig.memorySize.toUInt())
         }
 
         LOG.debug("LD V${toHex(x)}, [I]")

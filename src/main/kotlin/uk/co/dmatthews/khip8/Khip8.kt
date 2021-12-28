@@ -58,11 +58,11 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager,
     }
 
     internal fun numberOfCpuTicksPerPeripheralTick(): Int {
-        return config.cpuSpeed / config.timerSpeed
+        return config.systemSpeedConfig.cpuSpeed / config.systemSpeedConfig.timerSpeed
     }
 
     internal fun delayBetweenCycles(): List<Number> {
-        val cyclesDecimal = BigDecimal(1000.0 / config.cpuSpeed.toDouble())
+        val cyclesDecimal = BigDecimal(1000.0 / config.systemSpeedConfig.cpuSpeed.toDouble())
         val numberOfMillis = cyclesDecimal.setScale(0, RoundingMode.DOWN)
 
         val fractionalValue = (cyclesDecimal - numberOfMillis)

@@ -2,7 +2,7 @@ package uk.co.dmatthews.khip8.sound
 
 import uk.co.dmatthews.khip8.memory.TimerRegister
 
-class SoundTimerRegister(private val soundGenerator: SoundGenerator = SoundGenerator()): TimerRegister() {
+class SoundTimerRegister(private val soundGenerator: SoundGenerator): TimerRegister() {
 
     override var value
         get() = super.value

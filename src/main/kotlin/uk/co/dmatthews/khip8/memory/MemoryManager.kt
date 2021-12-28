@@ -2,26 +2,27 @@ package uk.co.dmatthews.khip8.memory
 
 import createBigEndianWordFromBytes
 import toHex
-import uk.co.dmatthews.khip8.sound.SoundTimerRegister
+import uk.co.dmatthews.khip8.config.MemoryConfig
 import wordHex
 import java.io.File
 import java.io.FileInputStream
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
-                    var soundRegister: TimerRegister = SoundTimerRegister(),
-                    var i: UInt = 0u, // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
-                    val stack: Stack = Stack(STACK_SIZE),
-                    val ram: ValidatedMemory = ValidatedMemory(RAM_MEMORY_SIZE),
-                    val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
-                   ) {
-    var pc: UInt = PROGRAM_START_ADDRESS.toUInt() // 16 bits, program counter
+                    var soundRegister: TimerRegister,
+                    private val memoryConfig: MemoryConfig,
+                    val stack: Stack = Stack(memoryConfig.stackSize),
+                    val ram: ValidatedMemory = ValidatedMemory(memoryConfig.memorySize),
+                    val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)) {
+    var i: UInt = 0u // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
+
+    var pc: UInt = memoryConfig.programStartAddress.toUInt() // 16 bits, program counter
         set(value) { field = value % 0x10000u }
 
     fun loadProgram(input: File) {
         FileInputStream(input).use {
             it.readAllBytes().toUByteArray().forEachIndexed { index, byte ->
-                ram[PROGRAM_START_ADDRESS + index] = byte
+                ram[memoryConfig.programStartAddress + index] = byte
             }
         }
     }
@@ -44,7 +45,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
         ram.clear()
         registers.clear()
 
-        pc = PROGRAM_START_ADDRESS.toUInt()
+        pc = memoryConfig.programStartAddress.toUInt()
     }
 
     /**
@@ -56,7 +57,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
 
     fun loadSpriteDigitsIntoMemory() {
         populateRam(
-            INTERPRETER_START_ADDRESS,
+            memoryConfig.interpreterStartAddress.toUInt(),
             arrayOf(
                 ubyteArrayOf(0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u), // Zero
                 ubyteArrayOf(0x20u, 0x60u, 0x20u, 0x20u, 0x70u), // One
@@ -79,7 +80,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     }
 
     fun getLocationOfSpriteDigit(digit: UInt): UInt {
-        return INTERPRETER_START_ADDRESS + (digit * NUM_BYTES_PER_DIGIT)
+        return memoryConfig.interpreterStartAddress.toUInt() + (digit * NUM_BYTES_PER_DIGIT)
     }
 
     private fun populateRam(startLocation: UInt, arrays: Array<UByteArray>) {
@@ -114,13 +115,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     }
 
     companion object {
-        const val RAM_MEMORY_SIZE = 4096 // 4 KB memory available to Chip 8
         private const val NUM_GENERAL_PURPOSE_REGISTERS = 16 // 16 registers, named Vx where x = 1...F
-        private const val STACK_SIZE = 16 // Up to 16 levels of nested subroutines
-
-        const val INTERPRETER_START_ADDRESS = 0x000u
-        private const val PROGRAM_START_ADDRESS = 0x200
-
         private const val NUM_BYTES_PER_DIGIT = 5u
     }
 }

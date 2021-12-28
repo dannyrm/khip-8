@@ -6,6 +6,8 @@ import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.koin.core.module.Module
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import uk.co.dmatthews.khip8.config.Config
 import uk.co.dmatthews.khip8.cpu.Cpu
 import uk.co.dmatthews.khip8.cpu.InstructionDecoder
@@ -18,6 +20,12 @@ import uk.co.dmatthews.khip8.input.Chip8InputManager
 import uk.co.dmatthews.khip8.input.KeyboardManager
 import uk.co.dmatthews.khip8.input.SystemActionInputManager
 import uk.co.dmatthews.khip8.memory.MemoryManager
+import uk.co.dmatthews.khip8.memory.Stack
+import uk.co.dmatthews.khip8.memory.TimerRegister
+import uk.co.dmatthews.khip8.memory.ValidatedMemory
+import uk.co.dmatthews.khip8.sound.SoundGenerator
+import uk.co.dmatthews.khip8.sound.SoundTimerRegister
+import uk.co.dmatthews.khip8.util.FeatureManager
 import uk.co.dmatthews.khip8.util.memoryDump
 import java.awt.Canvas
 import java.io.File
@@ -25,6 +33,7 @@ import kotlin.system.exitProcess
 
 object Khip8Bootstrap: KoinComponent {
     val khip8 by inject<Khip8>()
+    private val LOG: Logger = LoggerFactory.getLogger(Khip8Bootstrap::class.java)
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -45,11 +54,19 @@ object Khip8Bootstrap: KoinComponent {
     private fun loadDependencies(overrideModule: Module? = null) {
         val config = ConfigLoader().loadConfigOrThrow<Config>("/standard.json")
 
+        LOG.info("Loading Config: $config")
+
+        FeatureManager.systemMode = config.systemMode
+
         val dependencies = module {
             single { DisplayMemory() }
+            single { SoundGenerator(config.soundConfig) }
+            single<TimerRegister> { SoundTimerRegister(get()) }
             single { InstructionDecoder() }
-            single { Cpu(get(), get(), get(), get(), get()) }
-            single { MemoryManager() }
+            single { Cpu(get(), get(), get(), get(), get(), memoryConfig = config.memoryConfig) }
+            single { Stack(config.memoryConfig.stackSize) }
+            single { ValidatedMemory(config.memoryConfig.memorySize) }
+            single { MemoryManager(soundRegister = get(), memoryConfig = config.memoryConfig) }
             single { Khip8(get(), get(), get(), config) }
             single { Canvas() }
             single { Chip8InputManager() }

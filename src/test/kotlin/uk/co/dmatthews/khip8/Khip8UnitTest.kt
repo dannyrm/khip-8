@@ -12,7 +12,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import uk.co.dmatthews.khip8.config.Config
+import uk.co.dmatthews.khip8.config.MemoryConfig
+import uk.co.dmatthews.khip8.config.SoundConfig
+import uk.co.dmatthews.khip8.config.SystemSpeedConfig
 import uk.co.dmatthews.khip8.memory.TimerRegister
+import uk.co.dmatthews.khip8.util.SystemMode
 import java.io.File
 
 @ExtendWith(MockKExtension::class)
@@ -21,7 +25,12 @@ class Khip8UnitTest {
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var cpu: Cpu
     @MockK(relaxed = true) private lateinit var display: Display
-    private var config: Config = Config(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60)
+    private var config: Config = Config(
+        SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
+        SoundConfig(midiInstrumentNumber = 0, midiNoteNumber = 0, midiNoteVelocity = 0),
+        systemMode = SystemMode.SUPER_CHIP_MODE,
+        memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+    )
 
     @InjectMockKs private lateinit var khip8: Khip8
 
