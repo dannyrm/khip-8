@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import uk.co.dmatthews.khip8.input.SystemActionInputManager
+import uk.co.dmatthews.khip8.config.Config
 import uk.co.dmatthews.khip8.memory.TimerRegister
 import java.io.File
 
@@ -21,7 +21,7 @@ class Khip8UnitTest {
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var cpu: Cpu
     @MockK(relaxed = true) private lateinit var display: Display
-    @MockK(relaxed = true) private lateinit var systemActionInputManager: SystemActionInputManager
+    private var config: Config = Config(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60)
 
     @InjectMockKs private lateinit var khip8: Khip8
 

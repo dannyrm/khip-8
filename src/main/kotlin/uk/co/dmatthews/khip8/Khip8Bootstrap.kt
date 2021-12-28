@@ -1,10 +1,12 @@
 package uk.co.dmatthews.khip8
 
+import com.sksamuel.hoplite.ConfigLoader
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.koin.core.module.Module
+import uk.co.dmatthews.khip8.config.Config
 import uk.co.dmatthews.khip8.cpu.Cpu
 import uk.co.dmatthews.khip8.cpu.InstructionDecoder
 import uk.co.dmatthews.khip8.display.model.Display
@@ -24,6 +26,15 @@ import kotlin.system.exitProcess
 object Khip8Bootstrap: KoinComponent {
     val khip8 by inject<Khip8>()
 
+    @JvmStatic
+    fun main(args: Array<String>) {
+        if (args.isEmpty()) {
+            println("ERROR: ROM file expected as parameter")
+            exitProcess(1)
+        }
+        boot(File(args[0]))
+    }
+
     fun boot(file: File, overrideModule: Module? = null) {
         loadDependencies(overrideModule)
 
@@ -32,12 +43,14 @@ object Khip8Bootstrap: KoinComponent {
     }
 
     private fun loadDependencies(overrideModule: Module? = null) {
+        val config = ConfigLoader().loadConfigOrThrow<Config>("/standard.json")
+
         val dependencies = module {
             single { DisplayMemory() }
             single { InstructionDecoder() }
             single { Cpu(get(), get(), get(), get(), get()) }
             single { MemoryManager() }
-            single { Khip8(get(), get(), get()) }
+            single { Khip8(get(), get(), get(), config) }
             single { Canvas() }
             single { Chip8InputManager() }
             single { CpuInstructionExecutor() }
@@ -71,14 +84,5 @@ object Khip8Bootstrap: KoinComponent {
                 memoryDump(memoryManager.toString() + display.toString())
             }
         }
-    }
-
-    @JvmStatic
-    fun main(args: Array<String>) {
-        if (args.isEmpty()) {
-            println("ERROR: ROM file expected as parameter")
-            exitProcess(1)
-        }
-        boot(File(args[0]))
     }
 }

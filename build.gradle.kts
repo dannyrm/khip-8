@@ -5,9 +5,11 @@ version = "1.0-SNAPSHOT"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31")
-    implementation("ch.qos.logback:logback-classic:1.2.8")
+    implementation("ch.qos.logback:logback-classic:1.2.9")
     implementation("io.insert-koin:koin-core:3.1.4")
     implementation("io.insert-koin:koin-ktor:3.1.4")
+    implementation("com.sksamuel.hoplite:hoplite-core:1.4.16")
+    implementation("com.sksamuel.hoplite:hoplite-json:1.4.16")
 
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
     testImplementation("io.mockk:mockk:1.12.1")
@@ -16,8 +18,8 @@ dependencies {
 }
 
 plugins {
-    kotlin("jvm") version "1.6.10-RC"
-    id("name.remal.sonarlint") version "1.0.189"
+    kotlin("jvm") version "1.6.10"
+    id("name.remal.sonarlint") version "1.5.0"
     id("jacoco")
 }
 
