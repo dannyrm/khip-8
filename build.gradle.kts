@@ -5,9 +5,11 @@ version = "1.0-SNAPSHOT"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31")
-    implementation("ch.qos.logback:logback-classic:1.2.9")
+    implementation("ch.qos.logback:logback-classic:1.2.10")
+
     implementation("io.insert-koin:koin-core:3.1.4")
     implementation("io.insert-koin:koin-ktor:3.1.4")
+
     implementation("com.sksamuel.hoplite:hoplite-core:1.4.16")
     implementation("com.sksamuel.hoplite:hoplite-json:1.4.16")
 
