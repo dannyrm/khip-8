@@ -41,3 +41,9 @@ The interpreter can be configured by modifying the `src/main/resources/standard.
 * [Hoplite](https://github.com/sksamuel/hoplite) for configuration files
 * [Logback](https://github.com/qos-ch/logback) for logging
 * [JUnit 5](https://github.com/junit-team/junit5), [MockK](https://github.com/mockk/mockk) and [Strikt](https://github.com/robfletcher/strikt) for testing
+* [Java AWT](https://docs.oracle.com/javase/7/docs/api/java/awt/package-summary.html) for the UI
+
+## Future Work
+
+* Switch to [KorGE](https://github.com/korlibs/korge) for the UI
+* Allow loading of ROM files from within the UI
