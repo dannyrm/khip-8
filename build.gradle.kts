@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "uk.co.dmatthews.khip8"
+group = "com.github.dannyrm.khip8"
 version = "1.0-SNAPSHOT"
 
 dependencies {
@@ -36,7 +36,7 @@ tasks.wrapper {
 val fatJar = task("fatJar", type = Jar::class) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     manifest {
-        attributes["Main-Class"] = "uk.co.dmatthews.khip8.Khip8Bootstrap"
+        attributes["Main-Class"] = "com.github.dannyrm.khip8.Khip8Bootstrap"
     }
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     with(tasks.jar.get() as CopySpec)
