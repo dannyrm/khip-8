@@ -29,44 +29,37 @@ repositories {
     mavenCentral()
 }
 
-tasks.wrapper {
-    gradleVersion = "7.3.1"
-}
+tasks {
+    wrapper { gradleVersion = "7.3.1" }
 
-val fatJar = task("fatJar", type = Jar::class) {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    manifest {
-        attributes["Main-Class"] = "com.github.dannyrm.khip8.Khip8Bootstrap"
+    val fatJar = task("fatJar", type = Jar::class) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        manifest {
+            attributes["Main-Class"] = "com.github.dannyrm.khip8.Khip8Bootstrap"
+        }
+        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+        with(jar.get() as CopySpec)
     }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    with(tasks.jar.get() as CopySpec)
-}
 
-tasks.build {
-    dependsOn(fatJar)
-}
+    build { dependsOn(fatJar) }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        apiVersion = "1.6"
-        languageVersion = "1.6"
-        jvmTarget = "1.8"
-        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    withType<KotlinCompile> {
+        kotlinOptions {
+            apiVersion = "1.6"
+            languageVersion = "1.6"
+            jvmTarget = "1.8"
+            freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+        }
     }
-}
 
-tasks.jacocoTestReport {
-    dependsOn(tasks.test) // tests are required to run before generating the report
-}
+    jacocoTestReport { dependsOn(test) } // tests are required to run before generating the report
+    sonarlintMain { excludedMessages.add("kotlin:S1135") } // Do not alert for TODOs
 
-tasks.test {
-    useJUnitPlatform()
-    // Removes "Sharing is only supported for boot loader classes because bootstrap classpath has been appended" warning
-    jvmArgs = listOf("-Xshare:off")
+    test {
+        useJUnitPlatform()
+        // Removes "Sharing is only supported for boot loader classes because bootstrap classpath has been appended" warning
+        jvmArgs = listOf("-Xshare:off")
 
-    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-}
-
-tasks.sonarlintMain {
-    excludedMessages.add("kotlin:S1135") // Do not alert for TODOs
+        finalizedBy(jacocoTestReport) // report is always generated after tests run
+    }
 }
