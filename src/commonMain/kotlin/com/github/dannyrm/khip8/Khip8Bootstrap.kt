@@ -22,29 +22,19 @@ import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.logger
 import com.github.dannyrm.khip8.util.memoryDump
-import kotlin.jvm.JvmStatic
 
 object Khip8Bootstrap: KoinComponent {
     val khip8 by inject<Khip8>()
     private val LOG = logger(this::class)
 
-    @JvmStatic
-    fun main(args: Array<String>) {
-        if (args.isNotEmpty()) {
-            boot(args[0])
-        }
-
-        println("ERROR: ROM file expected as parameter")
-    }
-
-    fun boot(filePath: String, overrideModule: Module? = null) {
-        loadDependencies(overrideModule)
+    fun boot(filePath: String, additionalModules: List<Module>) {
+        loadDependencies(additionalModules)
 
         khip8.load(filePath)
         khip8.start()
     }
 
-    private fun loadDependencies(overrideModule: Module? = null) {
+    private fun loadDependencies(additionalModules: List<Module>) {
         val config = loadConfig()
 
         LOG.info { "Loading Config: $config" }
@@ -68,8 +58,8 @@ object Khip8Bootstrap: KoinComponent {
 
         startKoin {
             modules(dependencies)
-            overrideModule?.apply {
-                modules(overrideModule)
+            additionalModules.forEach {
+                modules(it)
             }
 
             val cpu = koin.get<Cpu>()

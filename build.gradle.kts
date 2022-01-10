@@ -1,8 +1,12 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "com.github.dannyrm.khip8"
 version = "1.0-SNAPSHOT"
 
 plugins {
     kotlin("multiplatform") version "1.6.10"
+    id("name.remal.sonarlint") version "1.5.0"
+    id("jacoco")
 }
 
 repositories {
@@ -39,6 +43,26 @@ kotlin {
     }
 }
 
-tasks.named<Test>("jvmTest") {
-    useJUnitPlatform()
+tasks {
+    wrapper { gradleVersion = "7.3.1" }
+
+    withType<KotlinCompile> {
+        kotlinOptions {
+            apiVersion = "1.6"
+            languageVersion = "1.6"
+            jvmTarget = "1.8"
+            freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+        }
+    }
+
+    sonarlint { excludes.messages("kotlin:S1135") } // Do not alert for TODOs
+
+    withType<Test> {
+        named("jvmTest")
+
+        useJUnitPlatform()
+
+        // Removes "Sharing is only supported for boot loader classes because bootstrap classpath has been appended" warning
+        jvmArgs = listOf("-Xshare:off")
+    }
 }

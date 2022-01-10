@@ -8,7 +8,7 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import java.io.File
 
-class Khip8BootstrapIntegrationTest: KoinTest {
+class JvmKhip8BootstrapIntegrationTest: KoinTest {
 
     @Test
     fun `Check app starts up correctly`() {
@@ -16,10 +16,10 @@ class Khip8BootstrapIntegrationTest: KoinTest {
 
         val rom = File(loadResource("inputs/test-roms/c8_test.ch8"))
 
-        Khip8Bootstrap.boot(rom.absolutePath,
-            module {
+        JvmKhip8Bootstrap.boot(rom.absolutePath,
+            listOf(module {
                 single { khip8 }
-            }
+            })
         )
 
         verify { khip8.load(rom.absolutePath) }

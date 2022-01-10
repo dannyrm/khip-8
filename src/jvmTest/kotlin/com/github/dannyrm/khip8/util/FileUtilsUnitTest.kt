@@ -12,6 +12,7 @@ import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.isDirectory
 
 class FileUtilsUnitTest {
@@ -21,10 +22,10 @@ class FileUtilsUnitTest {
         val file = File.createTempFile("saveDiskUTPrefix", "saveDiskUTSuffix")
 
         try {
-            val theFile = saveToDisk(file.absolutePath, "to save data")
+            val filePath = saveToDisk(file.absolutePath, "to save data")
 
             expectThat(file.readText()).isEqualTo("to save data")
-//            expectThat(theFile).isEqualTo(file)
+            expectThat(File(filePath)).isEqualTo(file)
         } finally {
             file.delete()
         }
@@ -48,43 +49,45 @@ class FileUtilsUnitTest {
 
     @Test
     fun `Current directory`() {
-//        expectThat(currentDirectory().isDirectory()).isTrue()
+        expectThat(File(currentDirectory()).isDirectory).isTrue()
     }
-//
-//    @Test
-//    fun `Save memory dump`() {
-//        var file: File? = null
-//
-//        try {
-//            file = memoryDump("this is saved")
-//
-//            expectThat(file.isFile).isTrue()
-//            expectThat(file.readText()).isEqualTo("this is saved")
-//            expectThat(file.name).startsWith("memory-dump")
-//            expectThat(file.name).endsWith(".txt")
-//        } finally {
-//            file?.delete()
-//        }
-//    }
 
-//    @Test
-//    fun `Save to disk with optional parameters specified`() {
-//        var file: File? = null
-//
-//        fun newFileNameSuffixFunction(p: String): String = "$p test suffix func"
-//
-//        try {
-//            file = saveContentToDisk(
-//                fileName = "test-file-name", toSave = "to save data",
-//                fileNameSuffixFunction = ::newFileNameSuffixFunction,
-//                directory = Paths.get(System.getProperty("user.dir")),
-//                fileExtension = "doc"
-//            )
-//
-//            expectThat(file.readText()).isEqualTo("to save data")
-//            expectThat(file.name).isEqualTo("test-file-name test suffix func.doc")
-//        } finally {
-//            file?.delete()
-//        }
-//    }
+    @Test
+    fun `Save memory dump`() {
+        var file: File? = null
+
+        try {
+            file = File(memoryDump("this is saved"))
+
+            expectThat(file.isFile).isTrue()
+            expectThat(file.readText()).isEqualTo("this is saved")
+            expectThat(file.name).startsWith("memory-dump")
+            expectThat(file.name).endsWith(".txt")
+        } finally {
+            file?.delete()
+        }
+    }
+
+    @Test
+    fun `Save to disk with optional parameters specified`() {
+        var file: File? = null
+
+        fun newFileNameSuffixFunction(p: String): String = "$p test suffix func"
+
+        try {
+            file = File(
+                saveContentToDisk(
+                    fileName = "test-file-name", toSave = "to save data",
+                    fileNameSuffixFunction = ::newFileNameSuffixFunction,
+                    directory = Paths.get(System.getProperty("user.dir")).absolutePathString(),
+                    fileExtension = "doc"
+                )
+            )
+
+            expectThat(file.readText()).isEqualTo("to save data")
+            expectThat(file.name).isEqualTo("test-file-name test suffix func.doc")
+        } finally {
+            file?.delete()
+        }
+    }
 }

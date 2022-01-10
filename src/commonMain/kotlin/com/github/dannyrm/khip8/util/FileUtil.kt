@@ -3,20 +3,22 @@ package com.github.dannyrm.khip8.util
 import com.soywiz.klogger.Logger
 import kotlin.reflect.KClass
 
-expect fun currentDirectory(): String
+typealias FileAbsolutePath = String
+
+expect fun currentDirectory(): FileAbsolutePath
 
 expect fun loadFile(filePath: String): ByteArray
 
-expect fun saveToDisk(filePath: String, toSave: String)
+expect fun saveToDisk(filePath: String, toSave: String): FileAbsolutePath
 
-expect fun constructDateTimeFileName(fileName: String): String
+expect fun constructDateTimeFileName(fileName: String): FileAbsolutePath
 
 expect fun saveContentToDisk(toSave: String, fileName: String, fileExtension: String,
                              directory: String = currentDirectory(),
-                             fileNameSuffixFunction: (p: String) -> String = ::constructDateTimeFileName)
+                             fileNameSuffixFunction: (p: String) -> String = ::constructDateTimeFileName): FileAbsolutePath
 
-expect fun memoryDump(toSave: String)
+expect fun memoryDump(toSave: String): FileAbsolutePath
 
-expect fun lineSeparator(): String
+expect fun lineSeparator(): FileAbsolutePath
 
 fun logger(klass: KClass<*>) = Logger(klass.qualifiedName ?: "Unknown")
