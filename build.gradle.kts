@@ -26,6 +26,12 @@ kotlin {
                 implementation("io.insert-koin:koin-ktor:3.1.4")
             }
         }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
         jvm().compilations["main"].defaultSourceSet {
             dependencies {
                 implementation("com.sksamuel.hoplite:hoplite-core:1.4.16")
@@ -34,9 +40,9 @@ kotlin {
         }
         jvm().compilations["test"].defaultSourceSet {
             dependencies {
-                implementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
                 implementation("io.mockk:mockk:1.12.1")
-                implementation("io.insert-koin:koin-test-junit5:3.1.4")
+//                implementation("io.insert-koin:koin-test-junit5:3.1.4")
+                implementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
                 implementation("io.strikt:strikt-core:0.33.0")
             }
         }
@@ -58,9 +64,11 @@ tasks {
     sonarlint { excludes.messages("kotlin:S1135") } // Do not alert for TODOs
 
     withType<Test> {
-        named("jvmTest")
-
         useJUnitPlatform()
+    }
+
+    withType<Test> {
+        named("jvmTest")
 
         // Removes "Sharing is only supported for boot loader classes because bootstrap classpath has been appended" warning
         jvmArgs = listOf("-Xshare:off")

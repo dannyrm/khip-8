@@ -3,141 +3,120 @@ package com.github.dannyrm.khip8.util
 import createBigEndianWordFromBytes
 import leftNibble
 import nibbleByteHex
-import org.junit.jupiter.api.Test
 import rightByte
 import rightNibble
 import rightNibbleByte
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 import toHex
 import toHexMinimal
 import wordHex
 import x
 import y
+import kotlin.test.Test
+import kotlin.test.expect
 
 class BitManipulationUnitTest {
     @Test
     fun `Get Right most byte`() {
-        expectThat(
-            rightByte(0x4321u)
-        ).isEqualTo(0x21u)
+        expect(0x21u) { rightByte(0x4321u) }
     }
 
     @Test
     fun `Get left Nibble`() {
-        expectThat(
-            leftNibble(0x4321u)
-        ).isEqualTo(0x4u
-        )
+        expect(0x4u) { leftNibble(0x4321u) }
     }
 
     @Test
     fun `Get right Nibble`() {
-        expectThat(
-            rightNibble(0x4321u)
-        ).isEqualTo(0x1u
-        )
+        expect(0x1u) { rightNibble(0x4321u) }
     }
 
     @Test
     fun `Get x value`() {
-        expectThat(
-            x(0x4321u)
-        ).isEqualTo(0x3u
-        )
+        expect(0x3u) { x(0x4321u) }
     }
 
     @Test
     fun `Get y value`() {
-        expectThat(
-            y(0x4321u)
-        ).isEqualTo(0x2u
-        )
+        expect(0x2u) { y(0x4321u) }
     }
 
     @Test
     fun `Get right nibble bytes`() {
-        expectThat(
-            rightNibbleByte(0x4321u)
-        ).isEqualTo(0x321u
-        )
+        expect(0x321u) { rightNibbleByte(0x4321u) }
     }
 
     @Test
     fun `Create big endian word`() {
-        expectThat(
-            createBigEndianWordFromBytes(0x43u, 0x21u)
-        ).isEqualTo(0x4321u
-        )
+        expect(0x4321u) { createBigEndianWordFromBytes(0x43u, 0x21u) }
     }
 
     @Test
     fun `Int to hex converts Int to hex`() {
-        expectThat(toHex(15u, 2)).isEqualTo("0x0F")
+        expect("0x0F") { toHex(15u, 2) }
     }
 
     @Test
     fun `Int to hex with padding of 2`() {
-        expectThat(toHex(0x1u, 2)).isEqualTo("0x01")
+        expect("0x01") { toHex(0x1u, 2) }
     }
 
     @Test
     fun `Int to hex with padding of 4`() {
-        expectThat(toHex(0x123u, 4)).isEqualTo("0x0123")
+        expect("0x0123") { toHex(0x123u, 4) }
     }
 
     @Test
     fun `Int to hex with padding of 4 and value matches limit`() {
-        expectThat(toHex(0x1234u, 4)).isEqualTo("0x1234")
+        expect("0x1234") { toHex(0x1234u, 4) }
     }
 
     @Test
     fun `Int to hex with padding of 4 and value over limit`() {
-        expectThat(toHex(0x12345u, 4)).isEqualTo("0x12345")
+        expect("0x12345") { toHex(0x12345u, 4) }
     }
 
     @Test
     fun `Byte to hex converts Byte to hex`() {
-        expectThat(toHex(15u)).isEqualTo("0x0F")
+        expect("0x0F") { toHex(15u) }
     }
 
     @Test
     fun `wordHex converts with padding of 4`() {
-        expectThat(wordHex(0x123u)).isEqualTo("0x0123")
+        expect("0x0123") { wordHex(0x123u) }
     }
 
     @Test
     fun `wordHex does not cut off if value is larger`() {
-        expectThat(wordHex(0x12345u)).isEqualTo("0x12345")
+        expect("0x12345") { wordHex(0x12345u) }
     }
 
     @Test
     fun `wordHex using Int converts with padding of 4`() {
-        expectThat(wordHex(0x123)).isEqualTo("0x0123")
+        expect("0x0123") { wordHex(0x123) }
     }
 
     @Test
     fun `wordHex Using Int does not cut off if value is larger`() {
-        expectThat(wordHex(0x12345)).isEqualTo("0x12345")
+        expect("0x12345") { wordHex(0x12345) }
     }
 
     @Test
     fun `nibbleByteHex converts with padding of 3`() {
-        expectThat(nibbleByteHex(0x12u)).isEqualTo("0x012")
+        expect("0x012") { nibbleByteHex(0x12u) }
     }
 
     @Test
     fun `nibbleByteHex does not cut off if value is larger`() {
-        expectThat(nibbleByteHex(0x12345u)).isEqualTo("0x12345")
+        expect("0x12345") { nibbleByteHex(0x12345u) }
     }
 
     @Test
     fun `toHex minimal works correctly for two digit value=`() {
-        expectThat(toHexMinimal(0xEFu)).isEqualTo("EF")
+        expect("EF") { toHexMinimal(0xEFu) }
     }
 
     @Test
     fun `toHex minimal works correctly for five digit value=`() {
-        expectThat(toHexMinimal(0xEF12Au)).isEqualTo("EF12A")
+        expect("EF12A") { toHexMinimal(0xEF12Au) }
     }
 }
