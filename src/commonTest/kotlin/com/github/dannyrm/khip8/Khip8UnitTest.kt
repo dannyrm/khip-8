@@ -5,22 +5,15 @@ import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
-import io.mockk.confirmVerified
-import io.mockk.every
+import com.github.dannyrm.khip8.test.utils.BaseTest
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.verify
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 import com.github.dannyrm.khip8.util.SystemMode
-import java.io.File
+import io.mockk.*
+import kotlin.test.Test
+import kotlin.test.expect
 
-@ExtendWith(MockKExtension::class)
-class Khip8UnitTest {
+class Khip8UnitTest: BaseTest() {
 
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var cpu: Cpu
@@ -64,12 +57,12 @@ class Khip8UnitTest {
 
     @Test
     fun `Check number of Cpu ticks per peripheral tick`() {
-        expectThat(khip8.numberOfCpuTicksPerPeripheralTick()).isEqualTo(9)
+        expect(9) { khip8.numberOfCpuTicksPerPeripheralTick() }
     }
 
     @Test
     fun `Check delay between Cpu ticks`() {
-        expectThat(delayBetweenCycles(config)).isEqualTo(Pair(1L, 851851))
+        expect(Pair(1L, 851851)) { delayBetweenCycles(config) }
     }
 
     @Test

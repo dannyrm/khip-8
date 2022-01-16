@@ -1,224 +1,221 @@
 package com.github.dannyrm.khip8.executors
 
+import com.github.dannyrm.khip8.test.utils.BaseTest
 import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.junit5.MockKExtension
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 import kotlin.test.AfterTest
+import kotlin.test.Test
+import kotlin.test.expect
 
-@ExtendWith(MockKExtension::class)
-class DisassemblerInstructionExecutorUnitTest {
+class DisassemblerInstructionExecutorUnitTest: BaseTest() {
     @InjectMockKs
     private lateinit var disassemblerInstructionExecutor: DissassemblerInstructionExecutor
 
     @AfterTest
     fun `After test`() {
-        expectThat(disassemblerInstructionExecutor.codeListing.size).isEqualTo(1)
+        expect(1) { disassemblerInstructionExecutor.codeListing.size }
     }
 
     @Test
     fun `Sys call instruction`() {
         disassemblerInstructionExecutor.sysCall(0x0F6Du)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SYS F6D")
+        expect("SYS F6D") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Clear screen instruction`() {
         disassemblerInstructionExecutor.clearScreen(0x00E0u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("CLS")
+        expect("CLS") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Return from subroutine instruction`() {
         disassemblerInstructionExecutor.doReturn(0x00EEu)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("RET")
+        expect("RET") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Jump instruction`() {
         disassemblerInstructionExecutor.jump(0x1EB6u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("JP EB6")
+        expect("JP EB6") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Call instruction`() {
         disassemblerInstructionExecutor.call(0x2EA6u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("CALL EA6")
+        expect("CALL EA6") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Skip if register and memory equal instruction`() {
         disassemblerInstructionExecutor.skipIfRegisterAndMemoryEqual(0x3EB5u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SE VE, B5")
+        expect("SE VE, B5") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Skip if register and memory not equal instruction`() {
         disassemblerInstructionExecutor.skipIfRegisterAndMemoryNotEqual(0x4DA2u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SNE VD, A2")
+        expect("SNE VD, A2") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Load memory into register instruction`() {
         disassemblerInstructionExecutor.loadMemoryIntoRegister(0x6FC3u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD VF, C3")
+        expect("LD VF, C3") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Add value to register instruction`() {
         disassemblerInstructionExecutor.addValueToRegister(0x7BD1u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("ADD VB, D1")
+        expect("ADD VB, D1") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Load memory into I register instruction`() {
         disassemblerInstructionExecutor.loadMemoryIntoIRegister(0xA6A5u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD I, 6A5")
+        expect("LD I, 6A5") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Jump with offset instruction`() {
         disassemblerInstructionExecutor.jumpWithOffset(0xB68Du)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("JP V0, 68D")
+        expect("JP V0, 68D") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Random instruction`() {
         disassemblerInstructionExecutor.random(0xCC5Au)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("RND VC, 5A")
+        expect("RND VC, 5A") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Draw instruction`() {
         disassemblerInstructionExecutor.draw(0xD4CFu)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("DRW V4, VC, F")
+        expect("DRW V4, VC, F") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Skip if register equals register instruction`() {
         disassemblerInstructionExecutor.skipIfRegisterAndRegisterEqual(0x5A30u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SE VA, V3")
+        expect("SE VA, V3") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Load register into register instruction`() {
         disassemblerInstructionExecutor.loadRegisterIntoRegister(0x81A0u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD V1, VA")
+        expect("LD V1, VA") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Or instruction`() {
         disassemblerInstructionExecutor.or(0x82D1u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("OR V2, VD")
+        expect("OR V2, VD") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `And instruction`() {
         disassemblerInstructionExecutor.and(0x8E12u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("AND VE, V1")
+        expect("AND VE, V1") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Xor instruction`() {
         disassemblerInstructionExecutor.xor(0x80D3u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("XOR V0, VD")
+        expect("XOR V0, VD") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Add register and register instruction`() {
         disassemblerInstructionExecutor.addRegisterAndRegister(0x8124u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("ADD V1, V2")
+        expect("ADD V1, V2") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Subtract Y register from X register instruction`() {
         disassemblerInstructionExecutor.subtractYRegisterFromXRegister(0x8565u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SUB V5, V6")
+        expect("SUB V5, V6") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Shift right instruction`() {
         disassemblerInstructionExecutor.shiftRightXOnlyVariant(0x8986u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SHR V9")
+        expect("SHR V9") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Shift left instruction`() {
         disassemblerInstructionExecutor.shiftLeftXOnlyVariant(0x852Eu)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SHL V5")
+        expect("SHL V5") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Subtract X register from Y register instruction`() {
         disassemblerInstructionExecutor.subtractXRegisterFromYRegister(0x8A37u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SUBN VA, V3")
+        expect("SUBN VA, V3") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Skip if key pressed instruction`() {
         disassemblerInstructionExecutor.skipIfKeyPressed(0xE49Eu)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SKP V4")
+        expect("SKP V4") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Skip if key not pressed instruction`() {
         disassemblerInstructionExecutor.skipIfKeyNotPressed(0xE7A1u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("SKNP V7")
+        expect("SKNP V7") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Set register to delay timer instruction`() {
         disassemblerInstructionExecutor.setRegisterToDelayTimerValue(0xFA07u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD VA, DT")
+        expect("LD VA, DT") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Wait for key press instruction`() {
         disassemblerInstructionExecutor.waitForKeyPress(0xF20Au)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD V2, K")
+        expect("LD V2, K") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Set delay timer to register instruction`() {
         disassemblerInstructionExecutor.setDelayTimerRegisterToValueInGeneralRegister(0xFD15u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD DT, VD")
+        expect("LD DT, VD") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Set sound timer to register instruction`() {
         disassemblerInstructionExecutor.setSoundTimerRegisterToValueInGeneralRegister(0xFE18u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD ST, VE")
+        expect("LD ST, VE") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Add general ledger to I register instruction`() {
         disassemblerInstructionExecutor.addGeneralRegisterToIRegister(0xF41Eu)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("ADD I, V4")
+        expect("ADD I, V4") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Load location of sprite to I register instruction`() {
         disassemblerInstructionExecutor.loadIRegisterWithLocationOfSpriteForDigit(0xF829u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD F, V8")
+        expect("LD F, V8") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Store BCD representation instruction`() {
         disassemblerInstructionExecutor.storeBCDRepresentation(0xF133u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD B, V1")
+        expect("LD B, V1") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Load general registers into memory instruction`() {
         disassemblerInstructionExecutor.loadAllGeneralRegistersIntoMemory(0xFF55u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD [I], VF")
+        expect("LD [I], VF") { disassemblerInstructionExecutor.codeListing[0] }
     }
 
     @Test
     fun `Read memory into registers instruction`() {
         disassemblerInstructionExecutor.readMemoryIntoAllGeneralRegisters(0xF265u)
-        expectThat(disassemblerInstructionExecutor.codeListing[0]).isEqualTo("LD V2, [I]")
+        expect("LD V2, [I]") { disassemblerInstructionExecutor.codeListing[0] }
     }
 }

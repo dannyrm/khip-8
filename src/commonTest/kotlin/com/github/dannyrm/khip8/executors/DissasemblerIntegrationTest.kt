@@ -1,13 +1,12 @@
 package com.github.dannyrm.khip8.executors
 
-import com.github.dannyrm.khip8.TestFileUtils
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.cpu.InstructionDecoder
 import com.github.dannyrm.khip8.memory.MemoryManager
+import com.github.dannyrm.khip8.test.utils.getAbsolutePath
 import io.mockk.mockk
-import org.junit.jupiter.api.Test
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
+import kotlin.test.Test
+import kotlin.test.expect
 
 class DissasemblerIntegrationTest {
 
@@ -18,7 +17,7 @@ class DissasemblerIntegrationTest {
         val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
 
         memoryManager.loadProgram(
-            TestFileUtils.loadFile("inputs/15-puzzle.ch8").absolutePath
+            getAbsolutePath("inputs/15-puzzle.ch8")
         )
 
         execute(memoryManager, InstructionDecoder(), DissassemblerInstructionExecutor(),
@@ -164,7 +163,7 @@ class DissasemblerIntegrationTest {
         for (i in expectedValues.indices) {
             instructionDecoder.decode(memoryManager.fetchNextInstruction(), instructionExecutors = listOf(dissassemblerInstructionExecutor))
 
-            expectThat(dissassemblerInstructionExecutor.codeListing[i]).isEqualTo(expectedValues[i])
+            expect(expectedValues[i]) { dissassemblerInstructionExecutor.codeListing[i] }
         }
     }
 }

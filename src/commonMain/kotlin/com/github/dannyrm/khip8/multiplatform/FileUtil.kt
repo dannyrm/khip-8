@@ -1,4 +1,4 @@
-package com.github.dannyrm.khip8.util
+package com.github.dannyrm.khip8.multiplatform
 
 import com.soywiz.klogger.Logger
 import kotlin.reflect.KClass

@@ -5,9 +5,9 @@ import com.github.dannyrm.khip8.config.delayBetweenCycles
 import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.memory.MemoryManager
-import com.github.dannyrm.khip8.util.lineSeparator
-import com.github.dannyrm.khip8.util.logger
-import com.github.dannyrm.khip8.util.waitFor
+import com.github.dannyrm.khip8.multiplatform.lineSeparator
+import com.github.dannyrm.khip8.multiplatform.logger
+import com.github.dannyrm.khip8.multiplatform.waitFor
 
 class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager,
             private val display: Display, private val config: Config,

@@ -1,21 +1,19 @@
 package com.github.dannyrm.khip8.executors
 
 import com.github.dannyrm.khip8.cpu.Cpu
+import com.github.dannyrm.khip8.test.utils.BaseTest
 import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import strikt.api.expectThrows
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
-@ExtendWith(MockKExtension::class)
-class CpuInstructionExecutorUnitTest {
+class CpuInstructionExecutorUnitTest: BaseTest() {
     private lateinit var instructionExecutor: CpuInstructionExecutor
 
     @MockK(relaxed = true) private lateinit var cpu: Cpu
 
-    @BeforeEach
+    @BeforeTest
     fun `Setup instruction executor`() {
         instructionExecutor = CpuInstructionExecutor()
         instructionExecutor.init(cpu)
@@ -24,7 +22,7 @@ class CpuInstructionExecutorUnitTest {
     @Test
     fun `Executor fails if Cpu not specified`() {
         instructionExecutor = CpuInstructionExecutor()
-        expectThrows<UninitializedPropertyAccessException> { instructionExecutor.clearScreen(UNUSED_VALUE) }
+        assertFailsWith<Exception> { instructionExecutor.clearScreen(UNUSED_VALUE) }
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.util.logger
+import com.github.dannyrm.khip8.multiplatform.logger
 
 open class TimerRegister(open var value: UByte = 0u) {
 

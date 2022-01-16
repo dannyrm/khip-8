@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.display.model
 
-import com.github.dannyrm.khip8.util.lineSeparator
+import com.github.dannyrm.khip8.multiplatform.lineSeparator
 
 class DisplayMemory(private val buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS) { 0u },
                     var collision: Boolean = false) {

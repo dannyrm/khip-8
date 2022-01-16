@@ -66,7 +66,9 @@ kotlin {
 //                implementation("io.insert-koin:koin-test-junit5:3.1.4")
                 implementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
                 implementation("io.strikt:strikt-core:$striktVersion")
+
                 implementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion")
+                implementation("io.kotest:kotest-framework-engine-jvm:$kotestVersion")
             }
         }
     }

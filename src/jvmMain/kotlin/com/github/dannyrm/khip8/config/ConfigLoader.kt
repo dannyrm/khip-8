@@ -4,7 +4,7 @@ import com.sksamuel.hoplite.ConfigLoader
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-actual fun loadConfig(): Config = ConfigLoader().loadConfigOrThrow<Config>("/standard.json")
+actual fun loadConfig(): Config = ConfigLoader().loadConfigOrThrow("/standard.json")
 
 actual fun delayBetweenCycles(config: Config): Pair<Long, Int> {
     val cyclesDecimal = BigDecimal(1000.0 / config.systemSpeedConfig.cpuSpeed.toDouble())

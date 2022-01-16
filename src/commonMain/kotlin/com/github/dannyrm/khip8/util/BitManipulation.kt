@@ -29,6 +29,16 @@ fun toHex(value: UInt, paddedLength: Int): String {
     return "0x${baseHexValue}"
 }
 
+fun toBinary(value: UInt, paddedLength: Int): String {
+    var baseBinaryValue = value.toString(2).uppercase()
+
+    for (i in baseBinaryValue.length until paddedLength) {
+        baseBinaryValue = "0$baseBinaryValue"
+    }
+
+    return baseBinaryValue
+}
+
 fun toHex(value: UByte): String = toHex(value.toUInt(), 2)
 fun wordHex(value: Int) = wordHex(value.toUInt())
 fun wordHex(value: UInt) = toHex(value, 4)
@@ -36,3 +46,13 @@ fun nibbleByteHex(value: UInt) = toHex(value, 3)
 
 fun toHexMinimal(value: UInt) = value.toString(16).uppercase()
 fun toHexMinimal(value: UByte) = value.toString(16).uppercase()
+
+private fun convertBaseAndFormat(value: UInt, base: Int, paddedLength: Int): String {
+    var baseValue = value.toString(16).uppercase()
+
+    for (i in baseValue.length until paddedLength) {
+        baseValue = "0$baseValue"
+    }
+
+    return "0x${baseValue}"
+}

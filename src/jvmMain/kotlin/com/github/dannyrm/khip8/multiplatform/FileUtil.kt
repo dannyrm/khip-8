@@ -1,5 +1,5 @@
 @file:JvmName("JvmFileUtil")
-package com.github.dannyrm.khip8.util
+package com.github.dannyrm.khip8.multiplatform
 
 import java.io.File
 import java.nio.file.Paths

@@ -1,9 +1,9 @@
 package com.github.dannyrm.khip8.display.model
 
+import com.github.dannyrm.khip8.multiplatform.lineSeparator
 import io.mockk.mockk
-import org.junit.jupiter.api.Test
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
+import kotlin.test.Test
+import kotlin.test.expect
 
 class DisplayIntegrationTest {
 
@@ -15,9 +15,9 @@ class DisplayIntegrationTest {
 
         val display = Display(displayMemory, mockk(relaxed = true))
 
-        var newLine = System.lineSeparator()
+        var newLine = lineSeparator()
 
-        expectThat(display.toString()).isEqualTo(
+        expect(
             "Display Memory {$newLine" +
                     "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
                     "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
@@ -52,6 +52,6 @@ class DisplayIntegrationTest {
                     "\t0000000000000000000000000000000000000000000000000000000000000000$newLine" +
                     "\t0000000000000000000000000111111110000000000000000000000000000000$newLine" +
                     "}"
-        )
+            ) { display.toString() }
     }
 }

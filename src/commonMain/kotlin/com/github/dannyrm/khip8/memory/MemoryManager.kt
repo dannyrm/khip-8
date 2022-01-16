@@ -1,8 +1,8 @@
 package com.github.dannyrm.khip8.memory
 
 import com.github.dannyrm.khip8.config.MemoryConfig
-import com.github.dannyrm.khip8.util.lineSeparator
-import com.github.dannyrm.khip8.util.loadFile
+import com.github.dannyrm.khip8.multiplatform.lineSeparator
+import com.github.dannyrm.khip8.multiplatform.loadFile
 import createBigEndianWordFromBytes
 import toHex
 import wordHex

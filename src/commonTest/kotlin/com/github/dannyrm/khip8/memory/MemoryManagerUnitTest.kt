@@ -1,19 +1,18 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.TestFileUtils
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
-import io.mockk.junit5.MockKExtension
+import com.github.dannyrm.khip8.test.utils.BaseTest
+import com.github.dannyrm.khip8.test.utils.getAbsolutePath
+import com.github.dannyrm.khip8.test.utils.loadFileAsList
+import com.github.dannyrm.khip8.multiplatform.lineSeparator
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
+import kotlin.test.Test
+import kotlin.test.expect
 
 @OptIn(ExperimentalUnsignedTypes::class)
-@ExtendWith(MockKExtension::class)
-class MemoryManagerUnitTest {
+class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Load Program Into Memory`() {
@@ -21,14 +20,14 @@ class MemoryManagerUnitTest {
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadProgram(
-            TestFileUtils.loadFile("inputs/15-puzzle.ch8").absolutePath
+            getAbsolutePath("inputs/15-puzzle.ch8")
         )
 
         val expectedOutput = hexToByteArray("inputs/15-puzzle.hex")
 
         // Program starts at 0x200 in memory.
         expectedOutput.forEachIndexed { index, byte ->
-            expectThat(memoryManager.ram[0x200 + index]).isEqualTo(byte)
+            expect(byte) { memoryManager.ram[0x200 + index] }
         }
     }
 
@@ -38,22 +37,22 @@ class MemoryManagerUnitTest {
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadProgram(
-            TestFileUtils.loadFile("inputs/15-puzzle.ch8").absolutePath
+            getAbsolutePath("inputs/15-puzzle.ch8")
         )
 
-        expectThat(memoryManager.pc).isEqualTo(0x200u)
+        expect(0x200u) { memoryManager.pc }
 
         var instruction = memoryManager.fetchNextInstruction()
-        expectThat(instruction).isEqualTo(0x00E0u)
-        expectThat(memoryManager.pc).isEqualTo(0x202u)
+        expect(0x00E0u) { instruction }
+        expect(0x202u) { memoryManager.pc }
 
         instruction = memoryManager.fetchNextInstruction()
-        expectThat(instruction).isEqualTo(0x6C00u)
-        expectThat(memoryManager.pc).isEqualTo(0x204u)
+        expect(0x6C00u) { instruction }
+        expect(0x204u) { memoryManager.pc }
 
         instruction = memoryManager.fetchNextInstruction()
-        expectThat(instruction).isEqualTo(0x4C00u)
-        expectThat(memoryManager.pc).isEqualTo(0x206u)
+        expect(0x4C00u) { instruction }
+        expect(0x206u) { memoryManager.pc }
     }
 
     @Test
@@ -83,7 +82,7 @@ class MemoryManagerUnitTest {
         )
 
         for (i in 0 until 80) {
-            expectThat(memoryManager.ram[i]).isEqualTo(expectedValues[i])
+            expect(expectedValues[i]) { memoryManager.ram[i] }
         }
     }
 
@@ -116,11 +115,11 @@ class MemoryManagerUnitTest {
         for (i in 0 until 16) {
             val digitStartLocation = memoryManager.getLocationOfSpriteDigit(i.toUInt()).toInt()
 
-            expectThat(memoryManager.ram[digitStartLocation]).isEqualTo(expectedValues[i][0])
-            expectThat(memoryManager.ram[digitStartLocation + 1]).isEqualTo(expectedValues[i][1])
-            expectThat(memoryManager.ram[digitStartLocation + 2]).isEqualTo(expectedValues[i][2])
-            expectThat(memoryManager.ram[digitStartLocation + 3]).isEqualTo(expectedValues[i][3])
-            expectThat(memoryManager.ram[digitStartLocation + 4]).isEqualTo(expectedValues[i][4])
+            expect(expectedValues[i][0]) { memoryManager.ram[digitStartLocation] }
+            expect(expectedValues[i][1]) { memoryManager.ram[digitStartLocation + 1] }
+            expect(expectedValues[i][2]) { memoryManager.ram[digitStartLocation + 2] }
+            expect(expectedValues[i][3]) { memoryManager.ram[digitStartLocation + 3] }
+            expect(expectedValues[i][4]) { memoryManager.ram[digitStartLocation + 4] }
         }
     }
 
@@ -129,9 +128,9 @@ class MemoryManagerUnitTest {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
-        expectThat(memoryManager.pc).isEqualTo(0x200u)
+        expect(0x200u) { memoryManager.pc }
         memoryManager.skipNextInstruction()
-        expectThat(memoryManager.pc).isEqualTo(0x202u)
+        expect(0x202u) { memoryManager.pc }
     }
 
     @Test
@@ -151,8 +150,8 @@ class MemoryManagerUnitTest {
 
         memoryManager.resetMemory()
 
-        expectThat(memoryManager.i).isEqualTo(0u)
-        expectThat(memoryManager.pc).isEqualTo(0x200u)
+        expect(0u) { memoryManager.i }
+        expect(0x200u) { memoryManager.pc }
 
         verify { memoryManager.delayRegister.clear() }
         verify { memoryManager.soundRegister.clear() }
@@ -187,9 +186,9 @@ class MemoryManagerUnitTest {
         memoryManager.stack.push(0x88u)
         memoryManager.stack.push(0x99u)
 
-        val newLine = System.lineSeparator()
+        val newLine = lineSeparator()
 
-        expectThat(memoryManager.toString()).isEqualTo(
+        expect(
             "Registers: {$newLine" +
                     "\tI = 0x0055, PC = 0x0200, DT = 0x44, ST = 0x33$newLine" +
                     "}$newLine" +
@@ -209,7 +208,9 @@ class MemoryManagerUnitTest {
                     "\t0x0014 | 0x00 0x00 0x00 0x00 0x11 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00  *$newLine" +
                     "\t0x0028 | 0x00 0x00$newLine" +
                     "}$newLine"
-        )
+        ) {
+            memoryManager.toString()
+        }
     }
 
     /**
@@ -218,15 +219,14 @@ class MemoryManagerUnitTest {
     private fun hexToByteArray(fileName: String): UByteArray {
         val outputList: MutableList<String> = mutableListOf()
 
-        val file = TestFileUtils.loadFile(fileName)
-        file.forEachLine {
+        loadFileAsList(fileName).forEach {
             outputList.addAll(it.split(" "))
         }
 
         val outputByteArray = UByteArray(outputList.size)
 
         outputList.forEachIndexed { index, s ->
-            outputByteArray[index] = Integer.parseInt(s, 16) .toUByte()
+            outputByteArray[index] = s.toInt(16).toUByte()
         }
 
         return outputByteArray

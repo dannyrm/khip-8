@@ -1,15 +1,13 @@
 package com.github.dannyrm.khip8.display.model
 
 import com.github.dannyrm.khip8.display.view.Ui
+import com.github.dannyrm.khip8.test.utils.BaseTest
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
+import kotlin.test.Test
 
-@ExtendWith(MockKExtension::class)
-class DisplayUnitTest {
+class DisplayUnitTest: BaseTest() {
     @MockK(relaxed = true) private lateinit var displayMemory: DisplayMemory
     @MockK(relaxed = true) private lateinit var ui: Ui
 
