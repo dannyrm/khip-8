@@ -2,9 +2,8 @@ package com.github.dannyrm.khip8.sound
 
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Test
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
+import kotlin.test.Test
+import kotlin.test.expect
 
 class SoundTimerRegisterUnitTest {
 
@@ -17,21 +16,21 @@ class SoundTimerRegisterUnitTest {
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = expectedTimerValue.toUByte()
 
-        expectThat(timerRegister.value).isEqualTo(5u)
+        expect(5u) { timerRegister.value }
         timerRegister.tick()
-        expectThat(timerRegister.value).isEqualTo(4u)
+        expect(4u) { timerRegister.value }
         timerRegister.tick()
-        expectThat(timerRegister.value).isEqualTo(3u)
+        expect(3u) { timerRegister.value }
         timerRegister.tick()
-        expectThat(timerRegister.value).isEqualTo(2u)
+        expect(2u) { timerRegister.value }
         timerRegister.tick()
-        expectThat(timerRegister.value).isEqualTo(1u)
+        expect(1u) { timerRegister.value }
         timerRegister.tick()
-        expectThat(timerRegister.value).isEqualTo(0u)
+        expect(0u) { timerRegister.value }
         timerRegister.tick()
-        expectThat(timerRegister.value).isEqualTo(0u)
+        expect(0u) { timerRegister.value }
         timerRegister.tick()
-        expectThat(timerRegister.value).isEqualTo(0u)
+        expect(0u) { timerRegister.value }
     }
 
     @Test
@@ -43,7 +42,7 @@ class SoundTimerRegisterUnitTest {
 
         timerRegister.clear()
 
-        expectThat(timerRegister.value).isEqualTo(0u)
+        expect(0u) { timerRegister.value }
     }
 
     @Test

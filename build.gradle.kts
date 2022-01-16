@@ -1,3 +1,5 @@
+import name.remal.gradle_plugins.dsl.extensions.implementation
+import name.remal.gradle_plugins.dsl.extensions.testImplementation
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.dannyrm.khip8"
@@ -25,11 +27,13 @@ val striktVersion = "0.33.0"
 
 // Business logic dependencies
 val hopliteVersion = "1.4.16"
-val kotlinStdLibraryVersion = "1.5.31"
-val koinVersion = "3.1.4"
+val kotlinStdLibraryVersion = "1.6.10"
+val koinVersion = "3.1.5"
 val kLoggerVersion = "2.2.0"
 
 kotlin {
+    jvm()
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -46,6 +50,8 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
 
+//                implementation("io.insert-koin:koin-test:$koinVersion")
+
                 implementation("io.mockk:mockk:$mockKVersion")
                 implementation("io.mockk:mockk-common:$mockKVersion")
 
@@ -54,17 +60,17 @@ kotlin {
                 implementation("io.kotest:kotest-framework-datatest:$kotestVersion")
             }
         }
-        jvm().compilations["main"].defaultSourceSet {
+        val jvmMain by getting {
             dependencies {
                 implementation("com.sksamuel.hoplite:hoplite-core:$hopliteVersion")
                 implementation("com.sksamuel.hoplite:hoplite-json:$hopliteVersion")
                 implementation("com.soywiz.korlibs.klogger:klogger-jvm:$kLoggerVersion")
             }
         }
-        jvm().compilations["test"].defaultSourceSet {
+        val jvmTest by getting {
             dependencies {
-//                implementation("io.insert-koin:koin-test-junit5:3.1.4")
-                implementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+//                implementation("io.insert-koin:koin-test-junit5:$koinVersion")
+
                 implementation("io.strikt:strikt-core:$striktVersion")
 
                 implementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion")

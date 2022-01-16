@@ -240,144 +240,129 @@ class CpuUnitTest: FunSpec({
         }
     }
 
-    //
-//    @ParameterizedTest
-//    @CsvSource(value = ["69AE,9,AE", "6F45,F,45", "60FF,0,FF", "6000,0,00"])
-//    fun `Load value into register 6XNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
-//                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) value: Int) {
-//        cpu.loadMemoryIntoRegister(instruction.toUInt())
-//
-//        verify { memoryManager.registers[registerLocation] = value.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["7510,5,30,40", "7F05,F,F4,F9", "7F05,F,FE,03", "7FFF,F,FF,FE", "7E01,E,00,01", "7E03,E,FF,02"])
-//    fun `Add value to register 7XKK`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                     @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerLocation: Int,
-//                                     @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValueBefore: Int,
-//                                     @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) registerValueAfter: Int) {
-//        every { memoryManager.registers[registerLocation] } returns registerValueBefore.toUByte()
-//
-//        cpu.addValueToRegister(instruction.toUInt())
-//
-//        verify { memoryManager.registers[registerLocation] = registerValueAfter.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["8120,1,2,FE", "8F30,F,3,06"])
-//    fun `Load register y into register x 8XY0`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int) {
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.loadRegisterIntoRegister(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = yRegisterValue.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["8121,1,2,FE,45,FF","8FE1,F,E,FF,FF,FF","8FE1,F,E,01,08,09","8FE1,F,E,0F,F0,FF"])
-//    fun `or x and y then store in x 8XY1`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                          @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                          @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                          @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                          @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                          @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.or(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["8122,1,2,FE,45,44","8FE2,F,E,FF,FF,FF","8FE2,F,E,01,08,0","8FE2,F,E,08,08,08","8452,4,5,0F,F1,01"])
-//    fun `and x and y then store in x 8XY2`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.and(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["8123,1,2,FE,45,BB","8FE3,F,E,FF,FF,0","8FE3,F,E,01,08,09","8763,7,6,0F,F1,FE"])
-//    fun `xor x and y then store in x 8XY3`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.xor(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["8124,1,2,FE,45,43,01","8FE4,F,E,FF,FF,FE,01","8FE4,F,E,01,08,09,0", "8FE4,F,E,08,08,10,0",
-//                        "8FE4,F,E,F1,0F,0,1"])
-//    fun `add x and y then store in x 8XY4`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.addRegisterAndRegister(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["8125,1,2,FE,45,B9,1","8FE5,F,E,FF,FF,0,0","8FE5,F,E,09,08,01,1","8FE5,F,E,08,08,0,0",
-//                        "8FE5,F,E,F1,0F,E2,1","8855,8,5,FF,F1,0E,1"])
-//    fun `subtract x and y then store in x 8XY5`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.subtractYRegisterFromXRegister(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["8126,1,2,45,22,1","8356,3,5,44,22,0","8356,3,5,FF,7F,1"])
-//    fun `right shift y and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
-//                                            @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.shiftRight(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
-//    }
+
+    context("Load value into register 6XNN") {
+        withData("69AE,9,AE", "6F45,F,45", "60FF,0,FF", "6000,0,00") { input ->
+            val (instruction:Int, registerLocation: Int, value: Int) = convertNumericParams(input)
+
+            cpu.loadMemoryIntoRegister(instruction.toUInt())
+
+            verify { memoryManager.registers[registerLocation] = value.toUByte() }
+        }
+
+    }
+
+    context("Add value to register 7XKK") {
+        withData(
+            "7510,5,30,40", "7F05,F,F4,F9", "7F05,F,FE,03", "7FFF,F,FF,FE", "7E01,E,00,01", "7E03,E,FF,02"
+        ) { input ->
+            val (instruction: Int, registerLocation: Int, registerValueBefore: Int, registerValueAfter: Int) = convertNumericParams(
+                input
+            )
+
+            every { memoryManager.registers[registerLocation] } returns registerValueBefore.toUByte()
+
+            cpu.addValueToRegister(instruction.toUInt())
+
+            verify { memoryManager.registers[registerLocation] = registerValueAfter.toUByte() }
+        }
+    }
+
+    context("Load register y into register x 8XY0") {
+        withData("8120,1,2,FE", "8F30,F,3,06") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, yRegisterValue: Int) = convertNumericParams(
+                input
+            )
+
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.loadRegisterIntoRegister(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = yRegisterValue.toUByte() }
+        }
+    }
+
+    context("or x and y then store in x 8XY1") {
+        withData("8121,1,2,FE,45,FF","8FE1,F,E,FF,FF,FF","8FE1,F,E,01,08,09","8FE1,F,E,0F,F0,FF") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, xRegisterValue: Int, yRegisterValue: Int, xRegisterResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.or(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+        }
+    }
+
+
+    context("and x and y then store in x 8XY2") {
+        withData("8122,1,2,FE,45,44","8FE2,F,E,FF,FF,FF","8FE2,F,E,01,08,0","8FE2,F,E,08,08,08","8452,4,5,0F,F1,01") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, xRegisterValue: Int, yRegisterValue: Int, xRegisterResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.and(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+        }
+    }
+
+    context("xor x and y then store in x 8XY3") {
+        withData("8123,1,2,FE,45,BB","8FE3,F,E,FF,FF,0","8FE3,F,E,01,08,09","8763,7,6,0F,F1,FE") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, xRegisterValue: Int, yRegisterValue: Int, xRegisterResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.xor(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+        }
+    }
+
+    context("add x and y then store in x 8XY4") {
+        withData("8124,1,2,FE,45,43,01","8FE4,F,E,FF,FF,FE,01","8FE4,F,E,01,08,09,0", "8FE4,F,E,08,08,10,0", "8FE4,F,E,F1,0F,0,1") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, xRegisterValue: Int, yRegisterValue: Int, xRegisterResult: Int, carryFlagResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.addRegisterAndRegister(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+            verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+        }
+    }
+
+    context("subtract x and y then store in x 8XY5") {
+        withData("8125,1,2,FE,45,B9,1","8FE5,F,E,FF,FF,0,0","8FE5,F,E,09,08,01,1","8FE5,F,E,08,08,0,0", "8FE5,F,E,F1,0F,E2,1","8855,8,5,FF,F1,0E,1") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, xRegisterValue: Int, yRegisterValue: Int, xRegisterResult: Int, carryFlagResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.subtractYRegisterFromXRegister(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+            verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+        }
+    }
+
+    context("right shift y and store in x 8XY6") {
+        withData("8126,1,2,45,22,1","8356,3,5,44,22,0","8356,3,5,FF,7F,1") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, yRegisterValue: Int, xRegisterResult: Int, carryFlagResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.shiftRight(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+            verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+        }
+    }
+
 //
 //    @ParameterizedTest
 //    @CsvSource(value = ["8126,1,45,22,1","8356,3,44,22,0","8356,3,FF,7F,1","8566,5,04,02,0","8566,5,05,02,1"])
