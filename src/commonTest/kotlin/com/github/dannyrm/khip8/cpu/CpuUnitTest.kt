@@ -13,6 +13,7 @@ import com.github.dannyrm.khip8.test.utils.convertNumericParams
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.*
+import kotlin.test.assertTrue
 import kotlin.test.expect
 
 @ExperimentalUnsignedTypes
@@ -363,105 +364,98 @@ class CpuUnitTest: FunSpec({
         }
     }
 
+
+    context("right shift x only variant and store in x 8XY6") {
+        withData("8126,1,45,22,1", "8356,3,44,22,0", "8356,3,FF,7F,1", "8566,5,04,02,0", "8566,5,05,02,1") { input ->
+            val (instruction: Int, xRegisterLocation: Int, xRegisterValue: Int, xRegisterResult: Int, carryFlagResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+
+            cpu.shiftRightXOnlyVariant(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+            verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+        }
+    }
+
+    context("left shift y and store in x 8XY6") {
+        withData("812E,1,2,45,8A,0","835E,3,5,F5,EA,1","835E,3,5,FF,FE,1") { input ->
+            val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, yRegisterValue: Int, xRegisterResult: Int, carryFlagResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+            cpu.shiftLeft(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+            verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+        }
+    }
+
+    context("left shift x only variant and store in x 8XY6") {
+        withData("812E,1,45,8A,0","835E,3,F5,EA,1","835E,3,FF,FE,1","835E,3,04,08,0","835E,3,84,08,1") { input ->
+            val (instruction: Int, xRegisterLocation: Int, xRegisterValue: Int, xRegisterResult: Int, carryFlagResult: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+
+            cpu.shiftLeftXOnlyVariant(instruction.toUInt())
+
+            verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
+            verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+        }
+    }
+
+    context("Jump with offset BNNN") {
+        withData("B123,12,135","BFFF,FF,10FE","B001,01,02", "B2FC,04,300") { input ->
+            val (instruction: Int, v0RegisterValue: Int, pcValue: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[0] } returns v0RegisterValue.toUByte()
+            cpu.jumpWithOffset(instruction.toUInt())
+
+            verify { memoryManager.pc = pcValue.toUInt() }
+        }
+    }
+
+    context("Random with mask CXNN Ranges") {
+        withData("C100,1,0,0", "C500,5,0,0", "C501,5,0,1", "C503,5,0,3", "C50F,5,0,F") { input ->
+            val (instruction: Int, xRegisterLocation: Int, resultRangeFrom: Int, resultRangeTo: Int) = convertNumericParams(input)
+
+            val memoryManager = MemoryManager(
+                    soundRegister = mockk(),
+                    memoryConfig = MemoryConfig(
+                            memorySize = 4096,
+                            stackSize = 16,
+                            interpreterStartAddress = 0x0,
+                            programStartAddress = 0x200
+                    )
+            )
+            val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
+
+            cpu.random(instruction.toUInt())
+
+            assertTrue { memoryManager.registers[xRegisterLocation] >= resultRangeFrom.toUByte() }
+            assertTrue { memoryManager.registers[xRegisterLocation] <= resultRangeTo.toUByte() }
+        }
+    }
+
+//    context("Random with mask CXNN Specific Values") {
+//        withData("C104,1,'0,4'", "C120,1,'0,20'", "C140,1,'0,40'", "CA15,A,'0,1,4,5,10,11,14,15'", "C380,3,'0,80'") { input ->
+//            val (instruction: Int, xRegisterLocation: Int, results: Int[]) = convertNumericParams(input)
 //
-//    @ParameterizedTest
-//    @CsvSource(value = ["8126,1,45,22,1","8356,3,44,22,0","8356,3,FF,7F,1","8566,5,04,02,0","8566,5,05,02,1"])
-//    fun `right shift x only variant and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
-//                                                         @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+//            val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+//            val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
+//            val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
 //
-//        cpu.shiftRightXOnlyVariant(instruction.toUInt())
+//            cpu.random(instruction.toUInt())
 //
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
+//            expectThat(memoryManager.registers[xRegisterLocation]).isContainedIn(results.map { it.toUByte() })
+//        }
 //    }
-//
 //    @ParameterizedTest
-//    @CsvSource(value = ["812E,1,2,45,8A,0","835E,3,5,F5,EA,1","835E,3,5,FF,FE,1"])
-//    fun `left shift y and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
-//                                           @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        cpu.shiftLeft(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["812E,1,45,8A,0","835E,3,F5,EA,1","835E,3,FF,FE,1","835E,3,04,08,0","835E,3,84,08,1"])
-//    fun `left shift x only variant and store in x 8XY6`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterResult: Int,
-//                                                        @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) carryFlagResult: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//
-//        cpu.shiftLeftXOnlyVariant(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xRegisterLocation] = xRegisterResult.toUByte() }
-//        verify { memoryManager.registers[0xF] = carryFlagResult.toUByte() }
-//    }
-//
-//
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["B123,12,135","BFFF,FF,10FE","B001,01,02", "B2FC,04,300"])
-//    fun `Jump with offset BNNN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) v0RegisterValue: Int,
-//                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) pcValue: Int) {
-//        every { memoryManager.registers[0] } returns v0RegisterValue.toUByte()
-//        cpu.jumpWithOffset(instruction.toUInt())
-//
-//        verify { memoryManager.pc = pcValue.toUInt() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["C100,1,0,0", "C500,5,0,0", "C501,5,0,1", "C503,5,0,3", "C50F,5,0,F"])
-//    fun `Random with mask CXNN Ranges`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeFrom: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultRangeTo: Int) {
-//        val memoryManager = MemoryManager(
-//            soundRegister = mockk(),
-//            memoryConfig = MemoryConfig(
-//                memorySize = 4096,
-//                stackSize = 16,
-//                interpreterStartAddress = 0x0,
-//                programStartAddress = 0x200
-//            )
-//        )
-//        val cpu =
-//            Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
-//
-//        cpu.random(instruction.toUInt())
-//
-//        expectThat(memoryManager.registers[xRegisterLocation])
-//            .isGreaterThanOrEqualTo(resultRangeFrom.toUByte())
-//            .isLessThanOrEqualTo(resultRangeTo.toUByte())
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["C104,1,'0,4'", "C120,1,'0,20'", "C140,1,'0,40'", "CA15,A,'0,1,4,5,10,11,14,15'", "C380,3,'0,80'"])
+//    @CsvSource(value = [])
 //    fun `Random with mask CXNN Specific Values`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
 //                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
 //                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) vararg results: Int) {
-//        val memoryConfig =
-//            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-//        val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
-//        val cpu =
-//            Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
 //
-//        cpu.random(instruction.toUInt())
-//
-//        expectThat(memoryManager.registers[xRegisterLocation]).isContainedIn(results.map { it.toUByte() })
 //    }
 //
 //    @ParameterizedTest

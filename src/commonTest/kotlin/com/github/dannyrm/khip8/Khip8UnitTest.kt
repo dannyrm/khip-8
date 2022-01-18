@@ -19,8 +19,9 @@ class Khip8UnitTest: BaseTest() {
     @MockK(relaxed = true) private lateinit var cpu: Cpu
     @MockK(relaxed = true) private lateinit var display: Display
     private var config: Config = Config(
-        SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
-        SoundConfig(midiInstrumentNumber = 0, midiNoteNumber = 0, midiNoteVelocity = 0),
+        systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
+        soundConfig = SoundConfig(midiInstrumentNumber = 0, midiNoteNumber = 0, midiNoteVelocity = 0),
+        frontEndConfig = FrontEndConfig(FrontEndType.JAVA_AWT),
         systemMode = SystemMode.SUPER_CHIP_MODE,
         memoryConfig = MemoryConfig(
             memorySize = 4096,
@@ -63,6 +64,24 @@ class Khip8UnitTest: BaseTest() {
     @Test
     fun `Check delay between Cpu ticks`() {
         expect(Pair(1L, 851851)) { delayBetweenCycles(config) }
+    }
+
+    @Test
+    fun `Check delay between Cpu ticks when a small number of nanos`() {
+        expect(Pair(1L, 25)) {
+            delayBetweenCycles(
+                    config.copy(systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 800, timerSpeed = 60, displayRefreshRate = 60))
+            )
+        }
+    }
+
+    @Test
+    fun `Check delay between Cpu ticks when no nanos`() {
+        expect(Pair(1L, 0)) {
+            delayBetweenCycles(
+                    config.copy(systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 1000, timerSpeed = 60, displayRefreshRate = 60))
+            )
+        }
     }
 
     @Test

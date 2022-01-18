@@ -1,6 +1,5 @@
-package com.github.dannyrm.khip8
+package com.github.dannyrm.khip8.config
 
-import com.github.dannyrm.khip8.config.loadConfig
 import com.github.dannyrm.khip8.util.SystemMode
 import kotlin.test.Test
 import kotlin.test.expect
@@ -25,5 +24,7 @@ class ConfigIntegrationTest {
         expect(0x0) { config.memoryConfig.interpreterStartAddress }
         expect(4096) { config.memoryConfig.memorySize }
         expect(16) { config.memoryConfig.stackSize }
+
+        expect(FrontEndType.JAVA_AWT) { config.frontEndConfig.frontEnd }
     }
 }
