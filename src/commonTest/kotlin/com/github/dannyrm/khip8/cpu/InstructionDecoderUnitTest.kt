@@ -202,76 +202,77 @@ class InstructionDecoderUnitTest: FunSpec({
 //        verify { instructionExecutor.skipIfKeyPressed(param.toUInt()) }
 //    }
 //
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xE1A1, 0xE5A1, 0xE9A1])
-//    fun `Decode skip if key is not pressed instruction (SKNP Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.skipIfKeyNotPressed(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF107, 0xF307, 0xFF07])
-//    fun `Decode set value of Delay timer to register instruction (LD Vx, DT)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.setRegisterToDelayTimerValue(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF10A, 0xF30A, 0xFF0A])
-//    fun `Decode wait for key press instruction (LD Vx, K)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.waitForKeyPress(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF115, 0xF315, 0xFF15])
-//    fun `Decode set delay timer to register value instruction (LD DT, Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.setDelayTimerRegisterToValueInGeneralRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF118, 0xF318, 0xFF18])
-//    fun `Decode set sound timer to register value instruction (LD ST, Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.setSoundTimerRegisterToValueInGeneralRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF11E, 0xF31E, 0xFF1E])
-//    fun `Decode add I register to general register value instruction (ADD I, Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.addGeneralRegisterToIRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF129, 0xF329, 0xFF29])
-//    fun `Decode set I register to location of sprite for digit instruction (LD F, Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.loadIRegisterWithLocationOfSpriteForDigit(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF133, 0xF333, 0xFF33])
-//    fun `Decode store BCD values of registers in memory locations instruction (LD B, Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.storeBCDRepresentation(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF155, 0xF355, 0xFF55])
-//    fun `Decode store multiple register values into memory locations instruction (LD (I), Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.loadAllGeneralRegistersIntoMemory(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xF165, 0xF365, 0xFF65])
-//    fun `Decode store multiple memory values into register locations instruction (LD Vx, (I))`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.readMemoryIntoAllGeneralRegisters(param.toUInt()) }
-//    }
-//
+
+    context("Decode skip if key is not pressed instruction (SKNP Vx)") {
+        withData(0xE1A1, 0xE5A1, 0xE9A1) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.skipIfKeyNotPressed(input.toUInt()) }
+        }
+    }
+
+    context("Decode set value of Delay timer to register instruction (LD Vx, DT)") {
+        withData(0xF107, 0xF307, 0xFF07) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.setRegisterToDelayTimerValue(input.toUInt()) }
+        }
+    }
+
+    context("Decode wait for key press instruction (LD Vx, K)") {
+        withData(0xF10A, 0xF30A, 0xFF0A) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.waitForKeyPress(input.toUInt()) }
+        }
+    }
+
+    context("Decode set delay timer to register value instruction (LD DT, Vx)") {
+        withData(0xF115, 0xF315, 0xFF15) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.setDelayTimerRegisterToValueInGeneralRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode set sound timer to register value instruction (LD ST, Vx)") {
+        withData(0xF118, 0xF318, 0xFF18) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.setSoundTimerRegisterToValueInGeneralRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode add I register to general register value instruction (ADD I, Vx)") {
+        withData(0xF11E, 0xF31E, 0xFF1E) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.addGeneralRegisterToIRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode set I register to location of sprite for digit instruction (LD F, Vx)") {
+        withData(0xF129, 0xF329, 0xFF29) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.loadIRegisterWithLocationOfSpriteForDigit(input.toUInt()) }
+        }
+    }
+
+    context("Decode store BCD values of registers in memory locations instruction (LD B, Vx)") {
+        withData(0xF133, 0xF333, 0xFF33) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.storeBCDRepresentation(input.toUInt()) }
+        }
+    }
+
+    context("Decode store multiple register values into memory locations instruction (LD (I), Vx)") {
+        withData(0xF155, 0xF355, 0xFF55) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.loadAllGeneralRegistersIntoMemory(input.toUInt()) }
+        }
+    }
+
+    context("Decode store multiple memory values into register locations instruction (LD Vx, (I))") {
+        withData(0xF165, 0xF365, 0xFF65) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.readMemoryIntoAllGeneralRegisters(input.toUInt()) }
+        }
+    }
+
     context("Decode unrecognised instructions") {
         withData(0x5121, 0x5122, 0x5123, 0x5124, 0x5125, 0x5126, 0x5127, 0x5128, 0x5129, // Requires the last byte to be zero (SE Vx, Vy)
                 0x8128, 0x8129, 0x812A, 0x812B, 0x812C, 0x812D, 0x812F, // Unsupported 8 Prefix instructions
