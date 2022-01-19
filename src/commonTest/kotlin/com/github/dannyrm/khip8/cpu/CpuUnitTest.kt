@@ -458,177 +458,165 @@ class CpuUnitTest: FunSpec({
 //
 //    }
 //
-//    @ParameterizedTest
-//    @CsvSource(value = ["D135,1,3,5,F,FEEE"])
-//    fun `Draw without collisions DXYN`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterLocation: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterValue: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) yRegisterValue: Int,
-//                                       @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) iRegisterValue: Int) {
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        every { memoryManager.i } returns iRegisterValue.toUInt()
-//
-//        val sprite = ubyteArrayOf(0x0u,  // 0000 0000
-//                                  0x81u, // 1000 0001
-//                                  0x81u, // 1000 0001
-//                                  0x81u, // 1000 0001
-//                                  0x0u)  // 0000 0000
-//
-//        every { memoryManager.ram[iRegisterValue] } returns sprite[0]
-//        every { memoryManager.ram[iRegisterValue + 1] } returns sprite[1]
-//        every { memoryManager.ram[iRegisterValue + 2] } returns sprite[2]
-//        every { memoryManager.ram[iRegisterValue + 3] } returns sprite[3]
-//        every { memoryManager.ram[iRegisterValue + 4] } returns sprite[4]
-//
-//        cpu.draw(instruction.toUInt())
-//
-//        verify { displayMemory[xRegisterValue, yRegisterValue] = sprite[0] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 1] = sprite[1] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 2] = sprite[2] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 3] = sprite[3] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 4] = sprite[4] }
-//
-//        verify { memoryManager.registers[0xF] = 0x0u }
-//    }
-//
-//    @Test
-//    fun `Draw with collisions DXYN`() {
-//        val xRegisterLocation = 0x1
-//        val yRegisterLocation = 0x3
-//        val xRegisterValue = 0x5
-//        val yRegisterValue = 0xF
-//        val instruction = 0xD135
-//        val iRegisterValue = 0xFEEE
-//
-//        every { displayMemory.collision } returns true
-//
-//        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
-//        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
-//
-//        every { memoryManager.i } returns iRegisterValue.toUInt()
-//
-//        val sprite = ubyteArrayOf(0x0u,  // 0000 0000
-//            0x81u, // 1000 0001
-//            0x81u, // 1000 0001
-//            0x81u, // 1000 0001
-//            0x0u)  // 0000 0000
-//
-//        every { memoryManager.ram[iRegisterValue] } returns sprite[0]
-//        every { memoryManager.ram[iRegisterValue + 1] } returns sprite[1]
-//        every { memoryManager.ram[iRegisterValue + 2] } returns sprite[2]
-//        every { memoryManager.ram[iRegisterValue + 3] } returns sprite[3]
-//        every { memoryManager.ram[iRegisterValue + 4] } returns sprite[4]
-//
-//        cpu.draw(instruction.toUInt())
-//
-//        verify { displayMemory[xRegisterValue, yRegisterValue] = sprite[0] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 1] = sprite[1] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 2] = sprite[2] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 3] = sprite[3] }
-//        verify { displayMemory[xRegisterValue, yRegisterValue + 4] = sprite[4] }
-//
-//        verify { memoryManager.registers[0xF] = 0x1u }
-//    }
-//
-//    @Test
-//    fun `Skip if key not pressed and key is not pressed EXA1`() {
-//        every { memoryManager.registers[4] } returns 14u
-//        every { chip8InputManager.isActive(14) } returns false
-//
-//        cpu.skipIfKeyNotPressed(0xE4A1u)
-//
-//        verify { memoryManager.skipNextInstruction() }
-//    }
-//
-//    @Test
-//    fun `Wait for key press FX0A`() {
-//        every { memoryManager.registers[4] } returns 14u
-//        every { chip8InputManager.isActive(14) } returns false
-//
-//        cpu.waitForKeyPress(0xF40Au)
-//    }
-//
-//    @Test
-//    fun `Skip if key not pressed and key is pressed EXA1`() {
-//        every { memoryManager.registers[4] } returns 14u
-//        every { chip8InputManager.isActive(14) } returns true
-//
-//        cpu.skipIfKeyNotPressed(0xE4A1u)
-//
-//        verify(inverse = true) { memoryManager.skipNextInstruction() }
-//    }
-//
-//    @Test
-//    fun `Skip if key pressed and key is not pressed EX9E`() {
-//        every { memoryManager.registers[4] } returns 14u
-//        every { chip8InputManager.isActive(14) } returns false
-//
-//        cpu.skipIfKeyPressed(0xE49Eu)
-//
-//        verify(inverse = true) { memoryManager.skipNextInstruction() }
-//    }
-//
-//    @Test
-//    fun `Skip if key pressed and key is pressed EX9E`() {
-//        every { memoryManager.registers[4] } returns 14u
-//        every { chip8InputManager.isActive(14) } returns true
-//
-//        cpu.skipIfKeyPressed(0xE49Eu)
-//
-//        verify { memoryManager.skipNextInstruction() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["FF07,F,33", "F207,2,43"])
-//    fun `Set register to delay timer value FX07`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
-//                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) delayTimerValue: Int) {
-//        every { memoryManager.delayRegister.value } returns delayTimerValue.toUByte()
-//
-//        cpu.setRegisterToDelayTimerValue(instruction.toUInt())
-//
-//        verify { memoryManager.registers[xLocation] = delayTimerValue.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["FF15,F,33", "F215,2,43", "FF15,F,FF"])
-//    fun `Set delay timer value to register FX15`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
-//                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xValue: Int) {
-//        every { memoryManager.registers[xLocation] } returns xValue.toUByte()
-//
-//        cpu.setDelayTimerRegisterToValueInGeneralRegister(instruction.toUInt())
-//
-//        verify { memoryManager.delayRegister.value = xValue.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["FF18,F,33", "F218,2,43"])
-//    fun `Set sound timer value to register FX18`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
-//                                                 @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xValue: Int) {
-//        every { memoryManager.registers[xLocation] } returns xValue.toUByte()
-//
-//        cpu.setSoundTimerRegisterToValueInGeneralRegister(instruction.toUInt())
-//
-//        verify { memoryManager.soundRegister.value = xValue.toUByte() }
-//    }
-//
-//    @ParameterizedTest
-//    @CsvSource(value = ["FF1E,F,33,FF,132", "F21E,2,43,1,44", "F01E,0,5,FFFF,5"])
-//    fun `Add general register value to I FX1E`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xLocation: Int,
-//                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xValue: Int,
-//                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) originalIValue: Int,
-//                                               @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) resultIValue: Int) {
-//        every { memoryManager.registers[xLocation] } returns xValue.toUByte()
-//        every { memoryManager.i } returns originalIValue.toUInt()
-//
-//        cpu.addGeneralRegisterToIRegister(instruction.toUInt())
-//
-//        verify { memoryManager.i = resultIValue.toUInt() }
-//    }
+    test("Draw without collisions DXYN") {
+        val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, xRegisterValue: Int, yRegisterValue: Int, iRegisterValue: Int) = convertNumericParams("D135,1,3,5,F,FEEE")
+
+        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+        every { memoryManager.i } returns iRegisterValue.toUInt()
+
+        val sprite = ubyteArrayOf(0x0u,  // 0000 0000
+                0x81u, // 1000 0001
+                0x81u, // 1000 0001
+                0x81u, // 1000 0001
+                0x0u)  // 0000 0000
+
+        every { memoryManager.ram[iRegisterValue] } returns sprite[0]
+        every { memoryManager.ram[iRegisterValue + 1] } returns sprite[1]
+        every { memoryManager.ram[iRegisterValue + 2] } returns sprite[2]
+        every { memoryManager.ram[iRegisterValue + 3] } returns sprite[3]
+        every { memoryManager.ram[iRegisterValue + 4] } returns sprite[4]
+
+        cpu.draw(instruction.toUInt())
+
+        verify { displayMemory[xRegisterValue, yRegisterValue] = sprite[0] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 1] = sprite[1] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 2] = sprite[2] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 3] = sprite[3] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 4] = sprite[4] }
+
+        verify { memoryManager.registers[0xF] = 0x0u }
+    }
+
+
+    test("Draw with collisions DXYN") {
+        val xRegisterLocation = 0x1
+        val yRegisterLocation = 0x3
+        val xRegisterValue = 0x5
+        val yRegisterValue = 0xF
+        val instruction = 0xD135
+        val iRegisterValue = 0xFEEE
+
+        every { displayMemory.collision } returns true
+
+        every { memoryManager.registers[xRegisterLocation] } returns xRegisterValue.toUByte()
+        every { memoryManager.registers[yRegisterLocation] } returns yRegisterValue.toUByte()
+
+        every { memoryManager.i } returns iRegisterValue.toUInt()
+
+        val sprite = ubyteArrayOf(0x0u,  // 0000 0000
+            0x81u, // 1000 0001
+            0x81u, // 1000 0001
+            0x81u, // 1000 0001
+            0x0u)  // 0000 0000
+
+        every { memoryManager.ram[iRegisterValue] } returns sprite[0]
+        every { memoryManager.ram[iRegisterValue + 1] } returns sprite[1]
+        every { memoryManager.ram[iRegisterValue + 2] } returns sprite[2]
+        every { memoryManager.ram[iRegisterValue + 3] } returns sprite[3]
+        every { memoryManager.ram[iRegisterValue + 4] } returns sprite[4]
+
+        cpu.draw(instruction.toUInt())
+
+        verify { displayMemory[xRegisterValue, yRegisterValue] = sprite[0] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 1] = sprite[1] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 2] = sprite[2] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 3] = sprite[3] }
+        verify { displayMemory[xRegisterValue, yRegisterValue + 4] = sprite[4] }
+
+        verify { memoryManager.registers[0xF] = 0x1u }
+    }
+
+    test("Skip if key not pressed and key is not pressed EXA1") {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns false
+
+        cpu.skipIfKeyNotPressed(0xE4A1u)
+
+        verify { memoryManager.skipNextInstruction() }
+    }
+
+    test("Wait for key press FX0A") {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns false
+
+        cpu.waitForKeyPress(0xF40Au)
+    }
+
+    test("Skip if key not pressed and key is pressed EXA1") {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns true
+
+        cpu.skipIfKeyNotPressed(0xE4A1u)
+
+        verify(inverse = true) { memoryManager.skipNextInstruction() }
+    }
+
+    test("Skip if key pressed and key is not pressed EX9E") {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns false
+
+        cpu.skipIfKeyPressed(0xE49Eu)
+
+        verify(inverse = true) { memoryManager.skipNextInstruction() }
+    }
+
+    test("Skip if key pressed and key is pressed EX9E") {
+        every { memoryManager.registers[4] } returns 14u
+        every { chip8InputManager.isActive(14) } returns true
+
+        cpu.skipIfKeyPressed(0xE49Eu)
+
+        verify { memoryManager.skipNextInstruction() }
+    }
+
+    context("Set register to delay timer value FX07") {
+        withData("FF07,F,33", "F207,2,43") { input ->
+            val (instruction: Int, xLocation: Int, delayTimerValue: Int) = convertNumericParams(input)
+
+            every { memoryManager.delayRegister.value } returns delayTimerValue.toUByte()
+
+            cpu.setRegisterToDelayTimerValue(instruction.toUInt())
+
+            verify { memoryManager.registers[xLocation] = delayTimerValue.toUByte() }
+        }
+    }
+
+    context("Set delay timer value to register FX15") {
+        withData("FF15,F,33", "F215,2,43", "FF15,F,FF") { input ->
+            val (instruction: Int, xLocation: Int, xValue: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xLocation] } returns xValue.toUByte()
+
+            cpu.setDelayTimerRegisterToValueInGeneralRegister(instruction.toUInt())
+
+            verify { memoryManager.delayRegister.value = xValue.toUByte() }
+        }
+    }
+
+    context("Set sound timer value to register FX18") {
+        withData("FF18,F,33", "F218,2,43") { input ->
+            val (instruction: Int, xLocation: Int, xValue: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xLocation] } returns xValue.toUByte()
+
+            cpu.setSoundTimerRegisterToValueInGeneralRegister(instruction.toUInt())
+
+            verify { memoryManager.soundRegister.value = xValue.toUByte() }
+        }
+    }
+
+    context("Add general register value to I FX1E") {
+        withData("FF1E,F,33,FF,132", "F21E,2,43,1,44", "F01E,0,5,FFFF,5") { input ->
+            val (instruction: Int, xLocation: Int, xValue: Int, originalIValue: Int, resultIValue: Int) = convertNumericParams(input)
+
+            every { memoryManager.registers[xLocation] } returns xValue.toUByte()
+            every { memoryManager.i } returns originalIValue.toUInt()
+
+            cpu.addGeneralRegisterToIRegister(instruction.toUInt())
+
+            verify { memoryManager.i = resultIValue.toUInt() }
+        }
+    }
 })

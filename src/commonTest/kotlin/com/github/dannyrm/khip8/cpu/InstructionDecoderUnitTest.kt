@@ -3,10 +3,12 @@ package com.github.dannyrm.khip8.cpu
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.executors.DissassemblerInstructionExecutor
 import com.github.dannyrm.khip8.executors.InstructionExecutor
+import com.github.dannyrm.khip8.test.utils.convertNumericParams
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.mockk
 import io.mockk.verify
+import kotlin.test.assertFailsWith
 
 class InstructionDecoderUnitTest: FunSpec({
     lateinit var instructionExecutor: InstructionExecutor
@@ -66,83 +68,83 @@ class InstructionDecoderUnitTest: FunSpec({
             verify { instructionExecutor.skipIfRegisterAndMemoryEqual(input) }
         }
     }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x4123, 0x4321, 0x4456])
-//    fun `Decode Skip if register does not equal memory instruction (SNE Vx, byte)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.skipIfRegisterAndMemoryNotEqual(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x5120, 0x5320, 0x5450])
-//    fun `Decode Skip if register equals register instruction (SE Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.skipIfRegisterAndRegisterEqual(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x6120, 0x6320, 0x6450])
-//    fun `Decode Load memory into register instruction (LD Vx, byte)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.loadMemoryIntoRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x7120, 0x7320, 0x7450])
-//    fun `Decode Add memory to register instruction (ADD Vx, byte)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.addValueToRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8120, 0x8320, 0x8450])
-//    fun `Decode Load register into register instruction (LD Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.loadRegisterIntoRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8121, 0x8321, 0x8451])
-//    fun `Decode or instruction (OR Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.or(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8122, 0x8322, 0x8452])
-//    fun `Decode and instruction (AND Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.and(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8123, 0x8323, 0x8453])
-//    fun `Decode xor instruction (XOR Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.xor(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8124, 0x8324, 0x8454])
-//    fun `Decode add register to register instruction (ADD Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.addRegisterAndRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8125, 0x8325, 0x8455])
-//    fun `Decode subtract y register from x register instruction (SUB Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.subtractYRegisterFromXRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8126, 0x8326, 0x8456])
-//    fun `Decode shift right instruction (SHR Vx {, Vy})`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.shiftRightXOnlyVariant(param.toUInt()) }
-//    }
+
+    context("Decode Skip if register does not equal memory instruction (SNE Vx, byte)") {
+        withData(0x4123, 0x4321, 0x4456) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.skipIfRegisterAndMemoryNotEqual(input.toUInt()) }
+        }
+    }
+
+    context("Decode Skip if register equals register instruction (SE Vx, Vy)") {
+        withData(0x5120, 0x5320, 0x5450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.skipIfRegisterAndRegisterEqual(input.toUInt()) }
+        }
+    }
+
+    context("Decode Load memory into register instruction (LD Vx, byte)") {
+        withData(0x6120, 0x6320, 0x6450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.loadMemoryIntoRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode Add memory to register instruction (ADD Vx, byte)") {
+        withData(0x7120, 0x7320, 0x7450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.addValueToRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode Load register into register instruction (LD Vx, Vy)") {
+        withData(0x8120, 0x8320, 0x8450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.loadRegisterIntoRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode or instruction (OR Vx, Vy)") {
+        withData(0x8121, 0x8321, 0x8451) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.or(input.toUInt()) }
+        }
+    }
+
+    context("Decode and instruction (AND Vx, Vy)") {
+        withData(0x8122, 0x8322, 0x8452) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.and(input.toUInt()) }
+        }
+    }
+
+    context("Decode xor instruction (XOR Vx, Vy)") {
+        withData(0x8123, 0x8323, 0x8453) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.xor(input.toUInt()) }
+        }
+    }
+
+    context("Decode add register to register instruction (ADD Vx, Vy)") {
+        withData(0x8124, 0x8324, 0x8454) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.addRegisterAndRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode subtract y register from x register instruction (SUB Vx, Vy)") {
+        withData(0x8125, 0x8325, 0x8455) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.subtractYRegisterFromXRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode shift right instruction (SHR Vx {, Vy})") {
+        withData(0x8126, 0x8326, 0x8456) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.shiftRightXOnlyVariant(input.toUInt()) }
+        }
+    }
 //
 //    @ParameterizedTest
 //    @ValueSource(ints = [0x812E, 0x832E, 0x845E])
@@ -270,24 +272,20 @@ class InstructionDecoderUnitTest: FunSpec({
 //        verify { instructionExecutor.readMemoryIntoAllGeneralRegisters(param.toUInt()) }
 //    }
 //
-//    @ParameterizedTest
-//    @ValueSource(
-//        ints = [
-//            0x5121, 0x5122, 0x5123, 0x5124, 0x5125, 0x5126, 0x5127, 0x5128, 0x5129, // Requires the last byte to be zero (SE Vx, Vy)
-//            0x8128, 0x8129, 0x812A, 0x812B, 0x812C, 0x812D, 0x812F, // Unsupported 8 Prefix instructions
-//            0x9121, 0x9122, 0x9123, 0x9124, 0x9125, 0x9126, 0x9127, 0x9128, 0x9129, // Requires the last byte to be zero (SNE Vx, Vy)
-//            0xE11F, 0xE14F, 0xE1FF, 0xE1F1, 0xE1F4, 0xE1EF, 0xE1A2, 0xE1A5, // Some unsupported E Prefix instructions
-//            0xF108, 0xF106, 0xF10B, 0xF109, 0xF114, 0xF116, 0xF117, 0xF119, // Some unsupported F Prefix instructions
-//            0xF11D, 0xF11F, 0xF128, 0xF130, 0xF132, 0xF134, 0xF154, 0xF156, // Some more unsupported F Prefix instructions
-//            0xF164, 0xF166, // Some more unsupported F Prefix instructions
-//        ]
-//    )
-//    fun `Decode unrecognised instructions`(param: Int) {
-//        expectThrows<IllegalArgumentException> {
-//            instructionDecoder.decode(
-//                param.toUInt(),
-//                listOf(instructionExecutor)
-//            )
-//        }
-//    }
+    context("Decode unrecognised instructions") {
+        withData(0x5121, 0x5122, 0x5123, 0x5124, 0x5125, 0x5126, 0x5127, 0x5128, 0x5129, // Requires the last byte to be zero (SE Vx, Vy)
+                0x8128, 0x8129, 0x812A, 0x812B, 0x812C, 0x812D, 0x812F, // Unsupported 8 Prefix instructions
+                0x9121, 0x9122, 0x9123, 0x9124, 0x9125, 0x9126, 0x9127, 0x9128, 0x9129, // Requires the last byte to be zero (SNE Vx, Vy)
+                0xE11F, 0xE14F, 0xE1FF, 0xE1F1, 0xE1F4, 0xE1EF, 0xE1A2, 0xE1A5, // Some unsupported E Prefix instructions
+                0xF108, 0xF106, 0xF10B, 0xF109, 0xF114, 0xF116, 0xF117, 0xF119, // Some unsupported F Prefix instructions
+                0xF11D, 0xF11F, 0xF128, 0xF130, 0xF132, 0xF134, 0xF154, 0xF156, // Some more unsupported F Prefix instructions
+                0xF164, 0xF166) { input -> // Some more unsupported F Prefix instructions
+            assertFailsWith<IllegalArgumentException> {
+                instructionDecoder.decode(
+                        input.toUInt(),
+                        listOf(instructionExecutor)
+                )
+            }
+        }
+    }
 })
