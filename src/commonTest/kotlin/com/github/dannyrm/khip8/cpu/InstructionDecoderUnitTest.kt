@@ -145,63 +145,63 @@ class InstructionDecoderUnitTest: FunSpec({
             verify { instructionExecutor.shiftRightXOnlyVariant(input.toUInt()) }
         }
     }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x812E, 0x832E, 0x845E])
-//    fun `Decode shift left instruction (SHL Vx {, Vy})`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.shiftLeftXOnlyVariant(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x8127, 0x8327, 0x8457])
-//    fun `Decode subtract x register from y register instruction (SUBN Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.subtractXRegisterFromYRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0x9120, 0x9320, 0x9450])
-//    fun `Decode skip if registers are not equal instruction (SNE Vx, Vy)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.skipIfRegisterAndRegisterNotEqual(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xA120, 0xA320, 0xA450])
-//    fun `Decode load memory into I register instruction (LD I, addr)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.loadMemoryIntoIRegister(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xB120, 0xB320, 0xB450])
-//    fun `Decode jump with offset instruction (JP V0, addr)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.jumpWithOffset(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xC120, 0xC320, 0xC450])
-//    fun `Decode random instruction (RND Vx, byte)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.random(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xD120, 0xD320, 0xD450])
-//    fun `Decode draw instruction (DRW Vx, Vy, nibble)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.draw(param.toUInt()) }
-//    }
-//
-//    @ParameterizedTest
-//    @ValueSource(ints = [0xE19E, 0xE59E, 0xE99E])
-//    fun `Decode skip if key is pressed instruction (SKP Vx)`(param: Int) {
-//        instructionDecoder.decode(param.toUInt(), listOf(instructionExecutor))
-//        verify { instructionExecutor.skipIfKeyPressed(param.toUInt()) }
-//    }
-//
+
+    context("Decode shift left instruction (SHL Vx {, Vy})") {
+        withData(0x812E, 0x832E, 0x845E) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.shiftLeftXOnlyVariant(input.toUInt()) }
+        }
+    }
+
+    context("Decode subtract x register from y register instruction (SUBN Vx, Vy)") {
+        withData(0x8127, 0x8327, 0x8457) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.subtractXRegisterFromYRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode skip if registers are not equal instruction (SNE Vx, Vy)") {
+        withData(0x9120, 0x9320, 0x9450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.skipIfRegisterAndRegisterNotEqual(input.toUInt()) }
+        }
+    }
+
+    context("Decode load memory into I register instruction (LD I, addr)") {
+        withData(0xA120, 0xA320, 0xA450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.loadMemoryIntoIRegister(input.toUInt()) }
+        }
+    }
+
+    context("Decode jump with offset instruction (JP V0, addr)") {
+        withData(0xB120, 0xB320, 0xB450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.jumpWithOffset(input.toUInt()) }            
+        }
+    }
+
+    context("Decode random instruction (RND Vx, byte") {
+        withData(0xC120, 0xC320, 0xC450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.random(input.toUInt()) }
+        }
+    }
+
+    context("Decode draw instruction (DRW Vx, Vy, nibble)") {
+        withData(0xD120, 0xD320, 0xD450) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.draw(input.toUInt()) }
+        }
+    }
+
+    context("Decode skip if key is pressed instruction (SKP Vx)") {
+        withData(0xE19E, 0xE59E, 0xE99E) { input ->
+            instructionDecoder.decode(input.toUInt(), listOf(instructionExecutor))
+            verify { instructionExecutor.skipIfKeyPressed(input.toUInt()) }
+        }
+    }
+
 
     context("Decode skip if key is not pressed instruction (SKNP Vx)") {
         withData(0xE1A1, 0xE5A1, 0xE9A1) { input ->

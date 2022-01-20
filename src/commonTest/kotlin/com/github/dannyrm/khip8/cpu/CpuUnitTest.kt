@@ -437,27 +437,21 @@ class CpuUnitTest: FunSpec({
         }
     }
 
-//    context("Random with mask CXNN Specific Values") {
-//        withData("C104,1,'0,4'", "C120,1,'0,20'", "C140,1,'0,40'", "CA15,A,'0,1,4,5,10,11,14,15'", "C380,3,'0,80'") { input ->
-//            val (instruction: Int, xRegisterLocation: Int, results: Int[]) = convertNumericParams(input)
-//
-//            val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-//            val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
-//            val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
-//
-//            cpu.random(instruction.toUInt())
-//
-//            expectThat(memoryManager.registers[xRegisterLocation]).isContainedIn(results.map { it.toUByte() })
-//        }
-//    }
-//    @ParameterizedTest
-//    @CsvSource(value = [])
-//    fun `Random with mask CXNN Specific Values`(@ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) instruction: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) xRegisterLocation: Int,
-//                                                @ConvertWith(HexToIntegerCsvSourceArgumentConverter::class) vararg results: Int) {
-//
-//    }
-//
+    context("Random with mask CXNN Specific Values") {
+        withData(Pair("C104,1", "0,4"), Pair("C120,1", "0,20"), Pair("C140,1", "0,40"), Pair("CA15,A","0,1,4,5,10,11,14,15"), Pair("C380,3","0,80")) { input ->
+            val (instruction: Int, xRegisterLocation: Int) = convertNumericParams(input.first)
+            val results = convertNumericParams(input.second)
+
+            val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+            val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
+            val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
+
+            cpu.random(instruction.toUInt())
+
+            assertTrue { results.map { it.toUByte() }.contains(memoryManager.registers[xRegisterLocation]) }
+        }
+    }
+
     test("Draw without collisions DXYN") {
         val (instruction: Int, xRegisterLocation: Int, yRegisterLocation: Int, xRegisterValue: Int, yRegisterValue: Int, iRegisterValue: Int) = convertNumericParams("D135,1,3,5,F,FEEE")
 

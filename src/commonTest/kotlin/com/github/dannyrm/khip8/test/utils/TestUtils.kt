@@ -3,8 +3,7 @@ package com.github.dannyrm.khip8.test.utils
 import com.github.dannyrm.khip8.multiplatform.FileAbsolutePath
 
 fun convertNumericParams(source: String, format: String? = null): IntArray {
-    // Remove the single quotes and split into tokens
-    val sourceSplit = source.replace("'", "").split(Regex(","))
+    val sourceSplit = source.split(Regex(","))
     // Parse the format string - or if it's null default to "h" (hex)
     val formatSplit = format?.toCharArray()?.map { it.toString() } ?: "h".repeat(sourceSplit.size).toCharArray().map { it.toString() }
 
