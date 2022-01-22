@@ -8,7 +8,15 @@ import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.multiplatform.lineSeparator
 import com.github.dannyrm.khip8.multiplatform.logger
 import com.github.dannyrm.khip8.multiplatform.waitFor
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager,
             private val display: Display, private val config: Config,
             private var halt: Boolean = false) {

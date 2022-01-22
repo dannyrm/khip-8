@@ -3,7 +3,7 @@ package com.github.dannyrm.khip8.executors
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.cpu.InstructionDecoder
 import com.github.dannyrm.khip8.memory.MemoryManager
-import com.github.dannyrm.khip8.test.utils.getAbsolutePath
+import com.github.dannyrm.khip8.test.utils.TestFile
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.expect
@@ -17,7 +17,7 @@ class DissasemblerIntegrationTest {
         val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
 
         memoryManager.loadProgram(
-            getAbsolutePath("inputs/15-puzzle.ch8")
+            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
         )
 
         execute(memoryManager, InstructionDecoder(), DissassemblerInstructionExecutor(),

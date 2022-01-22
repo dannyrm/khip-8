@@ -1,5 +1,3 @@
-import name.remal.gradle_plugins.dsl.extensions.implementation
-import name.remal.gradle_plugins.dsl.extensions.testImplementation
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.dannyrm.khip8"
@@ -12,13 +10,7 @@ plugins {
     id("io.kotest.multiplatform") version "5.0.2"
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
-        name = "ktor-eap"
-    }
-}
+repositories { mavenCentral() }
 
 // Test dependencies
 val mockKVersion = "1.12.1"

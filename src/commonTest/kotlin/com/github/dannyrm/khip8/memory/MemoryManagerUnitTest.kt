@@ -3,9 +3,8 @@ package com.github.dannyrm.khip8.memory
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.test.utils.BaseTest
-import com.github.dannyrm.khip8.test.utils.getAbsolutePath
-import com.github.dannyrm.khip8.test.utils.loadFileAsList
 import com.github.dannyrm.khip8.multiplatform.lineSeparator
+import com.github.dannyrm.khip8.test.utils.TestFile
 import io.mockk.mockk
 import io.mockk.verify
 import kotlin.test.Test
@@ -20,7 +19,7 @@ class MemoryManagerUnitTest: BaseTest() {
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadProgram(
-            getAbsolutePath("inputs/15-puzzle.ch8")
+            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
         )
 
         val expectedOutput = hexToByteArray("inputs/15-puzzle.hex")
@@ -37,7 +36,7 @@ class MemoryManagerUnitTest: BaseTest() {
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
         memoryManager.loadProgram(
-            getAbsolutePath("inputs/15-puzzle.ch8")
+            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
         )
 
         expect(0x200u) { memoryManager.pc }
@@ -219,7 +218,7 @@ class MemoryManagerUnitTest: BaseTest() {
     private fun hexToByteArray(fileName: String): UByteArray {
         val outputList: MutableList<String> = mutableListOf()
 
-        loadFileAsList(fileName).forEach {
+        TestFile(fileName, fromClasspath = true).asStringList().forEach {
             outputList.addAll(it.split(" "))
         }
 

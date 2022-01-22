@@ -10,27 +10,26 @@ class FileUtilsUnitTest {
 
     @Test
     fun `Save to disk writes data to disk`() {
-        val fileAbsolutePath = createTempFile("saveDiskUTPrefix", "saveDiskUTSuffix")
+        val file = TestFile("saveDiskUTPrefix", tempFile = true)
 
         try {
-            val filePath = saveToDisk(fileAbsolutePath, "to save data")
+            val filePath = saveToDisk(file.getAbsolutePath(), "to save data")
 
-            expect("to save data") { readFileAsString(fileAbsolutePath) }
-            expect(fileAbsolutePath) { filePath }
+            expect("to save data") { file.asString() }
+            expect(file.getAbsolutePath()) { filePath }
         } finally {
-            deleteFile(fileAbsolutePath)
+            file.delete()
         }
     }
 
-//    @Test
-//    fun `Construct date time based file name`() {
-//        val dateTime = LocalDateTime.of(2019, 10, 15, 16, 25, 45, 4)
-//
-//        val clock = Clock.fixed(dateTime.toInstant(ZoneOffset.UTC), ZoneId.systemDefault())
-//
-//        val fileName = constructDateTimeFileName("unitTestName", clock)
-//        expectThat(fileName).isEqualTo("unitTestName-2019-10-15T17-25-45-000000004")
-//    }
+    @Test
+    fun `Construct date time based file name`() {
+        val fileName = constructDateTimeFileName("unitTestName")
+
+        val fileNameRegex = Regex("unitTestName-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d{9}")
+
+        assertTrue { fileName.matches(fileNameRegex) }
+    }
 
     @Test
     fun `Construct date time based file name with default time`() {
@@ -40,33 +39,33 @@ class FileUtilsUnitTest {
 
     @Test
     fun `Current directory`() {
-        assertTrue { isDirectory(currentDirectory()) }
+        assertTrue { TestFile(currentDirectory()).isDirectory() }
     }
 
     @Test
     fun `Save memory dump`() {
-        var file: FileAbsolutePath? = null
+        var file: TestFile? = null
 
         try {
-            file = createFile(memoryDump("this is saved"))
+            file = TestFile(memoryDump("this is saved"))
 
-            assertTrue { isFile(file) }
-            expect("this is saved") { readFileAsString(file) }
-            assertTrue { getFileName(file).startsWith("memory-dump") }
-            assertTrue { getFileName(file).endsWith(".txt") }
+            assertTrue { file.isFile() }
+            expect("this is saved") { file.asString() }
+            assertTrue { file.getFileName().startsWith("memory-dump") }
+            assertTrue { file.getFileName().endsWith(".txt") }
         } finally {
-            file?.run { deleteFile(file) }
+            file?.run { file.delete() }
         }
     }
 
     @Test
     fun `Save to disk with optional parameters specified`() {
-        var file: FileAbsolutePath? = null
+        var file: TestFile? = null
 
         fun newFileNameSuffixFunction(p: String): String = "$p test suffix func"
 
         try {
-            file = createFile(
+            file = TestFile(
                 saveContentToDisk(
                     fileName = "test-file-name", toSave = "to save data",
                     fileNameSuffixFunction = ::newFileNameSuffixFunction,
@@ -75,10 +74,10 @@ class FileUtilsUnitTest {
                 )
             )
 
-            expect("to save data") { readFileAsString(file) }
-            expect("test-file-name test suffix func.doc") { getFileName(file) }
+            expect("to save data") { file.asString() }
+            expect("test-file-name test suffix func.doc") { file.getFileName() }
         } finally {
-            file?.run { deleteFile(file) }
+            file?.run { file.delete() }
         }
     }
 }
