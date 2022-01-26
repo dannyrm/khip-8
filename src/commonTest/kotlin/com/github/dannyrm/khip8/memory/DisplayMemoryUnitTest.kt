@@ -3,7 +3,7 @@ package com.github.dannyrm.khip8.memory
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.test.utils.BaseTest
-import com.github.dannyrm.khip8.multiplatform.lineSeparator
+import com.github.dannyrm.khip8.util.lineSeparator
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlin.test.Test

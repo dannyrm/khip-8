@@ -20,8 +20,8 @@ import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.memory.ValidatedMemory
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
-import com.github.dannyrm.khip8.multiplatform.logger
-import com.github.dannyrm.khip8.multiplatform.memoryDump
+import com.github.dannyrm.khip8.util.logger
+import com.github.dannyrm.khip8.util.memoryDump
 
 object Khip8Bootstrap: KoinComponent {
     val khip8 by inject<Khip8>()

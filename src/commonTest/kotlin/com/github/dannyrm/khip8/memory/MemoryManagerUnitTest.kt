@@ -3,7 +3,7 @@ package com.github.dannyrm.khip8.memory
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.test.utils.BaseTest
-import com.github.dannyrm.khip8.multiplatform.lineSeparator
+import com.github.dannyrm.khip8.util.lineSeparator
 import com.github.dannyrm.khip8.test.utils.TestFile
 import io.mockk.mockk
 import io.mockk.verify

@@ -4,7 +4,7 @@ import leftNibble
 import rightByte
 import rightNibble
 import com.github.dannyrm.khip8.executors.InstructionExecutor
-import com.github.dannyrm.khip8.multiplatform.logger
+import com.github.dannyrm.khip8.util.logger
 import wordHex
 
 class InstructionDecoder {

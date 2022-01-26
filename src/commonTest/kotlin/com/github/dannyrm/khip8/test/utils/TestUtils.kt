@@ -1,7 +1,5 @@
 package com.github.dannyrm.khip8.test.utils
 
-import com.github.dannyrm.khip8.multiplatform.FileAbsolutePath
-
 // Convert a set of comma separated String values into integers. By default, the function assumes the values are
 // all hex unless a format is given which says otherwise.
 fun convertNumericParams(source: String, format: String? = null): IntArray {

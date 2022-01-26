@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.display.model
 
-import com.github.dannyrm.khip8.multiplatform.lineSeparator
+import com.github.dannyrm.khip8.util.lineSeparator
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.expect

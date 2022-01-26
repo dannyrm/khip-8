@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.multiplatform.lineSeparator
+import com.github.dannyrm.khip8.util.lineSeparator
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.expect

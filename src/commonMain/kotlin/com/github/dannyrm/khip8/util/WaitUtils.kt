@@ -1,3 +1,3 @@
-package com.github.dannyrm.khip8.multiplatform
+package com.github.dannyrm.khip8.util
 
 expect fun waitFor(delayInMillis: Long, delayInNanos: Int)

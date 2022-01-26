@@ -4,7 +4,7 @@ import com.github.dannyrm.khip8.config.loadConfig
 import com.github.dannyrm.khip8.display.view.SwingUi
 import com.github.dannyrm.khip8.display.view.Ui
 import com.github.dannyrm.khip8.input.KeyboardManager
-import com.github.dannyrm.khip8.multiplatform.logger
+import com.github.dannyrm.khip8.util.logger
 import com.github.dannyrm.khip8.sound.SoundGenerator
 import org.koin.core.module.Module
 import org.koin.dsl.module

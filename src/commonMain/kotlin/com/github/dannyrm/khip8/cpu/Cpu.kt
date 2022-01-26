@@ -12,7 +12,7 @@ import com.github.dannyrm.khip8.input.Chip8InputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.SystemDependentInstructionFeature
-import com.github.dannyrm.khip8.multiplatform.logger
+import com.github.dannyrm.khip8.util.logger
 import wordHex
 import x
 import y

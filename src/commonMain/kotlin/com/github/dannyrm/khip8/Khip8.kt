@@ -5,15 +5,9 @@ import com.github.dannyrm.khip8.config.delayBetweenCycles
 import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.memory.MemoryManager
-import com.github.dannyrm.khip8.multiplatform.lineSeparator
-import com.github.dannyrm.khip8.multiplatform.logger
-import com.github.dannyrm.khip8.multiplatform.waitFor
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.nanoseconds
+import com.github.dannyrm.khip8.util.lineSeparator
+import com.github.dannyrm.khip8.util.logger
+import com.github.dannyrm.khip8.util.waitFor
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
