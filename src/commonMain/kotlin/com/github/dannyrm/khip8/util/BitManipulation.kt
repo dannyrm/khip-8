@@ -19,25 +19,8 @@ fun rightNibbleByte(value: UInt): UInt = value and 0xFFFu
 // Create a big endian 16 bit word from two 8 bit bytes
 fun createBigEndianWordFromBytes(value1: UByte, value2: UByte): UInt = (value1.toUInt() shl 8) or value2.toUInt()
 
-fun toHex(value: UInt, paddedLength: Int): String {
-    var baseHexValue = value.toString(16).uppercase()
-
-    for (i in baseHexValue.length until paddedLength) {
-        baseHexValue = "0$baseHexValue"
-    }
-
-    return "0x${baseHexValue}"
-}
-
-fun toBinary(value: UInt, paddedLength: Int): String {
-    var baseBinaryValue = value.toString(2).uppercase()
-
-    for (i in baseBinaryValue.length until paddedLength) {
-        baseBinaryValue = "0$baseBinaryValue"
-    }
-
-    return baseBinaryValue
-}
+fun toHex(value: UInt, paddedLength: Int): String = "0x${convertBaseAndFormat(value, 16, paddedLength)}"
+fun toBinary(value: UInt, paddedLength: Int): String = convertBaseAndFormat(value, 2, paddedLength)
 
 fun toHex(value: UByte): String = toHex(value.toUInt(), 2)
 fun wordHex(value: Int) = wordHex(value.toUInt())
@@ -47,12 +30,13 @@ fun nibbleByteHex(value: UInt) = toHex(value, 3)
 fun toHexMinimal(value: UInt) = value.toString(16).uppercase()
 fun toHexMinimal(value: UByte) = value.toString(16).uppercase()
 
+// TODO: Test this.
 private fun convertBaseAndFormat(value: UInt, base: Int, paddedLength: Int): String {
-    var baseValue = value.toString(16).uppercase()
+    var baseValue = value.toString(base).uppercase()
 
     for (i in baseValue.length until paddedLength) {
         baseValue = "0$baseValue"
     }
 
-    return "0x${baseValue}"
+    return baseValue
 }

@@ -3,7 +3,6 @@ package com.github.dannyrm.khip8
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
-import org.koin.core.module.Module
 import org.koin.dsl.module
 import com.github.dannyrm.khip8.config.loadConfig
 import com.github.dannyrm.khip8.cpu.Cpu
@@ -22,6 +21,7 @@ import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.logger
 import com.github.dannyrm.khip8.util.memoryDump
+import org.koin.core.module.Module
 
 object Khip8Bootstrap: KoinComponent {
     val khip8 by inject<Khip8>()
