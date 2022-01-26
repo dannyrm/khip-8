@@ -1,18 +1,18 @@
 # Kotlin Chip-8 Interpreter
 
-A Chip-8 interpreter written in Kotlin.
+A Kotlin multi-platform Chip-8 interpreter. Currently only supports the JVM.
 
-A number of Chip-8 games are available within the `src/main/resources/games/c8` directory.
+A number of Chip-8 games are available within the `resources/c8` directory.
 
 ## Loading ROM files
 
 Currently, the loading of ROM files is achieved by providing them on the command line. E.g.
 
-`java -jar ./Khip-8.jar src/main/resources/games/c8/TETRIS`
+`java -jar ./Khip-8.jar src/resources/c8/TETRIS`
 
 ## Configuration
 
-The interpreter can be configured by modifying the `src/main/resources/standard.json` JSON file. An example configuration follows:
+The interpreter can be configured by modifying the `src/jvmMain/resources/standard.json` JSON file. An example configuration follows:
 
 ```json
 {
@@ -32,6 +32,9 @@ The interpreter can be configured by modifying the `src/main/resources/standard.
     "stackSize": 16,
     "interpreterStartAddress": 0,
     "programStartAddress": 512
+  },
+  "frontEndConfig": {
+    "frontEnd": "JAVA_AWT"
   }
 }
 ```
@@ -39,8 +42,8 @@ The interpreter can be configured by modifying the `src/main/resources/standard.
 
 * [Koin](https://github.com/InsertKoinIO/koin) for dependency injection
 * [Hoplite](https://github.com/sksamuel/hoplite) for configuration files
-* [Logback](https://github.com/qos-ch/logback) for logging
-* [JUnit 5](https://github.com/junit-team/junit5), [MockK](https://github.com/mockk/mockk) and [Strikt](https://github.com/robfletcher/strikt) for testing
+* [KLogger](https://github.com/korlibs/klogger) for logging
+* [JUnit 5](https://github.com/junit-team/junit5), [MockK](https://github.com/mockk/mockk), [Strikt](https://github.com/robfletcher/strikt) and [Kotest](https://github.com/kotest/kotest) for testing
 * [Java AWT](https://docs.oracle.com/javase/7/docs/api/java/awt/package-summary.html) for the UI
 
 ## Future Work
