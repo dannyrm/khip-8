@@ -30,6 +30,8 @@ korge {
     id = "com.github.dannyrm.khip8"
 
     targetJvm()
+
+    jvmMainClassName = "com.github.dannyrm.khip8.display.view.KorgeUiKt"
 }
 
 kotlin {
@@ -78,9 +80,7 @@ kotlin {
                 implementation("io.kotest:kotest-runner-junit5-jvm:${property("kotest.version")}")
                 implementation("io.kotest:kotest-framework-engine-jvm:${property("kotest.version")}")
 
-                implementation("io.insert-koin:koin-test:${property("koin.version")}") {
-                    exclude("org.jetbrains.kotlin", "kotlin-test-junit")
-                }
+                implementation("io.insert-koin:koin-test:${property("koin.version")}")
             }
         }
     }
