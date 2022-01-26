@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.soywiz.korge.gradle.*
 
 group = "com.github.dannyrm.khip8"
 version = "1.0-SNAPSHOT"
@@ -10,8 +11,35 @@ plugins {
 
 repositories { mavenCentral() }
 
+buildscript {
+    val korgePluginVersion: String by project
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
+        maven { url = uri("https://plugins.gradle.org/m2/") }
+    }
+
+    dependencies {
+        classpath("com.soywiz.korlibs.korge.plugins:korge-gradle-plugin:$korgePluginVersion")
+    }
+}
+
+korge {
+    id = "com.github.dannyrm.khip8"
+
+    targetJvm()
+}
+
 kotlin {
     jvm()
+
+    apply<KorgeGradlePlugin>()
+
+    configurations.all {
+        exclude("org.jetbrains.kotlin", "kotlin-test-junit")
+    }
 
     sourceSets {
         val commonMain by getting {
