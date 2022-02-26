@@ -25,7 +25,7 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager,
         LOG.info {"Program Loaded..." }
     }
 
-    fun start() {
+    suspend fun start() {
         LOG.debug { "System starting state: ${lineSeparator()}" }
         LOG.debug { memoryManager.toString() }
         LOG.debug { display.toString() }

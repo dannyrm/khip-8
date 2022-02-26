@@ -9,23 +9,18 @@ class Display(private val displayMemory: DisplayMemory, private val ui: Ui) {
         displayMemory[x,y] = value
     }
 
-    fun tick() {
-        ui.update(displayMemory)
-    }
-
-    fun clear() {
-        displayMemory.clear()
-    }
+    fun tick() = ui.update(displayMemory)
+    fun clear() = displayMemory.clear()
 
     // TODO: Write tests around collisions
     fun hasCollision(): Boolean {
-        val hasCollision = displayMemory.collision
-        displayMemory.collision = false
+        if (displayMemory.collision) {
+            displayMemory.collision = false
+            return true
+        }
 
-        return hasCollision
+        return false
     }
 
-    override fun toString(): String {
-        return "Display Memory {${lineSeparator()}$displayMemory}"
-    }
+    override fun toString(): String = "Display Memory {${lineSeparator()}$displayMemory}"
 }

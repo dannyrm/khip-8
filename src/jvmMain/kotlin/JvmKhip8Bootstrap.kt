@@ -1,6 +1,9 @@
 import com.github.dannyrm.khip8.Khip8Bootstrap
 import com.github.dannyrm.khip8.config.FrontEndType
+import com.github.dannyrm.khip8.config.FrontEndType.JAVA_AWT
+import com.github.dannyrm.khip8.config.FrontEndType.KORGE
 import com.github.dannyrm.khip8.config.loadConfig
+import com.github.dannyrm.khip8.display.view.KorgeUi
 import com.github.dannyrm.khip8.display.view.SwingUi
 import com.github.dannyrm.khip8.display.view.Ui
 import com.github.dannyrm.khip8.input.KeyboardManager
@@ -17,12 +20,12 @@ object JvmKhip8Bootstrap {
     fun main(args: Array<String>) {
         if (args.isNotEmpty()) {
             boot(args[0])
+        } else {
+            LOG.error { "ERROR: ROM file expected as parameter" }
         }
-
-        println("ERROR: ROM file expected as parameter")
     }
 
-    fun boot(filePath: String, additionalModules: List<Module> = listOf()) {
+    private fun boot(filePath: String, additionalModules: List<Module> = listOf()) {
         val modules = loadDependencies().plus(additionalModules)
 
         Khip8Bootstrap.boot(filePath, modules)
@@ -34,14 +37,16 @@ object JvmKhip8Bootstrap {
         return module {
             single { SoundGenerator(config.soundConfig) }
 
-            if (FrontEndType.JAVA_AWT == config.frontEndConfig.frontEnd) {
-                single { Canvas() }
-                single<Ui> { SwingUi(get(), get()) }
-            } else {
-                LOG.error { "Front end: ${config.frontEndConfig.frontEnd} not supported on this platform" }
+            when (config.frontEndConfig.frontEnd) {
+                JAVA_AWT -> {
+                    single { Canvas() }
+                    single { KeyboardManager(get(), get()) }
+                    single<Ui> { SwingUi(get(), get()) }
+                }
+                KORGE -> {
+                    single<Ui> { KorgeUi() }
+                }
             }
-
-            single { KeyboardManager(get(), get()) }
         }
     }
 }

@@ -72,9 +72,9 @@ object Khip8Bootstrap: KoinComponent {
             val display = koin.get<Display>()
             val systemActionInputManager = koin.get<SystemActionInputManager>()
 
+            ui.init(config, khip8::halt)
             chip8InputManager.init(cpu)
             cpuInstructionExecutor.init(cpu)
-            ui.init(khip8::halt)
 
             systemActionInputManager.memoryDumpFunction = {
                 memoryDump(memoryManager.toString() + display.toString())

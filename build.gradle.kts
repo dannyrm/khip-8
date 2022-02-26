@@ -28,6 +28,7 @@ buildscript {
 
 korge {
     id = "com.github.dannyrm.khip8"
+    name = "Khip-8"
 
     targetJvm()
 
@@ -49,7 +50,8 @@ kotlin {
                 implementation("com.soywiz.korlibs.klogger:klogger:${property("kLogger.version")}")
 
                 implementation("io.insert-koin:koin-core:${property("koin.version")}")
-                implementation("io.insert-koin:koin-ktor:${property("koin.version")}")
+
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
             }
         }
 

@@ -419,17 +419,6 @@ class CpuUnitTest: FunSpec({
         withData("C100,1,0,0", "C500,5,0,0", "C501,5,0,1", "C503,5,0,3", "C50F,5,0,F") { input ->
             val (instruction: Int, xRegisterLocation: Int, resultRangeFrom: Int, resultRangeTo: Int) = convertNumericParams(input)
 
-            val memoryManager = MemoryManager(
-                    soundRegister = mockk(),
-                    memoryConfig = MemoryConfig(
-                            memorySize = 4096,
-                            stackSize = 16,
-                            interpreterStartAddress = 0x0,
-                            programStartAddress = 0x200
-                    )
-            )
-            val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
-
             cpu.random(instruction.toUInt())
 
             assertTrue { memoryManager.registers[xRegisterLocation] >= resultRangeFrom.toUByte() }
@@ -441,10 +430,6 @@ class CpuUnitTest: FunSpec({
         withData(Pair("C104,1", "0,4"), Pair("C120,1", "0,20"), Pair("C140,1", "0,40"), Pair("CA15,A","0,1,4,5,10,11,14,15"), Pair("C380,3","0,80")) { input ->
             val (instruction: Int, xRegisterLocation: Int) = convertNumericParams(input.first)
             val results = convertNumericParams(input.second)
-
-            val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-            val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
-            val cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, mockk())
 
             cpu.random(instruction.toUInt())
 

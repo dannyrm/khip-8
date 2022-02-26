@@ -1,6 +1,7 @@
 package com.github.dannyrm.khip8.util
 
 import com.soywiz.klogger.Logger
+import com.soywiz.klogger.setLevel
 import kotlin.reflect.KClass
 
 typealias FileAbsolutePath = String
@@ -21,4 +22,4 @@ expect fun memoryDump(toSave: String): FileAbsolutePath
 
 expect fun lineSeparator(): FileAbsolutePath
 
-fun logger(klass: KClass<*>) = Logger(klass.qualifiedName ?: "Unknown")
+fun logger(klass: KClass<*>) = Logger(klass.qualifiedName ?: "Unknown").setLevel(Logger.Level.INFO)

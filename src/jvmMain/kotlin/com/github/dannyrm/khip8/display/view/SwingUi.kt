@@ -1,5 +1,6 @@
 package com.github.dannyrm.khip8.display.view
 
+import com.github.dannyrm.khip8.config.Config
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.input.KeyboardManager
 import java.awt.*
@@ -8,9 +9,9 @@ import java.awt.event.WindowEvent
 import java.awt.image.BufferStrategy
 import kotlin.math.floor
 
-class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
-              private var onCloseSignal: () -> Unit = {}): Ui, Frame() {
-    internal val windowSize: Dimension
+class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager): Ui, Frame() {
+    private lateinit var onCloseSignal: () -> Unit
+    private val windowSize: Dimension
 
     init {
         title = "Khip 8"
@@ -42,7 +43,7 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
         pack()
     }
 
-    override fun init(onCloseSignal: () -> Unit) {
+    override suspend fun init(config: Config, onCloseSignal: () -> Unit) {
         this.onCloseSignal = onCloseSignal
         isVisible = true
     }
@@ -87,7 +88,7 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager,
         bufferStrategy.show()
     }
 
-    internal fun calculatePixelSize(displayMemory: DisplayMemory): IntArray {
+    private fun calculatePixelSize(displayMemory: DisplayMemory): IntArray {
         val (displayMemoryWidth, displayMemoryHeight) = displayMemory.dimensions()
         val frameWidth = windowSize.width.toDouble()
         val frameHeight = windowSize.height.toDouble()

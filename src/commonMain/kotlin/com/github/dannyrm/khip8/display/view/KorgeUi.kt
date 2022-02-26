@@ -1,32 +1,38 @@
 package com.github.dannyrm.khip8.display.view
 
-import com.soywiz.klock.seconds
+import com.github.dannyrm.khip8.config.Config
+import com.github.dannyrm.khip8.display.model.DisplayMemory
+import com.soywiz.klock.Frequency
 import com.soywiz.korge.Korge
-import com.soywiz.korge.tween.get
-import com.soywiz.korge.tween.tween
-import com.soywiz.korge.view.anchor
-import com.soywiz.korge.view.image
-import com.soywiz.korge.view.position
-import com.soywiz.korge.view.scale
+import com.soywiz.korge.view.*
+import com.soywiz.korim.bitmap.Bitmap
+import com.soywiz.korim.bitmap.Bitmap1
 import com.soywiz.korim.color.Colors
-import com.soywiz.korim.format.readBitmap
-import com.soywiz.korio.file.std.resourcesVfs
-import com.soywiz.korma.geom.degrees
-import com.soywiz.korma.interpolation.Easing
+import com.soywiz.korio.async.runBlockingNoJs
 
-suspend fun main() = Korge(width = 512, height = 512, bgcolor = Colors["#2b2b2b"]) {
-    val minDegrees = (-16).degrees
-    val maxDegrees = (+16).degrees
+class KorgeUi: Ui {
+    private lateinit var canvas: Bitmap1
+    private lateinit var config: Config
 
-    val image = image(resourcesVfs["duckington-manor-logo.png"].readBitmap()) {
-        rotation = maxDegrees
-        anchor(.5, .5)
-        scale(.08)
-        position(256, 256)
+
+    override fun init(config: Config, onCloseSignal: () -> Unit) {
+        this.config = config
     }
 
-    while (true) {
-        image.tween(image::rotation[minDegrees], time = 1.seconds, easing = Easing.EASE_IN_OUT)
-        image.tween(image::rotation[maxDegrees], time = 1.seconds, easing = Easing.EASE_IN_OUT)
+    override fun update(displayMemory: DisplayMemory) {
+        for (x in 0 until canvas.width) {
+            for (y in 0 until canvas.height) {
+                canvas[x, y] = 1
+            }
+        }
+    }
+
+    override fun halt() {
+    }
+
+    private suspend fun createUi(displayRefreshRate: Int) = Korge( width = 512, height = 256, title = "Khip-8", bgcolor = Colors["#2b2b2b"]) {
+        addFixedUpdater(Frequency(displayRefreshRate.toDouble())) {
+            canvas = Bitmap1(512, 256)
+        }
     }
 }
