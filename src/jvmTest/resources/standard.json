@@ -17,6 +17,8 @@
     "programStartAddress": 512
   },
   "frontEndConfig": {
-    "frontEnd": "JAVA_AWT"
+    "frontEnd": "JAVA_AWT",
+    "windowWidth": 512,
+    "windowHeight": 256
   }
 }

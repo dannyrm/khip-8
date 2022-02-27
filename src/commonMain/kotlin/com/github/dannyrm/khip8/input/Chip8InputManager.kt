@@ -4,7 +4,7 @@ import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.cpu.CpuState
 import com.github.dannyrm.khip8.util.logger
 
-class Chip8InputManager() {
+class Chip8InputManager {
     private var chip8InputState: UInt = 0u
     private var chip8LockedInputState: UInt = 0u
 

@@ -3,6 +3,7 @@ package com.github.dannyrm.khip8
 import com.github.dannyrm.khip8.config.*
 import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.display.model.Display
+import com.github.dannyrm.khip8.display.view.Ui
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.test.utils.BaseTest
@@ -10,6 +11,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import com.github.dannyrm.khip8.util.SystemMode
 import io.mockk.*
+import kotlinx.coroutines.test.*
 import kotlin.test.Test
 import kotlin.test.expect
 
@@ -18,10 +20,12 @@ class Khip8UnitTest: BaseTest() {
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var cpu: Cpu
     @MockK(relaxed = true) private lateinit var display: Display
+    @MockK(relaxed = true) private lateinit var ui: Ui
+
     private var config: Config = Config(
         systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
         soundConfig = SoundConfig(midiInstrumentNumber = 0, midiNoteNumber = 0, midiNoteVelocity = 0),
-        frontEndConfig = FrontEndConfig(FrontEndType.JAVA_AWT),
+        frontEndConfig = FrontEndConfig(FrontEndType.JAVA_AWT, windowWidth = 512, windowHeight = 256),
         systemMode = SystemMode.SUPER_CHIP_MODE,
         memoryConfig = MemoryConfig(
             memorySize = 4096,
@@ -48,17 +52,8 @@ class Khip8UnitTest: BaseTest() {
     }
 
     @Test
-    fun `Halt works correctly`() {
-        khip8.halt()
-
-        khip8.start()
-
-        verify(inverse = true) { cpu.tick() }
-    }
-
-    @Test
     fun `Check number of Cpu ticks per peripheral tick`() {
-        expect(9) { khip8.numberOfCpuTicksPerPeripheralTick() }
+        expect(9) { numberOfCpuTicksPerPeripheralTick(config) }
     }
 
     @Test
@@ -92,13 +87,14 @@ class Khip8UnitTest: BaseTest() {
         every { memoryManager.delayRegister } returns delayRegister
         every { memoryManager.soundRegister } returns soundRegister
 
-        khip8.execute(15, 0,0)
+        runTest {
+            khip8.execute(15, 0)
 
-        verify(exactly = 15) { cpu.tick() }
-        verify { delayRegister.tick() }
-        verify { soundRegister.tick() }
-        verify { display.tick() }
+            verify(exactly = 15) { cpu.tick() }
+            verify { delayRegister.tick() }
+            verify { soundRegister.tick() }
 
-        confirmVerified(cpu, delayRegister, soundRegister, display)
+            confirmVerified(cpu, delayRegister, soundRegister, display)
+        }
     }
 }

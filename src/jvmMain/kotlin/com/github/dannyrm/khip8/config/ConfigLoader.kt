@@ -26,3 +26,7 @@ actual fun delayBetweenCycles(config: Config): Pair<Long, Int> {
 
     return Pair(numberOfMillis.toLong(), numberOfNanos)
 }
+
+actual fun numberOfCpuTicksPerPeripheralTick(config: Config): Int {
+    return config.systemSpeedConfig.cpuSpeed / config.systemSpeedConfig.timerSpeed
+}

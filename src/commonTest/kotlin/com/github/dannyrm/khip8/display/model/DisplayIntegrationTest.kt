@@ -1,7 +1,6 @@
 package com.github.dannyrm.khip8.display.model
 
 import com.github.dannyrm.khip8.util.lineSeparator
-import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.expect
 
@@ -13,7 +12,7 @@ class DisplayIntegrationTest {
         displayMemory[5,5] = 0xFFu
         displayMemory[25,31] = 0xFFu
 
-        val display = Display(displayMemory, mockk(relaxed = true))
+        val display = Display(displayMemory)
 
         var newLine = lineSeparator()
 

@@ -64,6 +64,8 @@ kotlin {
                 implementation("io.kotest:kotest-assertions-core:${property("kotest.version")}")
                 implementation("io.kotest:kotest-framework-engine:${property("kotest.version")}")
                 implementation("io.kotest:kotest-framework-datatest:${property("kotest.version")}")
+
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
             }
         }
 

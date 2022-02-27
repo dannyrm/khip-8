@@ -1,14 +1,16 @@
 package com.github.dannyrm.khip8
 
+import com.github.dannyrm.khip8.config.Config
+import com.github.dannyrm.khip8.config.FrontEndType
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-import com.github.dannyrm.khip8.config.loadConfig
 import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.cpu.InstructionDecoder
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.display.model.DisplayMemory
+import com.github.dannyrm.khip8.display.view.KorgeUi
 import com.github.dannyrm.khip8.display.view.Ui
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.input.Chip8InputManager
@@ -27,33 +29,35 @@ object Khip8Bootstrap: KoinComponent {
     val khip8 by inject<Khip8>()
     private val LOG = logger(this::class)
 
-    fun boot(filePath: String, additionalModules: List<Module>) {
-        loadDependencies(additionalModules)
+    fun boot(filePath: String, config: Config, additionalModules: List<Module>) {
+        LOG.info { "Loading Config: $config" }
+
+        loadDependencies(additionalModules, config)
 
         khip8.load(filePath)
         khip8.start()
     }
 
-    private fun loadDependencies(additionalModules: List<Module>) {
-        val config = loadConfig()
-
-        LOG.info { "Loading Config: $config" }
-
+    private fun loadDependencies(additionalModules: List<Module>, config: Config) {
         FeatureManager.systemMode = config.systemMode
 
         val dependencies = module {
-            single { DisplayMemory() }
             single<TimerRegister> { SoundTimerRegister(get()) }
             single { InstructionDecoder() }
             single { Cpu(get(), get(), get(), get(), get(), memoryConfig = config.memoryConfig) }
             single { Stack(config.memoryConfig.stackSize) }
             single { ValidatedMemory(config.memoryConfig.memorySize) }
             single { MemoryManager(soundRegister = get(), memoryConfig = config.memoryConfig) }
-            single { Khip8(get(), get(), get(), config) }
-            single { Chip8InputManager() }
+            single { Khip8(get(), get(), get(), config, get()) }
             single { CpuInstructionExecutor() }
             single { SystemActionInputManager() }
-            single { Display(get(), get()) }
+            single { Display(get()) }
+            single { DisplayMemory() }
+            single { Chip8InputManager() }
+
+            if (config.frontEndConfig.frontEnd == FrontEndType.KORGE) {
+                single<Ui> { KorgeUi(get(), get()) }
+            }
         }
 
         startKoin {
@@ -65,14 +69,11 @@ object Khip8Bootstrap: KoinComponent {
             val cpu = koin.get<Cpu>()
             val chip8InputManager = koin.get<Chip8InputManager>()
             val cpuInstructionExecutor = koin.get<CpuInstructionExecutor>()
-            val khip8 = koin.get<Khip8>()
-            val ui = koin.get<Ui>()
 
             val memoryManager = koin.get<MemoryManager>()
             val display = koin.get<Display>()
             val systemActionInputManager = koin.get<SystemActionInputManager>()
 
-            ui.init(config, khip8::halt)
             chip8InputManager.init(cpu)
             cpuInstructionExecutor.init(cpu)
 

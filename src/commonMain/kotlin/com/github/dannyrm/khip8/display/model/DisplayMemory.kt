@@ -35,6 +35,10 @@ class DisplayMemory(private val buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS)
     }
 
     operator fun get(x: Int, y: Int): Boolean {
+        if (x >= MAX_WIDTH_IN_BITS || y >= MAX_HEIGHT_IN_BITS) {
+            return false
+        }
+
         val mask = (0x1.toULong() shl (MAX_WIDTH_IN_BITS -1 - x))
 
         val row = buffer[y]

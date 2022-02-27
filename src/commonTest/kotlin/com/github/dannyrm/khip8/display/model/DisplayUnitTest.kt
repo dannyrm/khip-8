@@ -20,11 +20,4 @@ class DisplayUnitTest: BaseTest() {
 
         verify { displayMemory.clear() }
     }
-
-    @Test
-    fun `Tick works correctly`() {
-        display.tick()
-
-        verify { ui.update(displayMemory) }
-    }
 }

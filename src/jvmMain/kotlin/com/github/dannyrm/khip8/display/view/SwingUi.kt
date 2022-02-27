@@ -1,77 +1,112 @@
 package com.github.dannyrm.khip8.display.view
 
+import com.github.dannyrm.khip8.Khip8
 import com.github.dannyrm.khip8.config.Config
+import com.github.dannyrm.khip8.config.delayBetweenCycles
+import com.github.dannyrm.khip8.config.numberOfCpuTicksPerPeripheralTick
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.input.KeyboardManager
+import com.github.dannyrm.khip8.util.logger
+import com.soywiz.korio.async.launch
+import kotlinx.coroutines.*
 import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.awt.image.BufferStrategy
-import kotlin.math.floor
 
-class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager): Ui, Frame() {
-    private lateinit var onCloseSignal: () -> Unit
-    private val windowSize: Dimension
+class SwingUi(private val displayMemory: DisplayMemory,
+              keyboardManager: KeyboardManager,
+              config: Config): Ui, Frame() {
+    private val pixelSizes: Pair<Int, Int>
+    private val canvas: Canvas
 
     init {
         title = "Khip 8"
 
-        // Setup Graphics
+        // We're going to deal with painting and refreshing the frame manually, so we can control the refresh rate
         ignoreRepaint = true
         isResizable = false
 
-        windowSize = getAdjustedDimension(512, 256)
-
-        canvas.size = windowSize
+        val windowSize = getAdjustedDimension(config.frontEndConfig.windowWidth, config.frontEndConfig.windowHeight)
         size = windowSize
 
-        // Halt the Khip8 system and dispose of the window. The program is exited after it has been fully halted.
-        val windowListener = object: WindowAdapter() {
-            override fun windowClosing(event: WindowEvent) {
-                super.windowClosing(event)
-                halt()
-            }
-        }
-
-        this.addWindowListener(windowListener)
+        // Setup canvas which all graphics are painted onto
+        canvas = Canvas()
+        canvas.size = windowSize
+        canvas.addKeyListener(keyboardManager)
+        this.add(canvas)
 
         this.addKeyListener(keyboardManager)
-        canvas.addKeyListener(keyboardManager)
 
-        this.add(canvas)
+        pixelSizes = calculatePixelSize(displayMemory, size.width, size.height)
 
         pack()
     }
 
-    override suspend fun init(config: Config, onCloseSignal: () -> Unit) {
-        this.onCloseSignal = onCloseSignal
+    override suspend fun start(config: Config, parentJob: Job, khip8: Khip8) {
         isVisible = true
-    }
 
-    override fun update(displayMemory: DisplayMemory) {
-        if (!isVisible) return
+        val delayBetweenFrames = 1000L / config.systemSpeedConfig.displayRefreshRate.toLong()
 
-        val graphics = startNewFrame()
+        val khip8Job = launch(Dispatchers.Default) {
+            val cpuTicksPerPeripheralTick = numberOfCpuTicksPerPeripheralTick(config)
+            val (delayInMillis, delayInNanos) = delayBetweenCycles(config)
 
-        graphics.color = Color.BLACK
-
-        val (width, height) = displayMemory.dimensions()
-        val (xPixelSize, yPixelSize) = calculatePixelSize(displayMemory)
-
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                if (displayMemory[x, y]) {
-                    graphics.fillRect(x*xPixelSize, y*yPixelSize, xPixelSize, yPixelSize)
-                }
+            while (true) {
+                khip8.execute(cpuTicksPerPeripheralTick, delayInMillis)
             }
         }
 
-        render()
+        val uiJob = launch(Dispatchers.Default) {
+            while (true) {
+                update()
+                delay(delayBetweenFrames)
+            }
+        }
+
+        addWindowListener(
+            object: WindowAdapter() {
+                override fun windowClosing(event: WindowEvent) {
+                    super.windowClosing(event)
+
+                    khip8Job.cancel()
+                    uiJob.cancel()
+
+                    dispose()
+                }
+            }
+        )
     }
 
-    override fun halt() {
-        onCloseSignal.invoke()
-        dispose()
+    private fun update() {
+        val graphics: Graphics2D? =
+            try {
+                obtainBufferStrategy().drawGraphics as Graphics2D
+            } catch (e: java.lang.IllegalStateException) {
+                null
+            }
+
+        // Skips rendering if the graphics context can't be obtained.
+        if (graphics != null) {
+            graphics.clearRect(0, 0, width, height)
+
+            graphics.color = Color.BLACK
+
+            val xPixelSize = pixelSizes.first
+            val yPixelSize = pixelSizes.second
+
+            for (x in 0 until displayMemory.dimensions()[0]) {
+                for (y in 0 until displayMemory.dimensions()[1]) {
+                    if (displayMemory[x, y]) {
+                        graphics.fillRect(x*xPixelSize, y*yPixelSize, xPixelSize, yPixelSize)
+                    }
+                }
+            }
+
+            render()
+        } else {
+            LOG.warn { "Unable to obtain graphics context. Skipping rendering this frame" }
+        }
     }
 
     private fun render() {
@@ -88,26 +123,6 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager): Ui,
         bufferStrategy.show()
     }
 
-    private fun calculatePixelSize(displayMemory: DisplayMemory): IntArray {
-        val (displayMemoryWidth, displayMemoryHeight) = displayMemory.dimensions()
-        val frameWidth = windowSize.width.toDouble()
-        val frameHeight = windowSize.height.toDouble()
-
-        val adjustedXPixelSize = floor(frameWidth / displayMemoryWidth).toInt()
-        val adjustedYPixelSize = floor(frameHeight / displayMemoryHeight).toInt()
-
-        return intArrayOf(adjustedXPixelSize, adjustedYPixelSize)
-    }
-
-    /**
-     * Clear the canvas and return the Graphics context.
-     */
-    private fun startNewFrame(): Graphics2D {
-        val graphics = obtainBufferStrategy().drawGraphics as Graphics2D
-        graphics.clearRect(0, 0, windowSize.width, windowSize.height)
-        return graphics
-    }
-
     private fun obtainBufferStrategy(): BufferStrategy {
         if (canvas.bufferStrategy == null) {
             canvas.createBufferStrategy(2)
@@ -122,5 +137,9 @@ class SwingUi(private val canvas: Canvas, keyboardManager: KeyboardManager): Ui,
         val heightInsetValue = screenInsets.top + screenInsets.bottom
 
         return Dimension(width + widthInsetValue, height + heightInsetValue)
+    }
+
+    companion object {
+        private val LOG = logger(this::class)
     }
 }

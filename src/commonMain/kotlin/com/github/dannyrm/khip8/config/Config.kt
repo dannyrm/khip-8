@@ -12,3 +12,5 @@ data class Config(val systemSpeedConfig: SystemSpeedConfig,
 expect fun loadConfig(): Config
 
 expect fun delayBetweenCycles(config: Config): Pair<Long, Int>
+
+expect fun numberOfCpuTicksPerPeripheralTick(config: Config): Int

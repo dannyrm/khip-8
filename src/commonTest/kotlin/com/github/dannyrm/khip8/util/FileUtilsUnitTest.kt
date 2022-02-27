@@ -25,7 +25,7 @@ class FileUtilsUnitTest {
     fun `Construct date time based file name`() {
         val fileName = constructDateTimeFileName("unitTestName")
 
-        val fileNameRegex = Regex("unitTestName-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d{9}")
+        val fileNameRegex = Regex("unitTestName-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d+")
 
         assertTrue { fileName.matches(fileNameRegex) }
     }
