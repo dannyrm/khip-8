@@ -20,13 +20,15 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     var pc: UInt = memoryConfig.programStartAddress.toUInt() // 16 bits, program counter
         set(value) { field = value % 0x10000u }
 
-    fun loadProgram(inputPath: String) {
+    fun loadProgram(inputPath: String?) {
         resetMemory()
         loadSpriteDigitsIntoMemory()
 
-        loadFile(inputPath).toUByteArray().forEachIndexed { index, byte ->
+        inputPath?.run {
+            loadFile(inputPath).toUByteArray().forEachIndexed { index, byte ->
                 ram[memoryConfig.programStartAddress + index] = byte
             }
+        }
     }
 
     fun fetchNextInstruction(): UInt {

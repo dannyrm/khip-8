@@ -45,6 +45,7 @@ object Khip8Bootstrap: KoinComponent {
 
         khip8.load(filePath)
 
+        // Starts the Chip-8 execution and UI execution in separate Co-routines
         runBlockingNoJs {
             launch(Dispatchers.Default) {
                 val cpuTicksPerPeripheralTick = numberOfCpuTicksPerPeripheralTick(config)
@@ -71,15 +72,15 @@ object Khip8Bootstrap: KoinComponent {
             single { Stack(config.memoryConfig.stackSize) }
             single { ValidatedMemory(config.memoryConfig.memorySize) }
             single { MemoryManager(soundRegister = get(), memoryConfig = config.memoryConfig) }
-            single { Khip8(get(), get()) }
+            single { Khip8(get(), get(), get()) }
             single { CpuInstructionExecutor() }
             single { SystemActionInputManager() }
-            single { Display(get()) }
             single { DisplayMemory() }
+            single { Display(get()) }
             single { Chip8InputManager() }
 
             if (config.frontEndConfig.frontEnd == FrontEndType.KORGE) {
-                single { KorgeConfigModule(get(), get(), config) }
+                single { KorgeConfigModule(get(), get(), config, get()) }
                 single<Ui> { KorgeUi(get()) }
             }
         }

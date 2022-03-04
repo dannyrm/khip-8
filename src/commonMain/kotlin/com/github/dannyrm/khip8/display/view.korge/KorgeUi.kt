@@ -1,5 +1,6 @@
 package com.github.dannyrm.khip8.display.view.korge
 
+import com.github.dannyrm.khip8.Khip8
 import com.github.dannyrm.khip8.config.Config
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.display.view.Ui
@@ -17,13 +18,15 @@ class KorgeUi(private val korgeConfigModule: KorgeConfigModule): Ui {
     override suspend fun start(config: Config, rootJob: Job) = Korge(Korge.Config(module = korgeConfigModule))
 }
 
-class KorgeConfigModule(private val displayMemory: DisplayMemory, private val chip8InputManager: Chip8InputManager, private val config: Config): Module() {
-    override val size = SizeInt(config.frontEndConfig.windowWidth, config.frontEndConfig.windowHeight+30)
+class KorgeConfigModule(private val displayMemory: DisplayMemory, private val chip8InputManager: Chip8InputManager,
+                        private val config: Config, private val khip8: Khip8): Module() {
+    override val size = SizeInt(config.frontEndConfig.windowWidth, config.frontEndConfig.windowHeight + KorgeEmulatorWindow.TOP_UI_HEIGHT.toInt())
     override val title = "Khip-8"
     override val bgcolor =  Colors["#2b2b2b"]
-    override val mainScene: KClass<out Scene> = KorgeEmulatorWindow::class
+    override val mainScene: KClass<out Scene> = KorgeEmptyMachineWindow::class
 
     override suspend fun AsyncInjector.configure() {
-        mapPrototype { KorgeEmulatorWindow(displayMemory, chip8InputManager, config) }
+        mapPrototype { KorgeEmulatorWindow(displayMemory, chip8InputManager, config, khip8) }
+        mapPrototype { KorgeEmptyMachineWindow(displayMemory, chip8InputManager, config, khip8) }
     }
 }

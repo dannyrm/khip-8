@@ -1,5 +1,6 @@
 package com.github.dannyrm.khip8.display.view.korge
 
+import com.github.dannyrm.khip8.Khip8
 import com.github.dannyrm.khip8.config.Config
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.input.Chip8InputManager
@@ -8,6 +9,7 @@ import com.github.dannyrm.khip8.util.calculatePixelSize
 import com.soywiz.klock.Frequency
 import com.soywiz.korev.Key
 import com.soywiz.korge.input.keys
+import com.soywiz.korge.input.onClick
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.ui.uiButton
 import com.soywiz.korge.ui.uiHorizontalStack
@@ -19,7 +21,7 @@ import com.soywiz.korim.color.Colors
 import com.soywiz.korma.geom.vector.rect
 
 class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val chip8InputManager: Chip8InputManager,
-                          private val config: Config): Scene() {
+                          private val config: Config, private val khip8: Khip8): Scene() {
 
     override suspend fun Container.sceneInit() {
         setupKeymap(this)
@@ -28,8 +30,10 @@ class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val 
     }
 
     private fun setupUi(container: Container) {
-        container.uiHorizontalStack(height = 30.0) {
-            uiButton(text = "Load ROM").position(0,0)
+        container.uiHorizontalStack(height = TOP_UI_HEIGHT) {
+            uiButton(text = "Reset")
+                .position(0,0)
+                .onClick { khip8.reset() }
         }
     }
 
@@ -43,7 +47,7 @@ class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val 
         val displayMemoryHeight = displayMemory.dimensions()[1]
 
         val graphics = container.graphics {
-            position(0,30)
+            position(0, TOP_UI_HEIGHT.toInt())
         }
 
         container.addFixedUpdater(Frequency(config.systemSpeedConfig.displayRefreshRate.toDouble())) {
@@ -119,5 +123,9 @@ class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val 
 //                }
 //            }
         }
+    }
+
+    companion object {
+        const val TOP_UI_HEIGHT = 30.0
     }
 }
