@@ -48,7 +48,7 @@ class CpuUnitTest: FunSpec({
 
         verify { chip8InputManager.lockInputs() }
         verify { memoryManager.fetchNextInstruction() }
-        verify { instructionDecoder.decode(nextInstruction, listOf(cpuInstructionExecutor)) }
+        verify { instructionDecoder.decodeAndExecute(nextInstruction, listOf(cpuInstructionExecutor)) }
     }
 
     test("ret sets correct value to pc 00EE") {

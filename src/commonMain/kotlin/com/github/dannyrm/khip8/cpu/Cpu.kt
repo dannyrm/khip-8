@@ -31,7 +31,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuIns
             val instruction = memoryManager.fetchNextInstruction()
 
             // DECODE & EXECUTE
-            instructionDecoder.decode(instruction, listOf(cpuInstructionExecutor))
+            instructionDecoder.decodeAndExecute(instruction, listOf(cpuInstructionExecutor))
         }
     }
 

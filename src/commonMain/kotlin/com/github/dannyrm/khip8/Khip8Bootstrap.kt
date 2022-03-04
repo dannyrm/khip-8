@@ -2,15 +2,17 @@ package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.config.Config
 import com.github.dannyrm.khip8.config.FrontEndType
+import com.github.dannyrm.khip8.config.delayBetweenCycles
+import com.github.dannyrm.khip8.config.numberOfCpuTicksPerPeripheralTick
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.cpu.InstructionDecoder
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.display.model.DisplayMemory
-import com.github.dannyrm.khip8.display.view.KorgeUi
+import com.github.dannyrm.khip8.display.view.korge.KorgeConfigModule
+import com.github.dannyrm.khip8.display.view.korge.KorgeUi
 import com.github.dannyrm.khip8.display.view.Ui
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.input.Chip8InputManager
@@ -23,10 +25,14 @@ import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.logger
 import com.github.dannyrm.khip8.util.memoryDump
+import com.soywiz.korio.async.launch
+import com.soywiz.korio.async.runBlockingNoJs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.job
+import org.koin.core.component.get
 import org.koin.core.module.Module
 
 object Khip8Bootstrap: KoinComponent {
-    val khip8 by inject<Khip8>()
     private val LOG = logger(this::class)
 
     fun boot(filePath: String, config: Config, additionalModules: List<Module>) {
@@ -34,8 +40,25 @@ object Khip8Bootstrap: KoinComponent {
 
         loadDependencies(additionalModules, config)
 
+        val khip8 = get<Khip8>()
+        val ui = get<Ui>()
+
         khip8.load(filePath)
-        khip8.start()
+
+        runBlockingNoJs {
+            launch(Dispatchers.Default) {
+                val cpuTicksPerPeripheralTick = numberOfCpuTicksPerPeripheralTick(config)
+                val (delayInMillis, delayInNanos) = delayBetweenCycles(config)
+
+                while (true) {
+                    khip8.execute(cpuTicksPerPeripheralTick, delayInMillis)
+                }
+            }
+
+            launch(Dispatchers.Default) {
+                ui.start(config, this.coroutineContext.job)
+            }
+        }
     }
 
     private fun loadDependencies(additionalModules: List<Module>, config: Config) {
@@ -48,7 +71,7 @@ object Khip8Bootstrap: KoinComponent {
             single { Stack(config.memoryConfig.stackSize) }
             single { ValidatedMemory(config.memoryConfig.memorySize) }
             single { MemoryManager(soundRegister = get(), memoryConfig = config.memoryConfig) }
-            single { Khip8(get(), get(), get(), config, get()) }
+            single { Khip8(get(), get()) }
             single { CpuInstructionExecutor() }
             single { SystemActionInputManager() }
             single { Display(get()) }
@@ -56,7 +79,8 @@ object Khip8Bootstrap: KoinComponent {
             single { Chip8InputManager() }
 
             if (config.frontEndConfig.frontEnd == FrontEndType.KORGE) {
-                single<Ui> { KorgeUi(get(), get()) }
+                single { KorgeConfigModule(get(), get(), config) }
+                single<Ui> { KorgeUi(get()) }
             }
         }
 

@@ -1,13 +1,10 @@
 package com.github.dannyrm.khip8.display.view
 
-import com.github.dannyrm.khip8.Khip8
 import com.github.dannyrm.khip8.config.Config
-import com.github.dannyrm.khip8.config.delayBetweenCycles
-import com.github.dannyrm.khip8.config.numberOfCpuTicksPerPeripheralTick
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.input.KeyboardManager
+import com.github.dannyrm.khip8.util.calculatePixelSize
 import com.github.dannyrm.khip8.util.logger
-import com.soywiz.korio.async.launch
 import kotlinx.coroutines.*
 import java.awt.*
 import java.awt.event.WindowAdapter
@@ -43,39 +40,27 @@ class SwingUi(private val displayMemory: DisplayMemory,
         pack()
     }
 
-    override suspend fun start(config: Config, parentJob: Job, khip8: Khip8) {
+    override suspend fun start(config: Config, parentJob: Job) {
         isVisible = true
-
-        val delayBetweenFrames = 1000L / config.systemSpeedConfig.displayRefreshRate.toLong()
-
-        val khip8Job = launch(Dispatchers.Default) {
-            val cpuTicksPerPeripheralTick = numberOfCpuTicksPerPeripheralTick(config)
-            val (delayInMillis, delayInNanos) = delayBetweenCycles(config)
-
-            while (true) {
-                khip8.execute(cpuTicksPerPeripheralTick, delayInMillis)
-            }
-        }
-
-        val uiJob = launch(Dispatchers.Default) {
-            while (true) {
-                update()
-                delay(delayBetweenFrames)
-            }
-        }
 
         addWindowListener(
             object: WindowAdapter() {
                 override fun windowClosing(event: WindowEvent) {
                     super.windowClosing(event)
 
-                    khip8Job.cancel()
-                    uiJob.cancel()
+                    parentJob.cancelChildren()
 
                     dispose()
                 }
             }
         )
+
+        val delayBetweenFrames = 1000L / config.systemSpeedConfig.displayRefreshRate.toLong()
+
+        while (true) {
+            update()
+            delay(delayBetweenFrames)
+        }
     }
 
     private fun update() {

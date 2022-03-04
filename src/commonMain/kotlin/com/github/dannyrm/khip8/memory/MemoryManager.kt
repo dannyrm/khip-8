@@ -21,6 +21,9 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
         set(value) { field = value % 0x10000u }
 
     fun loadProgram(inputPath: String) {
+        resetMemory()
+        loadSpriteDigitsIntoMemory()
+
         loadFile(inputPath).toUByteArray().forEachIndexed { index, byte ->
                 ram[memoryConfig.programStartAddress + index] = byte
             }

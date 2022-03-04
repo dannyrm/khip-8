@@ -161,7 +161,7 @@ class DissasemblerIntegrationTest {
                         dissassemblerInstructionExecutor: DissassemblerInstructionExecutor,
                         expectedValues: List<String>) {
         for (i in expectedValues.indices) {
-            instructionDecoder.decode(memoryManager.fetchNextInstruction(), instructionExecutors = listOf(dissassemblerInstructionExecutor))
+            instructionDecoder.decodeAndExecute(memoryManager.fetchNextInstruction(), instructionExecutors = listOf(dissassemblerInstructionExecutor))
 
             expect(expectedValues[i]) { dissassemblerInstructionExecutor.codeListing[i] }
         }

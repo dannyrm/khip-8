@@ -8,7 +8,7 @@ import com.github.dannyrm.khip8.util.logger
 import wordHex
 
 class InstructionDecoder {
-    fun decode(instruction: UInt, instructionExecutors: List<InstructionExecutor>) {
+    fun decodeAndExecute(instruction: UInt, instructionExecutors: List<InstructionExecutor>) {
         LOG.trace { "Decoding instruction: ${wordHex(instruction)}" }
 
         when (instruction.toInt()) {
