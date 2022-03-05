@@ -11,17 +11,11 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 object JvmKhip8Bootstrap {
-    private val LOG = logger(this::class)
 
     @JvmStatic
     fun main(args: Array<String>) {
         val config = loadConfig()
-
-        if (args.isNotEmpty()) {
-            Khip8Bootstrap.boot(args[0], config, listOf(loadDependencies(config)))
-        } else {
-            LOG.error { "ERROR: ROM file expected as parameter" }
-        }
+        Khip8Bootstrap.boot(config, listOf(loadDependencies(config)))
     }
 
     private fun loadDependencies(config: Config): Module = module {

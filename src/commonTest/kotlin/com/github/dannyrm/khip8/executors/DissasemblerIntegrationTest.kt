@@ -14,7 +14,7 @@ class DissasemblerIntegrationTest {
     fun `Check dissasembly of 15 puzzle`() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-        val memoryManager = MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
+        val memoryManager = MemoryManager(memoryConfig = memoryConfig)
 
         memoryManager.loadProgram(
             TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()

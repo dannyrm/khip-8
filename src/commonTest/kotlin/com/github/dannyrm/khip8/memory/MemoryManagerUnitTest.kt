@@ -17,7 +17,7 @@ class MemoryManagerUnitTest: BaseTest() {
     fun `Load Program Into Memory`() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
+        val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadProgram(
             TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
         )
@@ -34,7 +34,7 @@ class MemoryManagerUnitTest: BaseTest() {
     fun `Fetch next instruction`() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
+        val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadProgram(
             TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
         )
@@ -58,7 +58,7 @@ class MemoryManagerUnitTest: BaseTest() {
     fun `Check correct values after loading sprite data`() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
+        val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadSpriteDigitsIntoMemory()
 
         val expectedValues = ubyteArrayOf(
@@ -89,7 +89,7 @@ class MemoryManagerUnitTest: BaseTest() {
     fun `Check correct data for each sprite digit`() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
+        val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadSpriteDigitsIntoMemory()
 
         val expectedValues = arrayOf(
@@ -126,7 +126,7 @@ class MemoryManagerUnitTest: BaseTest() {
     fun `Check skip next instruction works as expected`() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
-        val memoryManager = MemoryManager(mockk(), mockk(), memoryConfig)
+        val memoryManager = MemoryManager(memoryConfig)
         expect(0x200u) { memoryManager.pc }
         memoryManager.skipNextInstruction()
         expect(0x202u) { memoryManager.pc }
@@ -137,8 +137,6 @@ class MemoryManagerUnitTest: BaseTest() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(
-            delayRegister = mockk(relaxed = true),
-            soundRegister = mockk(relaxed = true),
             stack = mockk(relaxed = true),
             ram = mockk(relaxed = true),
             registers = mockk(relaxed = true),
@@ -152,21 +150,41 @@ class MemoryManagerUnitTest: BaseTest() {
         expect(0u) { memoryManager.i }
         expect(0x200u) { memoryManager.pc }
 
-        verify { memoryManager.delayRegister.clear() }
-        verify { memoryManager.soundRegister.clear() }
         verify { memoryManager.stack.clear() }
         verify { memoryManager.ram.clear() }
         verify { memoryManager.registers.clear() }
+
+        // Reset also loads the sprite digits into memory
+        val expectedValues = ubyteArrayOf(
+            0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u,
+            0x20u, 0x60u, 0x20u, 0x20u, 0x70u,
+            0xF0u, 0x10u, 0xF0u, 0x80u, 0xF0u,
+            0xF0u, 0x10u, 0xF0u, 0x10u, 0xF0u,
+            0x90u, 0x90u, 0xF0u, 0x10u, 0x10u,
+            0xF0u, 0x80u, 0xF0u, 0x10u, 0xF0u,
+            0xF0u, 0x80u, 0xF0u, 0x90u, 0xF0u,
+            0xF0u, 0x10u, 0x20u, 0x40u, 0x40u,
+            0xF0u, 0x90u, 0xF0u, 0x90u, 0xF0u,
+            0xF0u, 0x90u, 0xF0u, 0x10u, 0xF0u,
+            0xF0u, 0x90u, 0xF0u, 0x90u, 0x90u,
+            0xE0u, 0x90u, 0xE0u, 0x90u, 0xE0u,
+            0xF0u, 0x80u, 0x80u, 0x80u, 0xF0u,
+            0xE0u, 0x90u, 0x90u, 0x90u, 0xE0u,
+            0xF0u, 0x80u, 0xF0u, 0x80u, 0xF0u,
+            0xF0u, 0x80u, 0xF0u, 0x80u, 0x80u,
+        )
+
+        for (i in 0 until 80) {
+            verify { memoryManager.ram[i] = expectedValues[i] }
+        }
     }
 
     @Test
     fun `check toString format`() {
-        val soundTimerRegister = SoundTimerRegister(mockk(relaxed = true))
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(
             ram = ValidatedMemory(42),
-            soundRegister = soundTimerRegister,
             memoryConfig = memoryConfig,
             stack = Stack(16)
         )
@@ -174,8 +192,6 @@ class MemoryManagerUnitTest: BaseTest() {
         memoryManager.ram[24] = 0x11u
 
         memoryManager.i = 0x55u
-        memoryManager.delayRegister.value = 0x44u
-        memoryManager.soundRegister.value = 0x33u
 
         memoryManager.registers[1] = 0x11u
         memoryManager.registers[3] = 0x22u
@@ -189,7 +205,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
         expect(
             "Registers: {$newLine" +
-                    "\tI = 0x0055, PC = 0x0200, DT = 0x44, ST = 0x33$newLine" +
+                    "\tI = 0x0055, PC = 0x0200$newLine" +
                     "}$newLine" +
                     "General Registers: {$newLine" +
                     "\t0x0000 | 0x00 0x11 0x00 0x22 0x00 0x00 0x00 0x00 0x00 0x66 0x00 0x00 0x00 0x00 0x00 0x00                      *$newLine" +

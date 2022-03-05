@@ -4,37 +4,42 @@ import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.cpu.CpuState
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.memory.MemoryManager
+import com.github.dannyrm.khip8.memory.TimerRegister
+import com.github.dannyrm.khip8.memory.TimerRegisterState
+import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.logger
 import kotlinx.coroutines.delay
 
 class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager, private val display: Display,
-            private var khip8State: Khip8State = Khip8State.EMPTY, private var loadedRomPath: String? = null) {
+            private val delayRegister: TimerRegister, private val soundRegister: SoundTimerRegister,
+            private var khip8Status: Khip8Status) {
 
 
-    fun load(romPath: String) {
-        loadedRomPath =  romPath
+    fun load(romPath: String?) {
+        khip8Status.loadedRomPath = romPath
         reset()
     }
 
     fun reset() {
-        LOG.info { "***** Resetting system" }
-
+        khip8Status.khip8State = Khip8State.EMPTY
         cpu.cpuState = CpuState.PAUSED
-        LOG.info { "CPU State: ${cpu.cpuState}" }
+        delayRegister.state = TimerRegisterState.PAUSED
+        soundRegister.state = TimerRegisterState.PAUSED
 
+        delayRegister.clear()
+        soundRegister.clear()
         display.clear()
-        LOG.info { "Cleared display..." }
 
-        memoryManager.loadProgram(loadedRomPath)
+        memoryManager.resetMemory()
 
-        khip8State = if (loadedRomPath != null) Khip8State.LOADED else Khip8State.EMPTY
+        if (memoryManager.loadProgram(khip8Status.loadedRomPath)) {
+            khip8Status.khip8State = Khip8State.LOADED
+            cpu.cpuState = CpuState.RUNNING
+            delayRegister.state = TimerRegisterState.RUNNING
+            soundRegister.state = TimerRegisterState.RUNNING
+        }
 
-        LOG.info {"Console State: $khip8State" }
-
-        cpu.cpuState = CpuState.RUNNING
-        LOG.info { "CPU State: ${cpu.cpuState}" }
-
-        LOG.info { "***** System reset successfully" }
+        LOG.info { "System reset. State: { Console: ${khip8Status.khip8State}, CPU: ${cpu.cpuState}, Delay Timer: ${delayRegister.state}, Sound Timer: ${soundRegister.state} }" }
     }
 
     suspend fun execute(cpuTicksPerPeripheralTick: Int, delayInMillis: Long) {
@@ -42,8 +47,8 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager, priv
             cpu.tick()
             delay(delayInMillis)
         }
-        memoryManager.delayRegister.tick()
-        memoryManager.soundRegister.tick()
+        delayRegister.tick()
+        soundRegister.tick()
     }
 
     companion object { private val LOG = logger(this::class) }

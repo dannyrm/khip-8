@@ -2,10 +2,12 @@ package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.config.*
 import com.github.dannyrm.khip8.cpu.Cpu
+import com.github.dannyrm.khip8.cpu.CpuState
 import com.github.dannyrm.khip8.display.model.Display
-import com.github.dannyrm.khip8.display.view.Ui
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
+import com.github.dannyrm.khip8.memory.TimerRegisterState
+import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.test.utils.BaseTest
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -20,7 +22,9 @@ class Khip8UnitTest: BaseTest() {
     @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
     @MockK(relaxed = true) private lateinit var cpu: Cpu
     @MockK(relaxed = true) private lateinit var display: Display
-    @MockK(relaxed = true) private lateinit var ui: Ui
+    @MockK(relaxed = true) private lateinit var delayRegister: TimerRegister
+    @MockK(relaxed = true) private lateinit var soundRegister: SoundTimerRegister
+    @MockK(relaxed = true) private lateinit var khip8Status: Khip8Status
 
     private var config: Config = Config(
         systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
@@ -39,16 +43,93 @@ class Khip8UnitTest: BaseTest() {
     private lateinit var khip8: Khip8
 
     @Test
-    fun `Sprite data loaded at startup`() {
-        verify { memoryManager.loadSpriteDigitsIntoMemory() }
+    fun `load loads rom into memory`() {
+        val filePath = "the-file-path"
+
+        every { khip8Status.loadedRomPath } returns filePath
+        every { memoryManager.loadProgram(filePath) } returns true
+
+        khip8.load(filePath)
+
+        verify { khip8Status.loadedRomPath = filePath }
+
+        verify { delayRegister.clear() }
+        verify { soundRegister.clear() }
+        verify { display.clear() }
+        verify { memoryManager.resetMemory() }
+        verify { memoryManager.loadProgram(filePath) }
+
+        verifyOrder {
+            // Initially the machine will be empty and paused
+            khip8Status.khip8State = Khip8State.EMPTY
+            cpu.cpuState = CpuState.PAUSED
+            delayRegister.state = TimerRegisterState.PAUSED
+            soundRegister.state = TimerRegisterState.PAUSED
+
+            // Once the Rom is successfully loaded we indicate this and unpause
+            khip8Status.khip8State = Khip8State.LOADED
+            cpu.cpuState = CpuState.RUNNING
+            delayRegister.state = TimerRegisterState.RUNNING
+            soundRegister.state = TimerRegisterState.RUNNING
+        }
     }
 
     @Test
-    fun `load loads rom into memory`() {
+    fun `Reset clears state`() {
         val filePath = "the-file-path"
-        khip8.load(filePath)
 
-        verify { memoryManager.loadProgram(filePath) }
+        every { khip8Status.loadedRomPath } returns filePath
+        every { memoryManager.loadProgram(filePath) } returns true
+
+        khip8.reset()
+
+        verify { delayRegister.clear() }
+        verify { soundRegister.clear() }
+        verify { display.clear() }
+        verify { memoryManager.resetMemory() }
+
+        verifyOrder {
+            // Initially the machine will be empty and paused
+            khip8Status.khip8State = Khip8State.EMPTY
+            cpu.cpuState = CpuState.PAUSED
+            delayRegister.state = TimerRegisterState.PAUSED
+            soundRegister.state = TimerRegisterState.PAUSED
+
+            // Once the Rom is successfully loaded we indicate this and unpause
+            khip8Status.khip8State = Khip8State.LOADED
+            cpu.cpuState = CpuState.RUNNING
+            delayRegister.state = TimerRegisterState.RUNNING
+            soundRegister.state = TimerRegisterState.RUNNING
+        }
+    }
+
+    @Test
+    fun `Reset clears state and leaves the emulator paused if rom does not load`() {
+        val filePath = "the-file-path"
+
+        every { khip8Status.loadedRomPath } returns filePath
+        every { memoryManager.loadProgram(filePath) } returns false
+
+        khip8.reset()
+
+        verify { delayRegister.clear() }
+        verify { soundRegister.clear() }
+        verify { display.clear() }
+        verify { memoryManager.resetMemory() }
+
+        verifyOrder {
+            khip8Status.khip8State = Khip8State.EMPTY
+            cpu.cpuState = CpuState.PAUSED
+            delayRegister.state = TimerRegisterState.PAUSED
+            soundRegister.state = TimerRegisterState.PAUSED
+        }
+
+        verifyAll(inverse = true) {
+            khip8Status.khip8State = Khip8State.LOADED
+            cpu.cpuState = CpuState.RUNNING
+            delayRegister.state = TimerRegisterState.RUNNING
+            soundRegister.state = TimerRegisterState.RUNNING
+        }
     }
 
     @Test
@@ -81,12 +162,6 @@ class Khip8UnitTest: BaseTest() {
 
     @Test
     fun `Execute works correctly`() {
-        val delayRegister = mockk<TimerRegister>(relaxed = true)
-        val soundRegister = mockk<TimerRegister>(relaxed = true)
-
-        every { memoryManager.delayRegister } returns delayRegister
-        every { memoryManager.soundRegister } returns soundRegister
-
         runTest {
             khip8.execute(15, 0)
 

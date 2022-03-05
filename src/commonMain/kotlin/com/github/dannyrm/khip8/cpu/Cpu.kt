@@ -10,6 +10,8 @@ import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.input.Chip8InputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
+import com.github.dannyrm.khip8.memory.TimerRegister
+import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.SystemDependentInstructionFeature
 import com.github.dannyrm.khip8.util.logger
@@ -19,8 +21,9 @@ import y
 
 class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuInstructionExecutor: CpuInstructionExecutor,
           private val displayMemory: DisplayMemory, private val memoryManager: MemoryManager,
+          private val delayRegister: TimerRegister, private val soundRegister: SoundTimerRegister,
           private val chip8InputManager: Chip8InputManager, private val memoryConfig: MemoryConfig,
-          var cpuState: CpuState = CpuState.RUNNING) {
+          var cpuState: CpuState) {
 
     fun tick() {
         // Lock inputs, so they can't change during the cycle.
@@ -491,7 +494,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuIns
      */
     fun setRegisterToDelayTimerValue(value: UInt) {
         val x = x(value)
-        val delayTimerValue = memoryManager.delayRegister.value
+        val delayTimerValue = delayRegister.value
 
         memoryManager.registers[x.toInt()] = delayTimerValue
 
@@ -520,7 +523,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuIns
     fun setDelayTimerRegisterToValueInGeneralRegister(value: UInt) {
         val x = x(value)
 
-        memoryManager.delayRegister.value = memoryManager.registers[x.toInt()]
+        delayRegister.value = memoryManager.registers[x.toInt()]
 
         LOG.debug { "LD DT, V${toHex(x)}" }
     }
@@ -533,7 +536,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuIns
     fun setSoundTimerRegisterToValueInGeneralRegister(value: UInt) {
         val x = x(value)
 
-        memoryManager.soundRegister.value = memoryManager.registers[x.toInt()]
+        soundRegister.value = memoryManager.registers[x.toInt()]
 
         LOG.debug { "LD ST, V${toHex(x)}" }
     }

@@ -8,9 +8,7 @@ import toHex
 import wordHex
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
-                    var soundRegister: TimerRegister,
-                    private val memoryConfig: MemoryConfig,
+class MemoryManager(private val memoryConfig: MemoryConfig,
                     val stack: Stack = Stack(memoryConfig.stackSize),
                     val ram: ValidatedMemory = ValidatedMemory(memoryConfig.memorySize),
                     val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
@@ -20,15 +18,13 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     var pc: UInt = memoryConfig.programStartAddress.toUInt() // 16 bits, program counter
         set(value) { field = value % 0x10000u }
 
-    fun loadProgram(inputPath: String?) {
-        resetMemory()
-        loadSpriteDigitsIntoMemory()
-
-        inputPath?.run {
+    fun loadProgram(inputPath: String?): Boolean {
+        return inputPath?.run {
             loadFile(inputPath).toUByteArray().forEachIndexed { index, byte ->
                 ram[memoryConfig.programStartAddress + index] = byte
             }
-        }
+            true
+        } ?: false
     }
 
     fun fetchNextInstruction(): UInt {
@@ -42,14 +38,13 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
     fun resetMemory() {
         i = 0u
 
-        delayRegister.clear()
-        soundRegister.clear()
-
         stack.clear()
         ram.clear()
         registers.clear()
 
         pc = memoryConfig.programStartAddress.toUInt()
+
+        loadSpriteDigitsIntoMemory()
     }
 
     /**
@@ -102,7 +97,7 @@ class MemoryManager(var delayRegister: TimerRegister = TimerRegister(),
 
         stringBuilder.append(
             "Registers: {$newLine" +
-            "\tI = ${wordHex(i)}, PC = ${wordHex(pc)}, DT = ${toHex(delayRegister.value)}, ST = ${toHex(soundRegister.value)}$newLine" +
+            "\tI = ${wordHex(i)}, PC = ${wordHex(pc)}$newLine" +
             "}$newLine" +
             "General Registers: {$newLine" +
             registers +

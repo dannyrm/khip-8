@@ -35,7 +35,7 @@ class SwingUi(private val displayMemory: DisplayMemory,
 
         this.addKeyListener(keyboardManager)
 
-        pixelSizes = calculatePixelSize(displayMemory, size.width, size.height)
+        pixelSizes = calculatePixelSize(displayMemory.dimensions(), size.width, size.height)
 
         pack()
     }

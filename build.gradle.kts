@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.soywiz.korge.gradle.*
+import kotlinx.kover.KoverPlugin
 
 group = "com.github.dannyrm.khip8"
 version = "1.0-SNAPSHOT"
@@ -7,6 +8,7 @@ version = "1.0-SNAPSHOT"
 plugins {
     kotlin("multiplatform") version "1.6.10"
     id("io.kotest.multiplatform") version "5.0.2"
+    id("org.jetbrains.kotlinx.kover") version "0.5.0"
 }
 
 repositories { mavenCentral() }
@@ -39,6 +41,7 @@ kotlin {
     jvm()
 
     apply<KorgeGradlePlugin>()
+    apply<KoverPlugin>()
 
     configurations.all {
         exclude("org.jetbrains.kotlin", "kotlin-test-junit")

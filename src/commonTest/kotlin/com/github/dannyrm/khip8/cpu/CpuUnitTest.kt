@@ -6,7 +6,9 @@ import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.input.Chip8InputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.Stack
+import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.memory.ValidatedMemory
+import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.test.utils.component6
 import com.github.dannyrm.khip8.test.utils.component7
 import com.github.dannyrm.khip8.test.utils.convertNumericParams
@@ -23,6 +25,8 @@ class CpuUnitTest: FunSpec({
     lateinit var instructionDecoder: InstructionDecoder
     lateinit var displayMemory: DisplayMemory
     lateinit var cpuInstructionExecutor: CpuInstructionExecutor
+    lateinit var delayRegister: TimerRegister
+    lateinit var soundRegister: SoundTimerRegister
     val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
 
     lateinit var cpu: Cpu
@@ -35,8 +39,10 @@ class CpuUnitTest: FunSpec({
         instructionDecoder = mockk(relaxed = true)
         displayMemory = mockk(relaxed = true)
         cpuInstructionExecutor = mockk(relaxed = true)
+        delayRegister = mockk(relaxed = true)
+        soundRegister = mockk(relaxed = true)
 
-        cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, chip8InputManager, memoryConfig)
+        cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, delayRegister, soundRegister, chip8InputManager, memoryConfig, CpuState.RUNNING)
     }
 
     test("tick works correctly") {
@@ -554,7 +560,7 @@ class CpuUnitTest: FunSpec({
         withData("FF07,F,33", "F207,2,43") { input ->
             val (instruction: Int, xLocation: Int, delayTimerValue: Int) = convertNumericParams(input)
 
-            every { memoryManager.delayRegister.value } returns delayTimerValue.toUByte()
+            every { delayRegister.value } returns delayTimerValue.toUByte()
 
             cpu.setRegisterToDelayTimerValue(instruction.toUInt())
 
@@ -570,7 +576,7 @@ class CpuUnitTest: FunSpec({
 
             cpu.setDelayTimerRegisterToValueInGeneralRegister(instruction.toUInt())
 
-            verify { memoryManager.delayRegister.value = xValue.toUByte() }
+            verify { delayRegister.value = xValue.toUByte() }
         }
     }
 
@@ -582,7 +588,7 @@ class CpuUnitTest: FunSpec({
 
             cpu.setSoundTimerRegisterToValueInGeneralRegister(instruction.toUInt())
 
-            verify { memoryManager.soundRegister.value = xValue.toUByte() }
+            verify { soundRegister.value = xValue.toUByte() }
         }
     }
 

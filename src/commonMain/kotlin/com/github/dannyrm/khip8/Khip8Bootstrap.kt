@@ -8,6 +8,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import com.github.dannyrm.khip8.cpu.Cpu
+import com.github.dannyrm.khip8.cpu.CpuState
 import com.github.dannyrm.khip8.cpu.InstructionDecoder
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.display.model.DisplayMemory
@@ -35,7 +36,7 @@ import org.koin.core.module.Module
 object Khip8Bootstrap: KoinComponent {
     private val LOG = logger(this::class)
 
-    fun boot(filePath: String, config: Config, additionalModules: List<Module>) {
+    fun boot(config: Config, additionalModules: List<Module>) {
         LOG.info { "Loading Config: $config" }
 
         loadDependencies(additionalModules, config)
@@ -43,7 +44,7 @@ object Khip8Bootstrap: KoinComponent {
         val khip8 = get<Khip8>()
         val ui = get<Ui>()
 
-        khip8.load(filePath)
+        khip8.reset()
 
         // Starts the Chip-8 execution and UI execution in separate Co-routines
         runBlockingNoJs {
@@ -65,14 +66,17 @@ object Khip8Bootstrap: KoinComponent {
     private fun loadDependencies(additionalModules: List<Module>, config: Config) {
         FeatureManager.systemMode = config.systemMode
 
+        val khip8Status = Khip8Status(khip8State = Khip8State.EMPTY)
+
         val dependencies = module {
-            single<TimerRegister> { SoundTimerRegister(get()) }
+            single { SoundTimerRegister(get()) }
+            single { TimerRegister() }
             single { InstructionDecoder() }
-            single { Cpu(get(), get(), get(), get(), get(), memoryConfig = config.memoryConfig) }
+            single { Cpu(get(), get(), get(), get(), get(), get(), get(), config.memoryConfig, CpuState.RUNNING) }
             single { Stack(config.memoryConfig.stackSize) }
             single { ValidatedMemory(config.memoryConfig.memorySize) }
-            single { MemoryManager(soundRegister = get(), memoryConfig = config.memoryConfig) }
-            single { Khip8(get(), get(), get()) }
+            single { MemoryManager(memoryConfig = config.memoryConfig) }
+            single { Khip8(get(), get(), get(), get(), get(), khip8Status) }
             single { CpuInstructionExecutor() }
             single { SystemActionInputManager() }
             single { DisplayMemory() }

@@ -15,7 +15,7 @@ import kotlin.test.expect
 class CpuIntegrationTest: FunSpec({
 
     fun buildMemoryManager(memoryConfig: MemoryConfig): MemoryManager {
-        return MemoryManager(soundRegister = mockk(), memoryConfig = memoryConfig)
+        return MemoryManager(memoryConfig = memoryConfig)
     }
 
     test("syscall works correctly") {
@@ -35,7 +35,10 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
-            memoryConfig
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            memoryConfig,
+            CpuState.RUNNING
         )
 
         cpu.tick()
@@ -61,7 +64,10 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
-            memoryConfig
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            memoryConfig,
+            CpuState.RUNNING
         )
         cpuInstructionExecutor.init(cpu)
 
@@ -81,7 +87,10 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
-            memoryConfig
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            memoryConfig,
+            CpuState.RUNNING
         )
 
         val instruction1 = 0x7510
@@ -119,7 +128,10 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
-            memoryConfig
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            memoryConfig,
+            CpuState.RUNNING
         )
 
         val instruction1 = 0x7503
@@ -161,7 +173,10 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
-            memoryConfig
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            memoryConfig,
+            CpuState.RUNNING
         )
 
         val instruction0 = 0x7510u
@@ -213,7 +228,10 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
-            memoryConfig
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            memoryConfig,
+            CpuState.RUNNING
         )
 
         memoryManager.registers[0x0] = 0u
@@ -246,7 +264,10 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
-            memoryConfig
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            memoryConfig,
+            CpuState.RUNNING
         )
 
         memoryManager.registers[0x0] = 9u
@@ -315,7 +336,10 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 memoryManager,
                 mockk(relaxed = true),
-                memoryConfig
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                memoryConfig,
+                CpuState.RUNNING
             )
 
             memoryManager.registers[registerNumber] = registerValue.toUByte()
@@ -345,7 +369,10 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 memoryManager,
                 mockk(relaxed = true),
-                memoryConfig
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                memoryConfig,
+                CpuState.RUNNING
             )
 
             try {
@@ -393,7 +420,10 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 memoryManager,
                 mockk(relaxed = true),
-                memoryConfig
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                memoryConfig,
+                CpuState.RUNNING
             )
 
             try {

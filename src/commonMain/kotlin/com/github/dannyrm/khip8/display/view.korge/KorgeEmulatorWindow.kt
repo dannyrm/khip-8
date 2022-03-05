@@ -3,129 +3,45 @@ package com.github.dannyrm.khip8.display.view.korge
 import com.github.dannyrm.khip8.Khip8
 import com.github.dannyrm.khip8.config.Config
 import com.github.dannyrm.khip8.display.model.DisplayMemory
+import com.github.dannyrm.khip8.display.view.korge.containers.khip8DisplayContainer
+import com.github.dannyrm.khip8.display.view.korge.containers.khip8UiContainer
 import com.github.dannyrm.khip8.input.Chip8InputManager
 import com.github.dannyrm.khip8.input.Chip8Inputs
-import com.github.dannyrm.khip8.util.calculatePixelSize
-import com.soywiz.klock.Frequency
 import com.soywiz.korev.Key
+import com.soywiz.korge.input.KeysEvents
 import com.soywiz.korge.input.keys
-import com.soywiz.korge.input.onClick
 import com.soywiz.korge.scene.Scene
-import com.soywiz.korge.ui.uiButton
-import com.soywiz.korge.ui.uiHorizontalStack
-import com.soywiz.korge.view.Container
-import com.soywiz.korge.view.addFixedUpdater
-import com.soywiz.korge.view.graphics
-import com.soywiz.korge.view.position
-import com.soywiz.korim.color.Colors
-import com.soywiz.korma.geom.vector.rect
+import com.soywiz.korge.view.*
 
 class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val chip8InputManager: Chip8InputManager,
                           private val config: Config, private val khip8: Khip8): Scene() {
 
     override suspend fun Container.sceneInit() {
-        setupKeymap(this)
-        setupUi(this)
-        setupRunLoop(this)
-    }
+        khip8DisplayContainer(config, displayMemory)
+            .alignTopToBottomOf(khip8UiContainer(khip8))
 
-    private fun setupUi(container: Container) {
-        container.uiHorizontalStack(height = TOP_UI_HEIGHT) {
-            uiButton(text = "Reset")
-                .position(0,0)
-                .onClick { khip8.reset() }
+        keys {
+            mapKhip8Key(Key.KP_0, Chip8Inputs.ONE)
+            mapKhip8Key(Key.KP_2, Chip8Inputs.TWO)
+            mapKhip8Key(Key.KP_3, Chip8Inputs.THREE)
+            mapKhip8Key(Key.KP_4, Chip8Inputs.C)
+            mapKhip8Key(Key.Q, Chip8Inputs.FOUR)
+            mapKhip8Key(Key.W, Chip8Inputs.FIVE)
+            mapKhip8Key(Key.E, Chip8Inputs.SIX)
+            mapKhip8Key(Key.R, Chip8Inputs.D)
+            mapKhip8Key(Key.A, Chip8Inputs.SEVEN)
+            mapKhip8Key(Key.S, Chip8Inputs.EIGHT)
+            mapKhip8Key(Key.D, Chip8Inputs.NINE)
+            mapKhip8Key(Key.F, Chip8Inputs.E)
+            mapKhip8Key(Key.Z, Chip8Inputs.A)
+            mapKhip8Key(Key.X, Chip8Inputs.ZERO)
+            mapKhip8Key(Key.C, Chip8Inputs.B)
+            mapKhip8Key(Key.V, Chip8Inputs.F)
         }
     }
 
-    private fun setupRunLoop(container: Container) {
-        val windowWidth = config.frontEndConfig.windowWidth
-        val windowHeight = config.frontEndConfig.windowHeight
-
-        val (xPixelSize, yPixelSize) = calculatePixelSize(displayMemory, windowWidth, windowHeight)
-
-        val displayMemoryWidth = displayMemory.dimensions()[0]
-        val displayMemoryHeight = displayMemory.dimensions()[1]
-
-        val graphics = container.graphics {
-            position(0, TOP_UI_HEIGHT.toInt())
-        }
-
-        container.addFixedUpdater(Frequency(config.systemSpeedConfig.displayRefreshRate.toDouble())) {
-            graphics.clear()
-
-            for (x in 0 until displayMemoryWidth) {
-                for (y in 0 until displayMemoryHeight) {
-                    val pixelColour = if (displayMemory[x, y]) Colors.BLACK else Colors.WHITE
-
-                    graphics.fill(pixelColour) {
-                        rect(x * xPixelSize, y * yPixelSize, xPixelSize, yPixelSize)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun setupKeymap(container: Container) {
-        container.keys {
-            down(Key.KP_0) { chip8InputManager[Chip8Inputs.ONE] = true }
-            up(Key.KP_0) { chip8InputManager[Chip8Inputs.ONE] = false }
-
-            down(Key.KP_2) { chip8InputManager[Chip8Inputs.TWO] = true }
-            up(Key.KP_2) { chip8InputManager[Chip8Inputs.TWO] = false }
-
-            down(Key.KP_3) { chip8InputManager[Chip8Inputs.THREE] = true }
-            up(Key.KP_3) { chip8InputManager[Chip8Inputs.THREE] = false }
-
-            down(Key.KP_4) { chip8InputManager[Chip8Inputs.C] = true }
-            up(Key.KP_4) { chip8InputManager[Chip8Inputs.C] = false }
-
-            down(Key.Q) { chip8InputManager[Chip8Inputs.FOUR] = true }
-            up(Key.Q) { chip8InputManager[Chip8Inputs.FOUR] = false }
-
-            down(Key.W) { chip8InputManager[Chip8Inputs.FIVE] = true }
-            up(Key.W) { chip8InputManager[Chip8Inputs.FIVE] = false }
-
-            down(Key.E) { chip8InputManager[Chip8Inputs.SIX] = true }
-            up(Key.E) { chip8InputManager[Chip8Inputs.SIX] = false }
-
-            down(Key.R) { chip8InputManager[Chip8Inputs.D] = true }
-            up(Key.R) { chip8InputManager[Chip8Inputs.D] = false }
-
-            down(Key.A) { chip8InputManager[Chip8Inputs.SEVEN] = true }
-            up(Key.A) { chip8InputManager[Chip8Inputs.SEVEN] = false }
-
-            down(Key.S) { chip8InputManager[Chip8Inputs.EIGHT] = true }
-            up(Key.S) { chip8InputManager[Chip8Inputs.EIGHT] = false }
-
-            down(Key.D) { chip8InputManager[Chip8Inputs.NINE] = true }
-            up(Key.D) { chip8InputManager[Chip8Inputs.NINE] = false }
-
-            down(Key.F) { chip8InputManager[Chip8Inputs.E] = true }
-            up(Key.F) { chip8InputManager[Chip8Inputs.E] = false }
-
-            down(Key.Z) { chip8InputManager[Chip8Inputs.A] = true }
-            up(Key.Z) { chip8InputManager[Chip8Inputs.A] = false }
-
-            down(Key.X) { chip8InputManager[Chip8Inputs.ZERO] = true }
-            up(Key.X) { chip8InputManager[Chip8Inputs.ZERO] = false }
-
-            down(Key.C) { chip8InputManager[Chip8Inputs.B] = true }
-            up(Key.C) { chip8InputManager[Chip8Inputs.B] = false }
-
-            down(Key.V) { chip8InputManager[Chip8Inputs.F] = true }
-            up(Key.V) { chip8InputManager[Chip8Inputs.F] = false }
-
-            // For system operations we only want to detect the initial press, ignoring the release
-//            down(Key.F1) {  }
-//            if (switchOn) {
-//                when (e.keyCode) {
-//                    KeyEvent.VK_F1 -> systemActionInputManager.memoryDumpFunction()
-//                }
-//            }
-        }
-    }
-
-    companion object {
-        const val TOP_UI_HEIGHT = 30.0
+    private fun KeysEvents.mapKhip8Key(key: Key, chip8Inputs: Chip8Inputs) {
+        down(key) { chip8InputManager[chip8Inputs] = true }
+        up(key) { chip8InputManager[chip8Inputs] = false }
     }
 }
