@@ -1,7 +1,6 @@
 package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.config.Config
-import com.github.dannyrm.khip8.config.FrontEndType
 import com.github.dannyrm.khip8.config.delayBetweenCycles
 import com.github.dannyrm.khip8.config.numberOfCpuTicksPerPeripheralTick
 import org.koin.core.component.KoinComponent
@@ -83,10 +82,8 @@ object Khip8Bootstrap: KoinComponent {
             single { Display(get()) }
             single { Chip8InputManager() }
 
-            if (config.frontEndConfig.frontEnd == FrontEndType.KORGE) {
-                single { KorgeConfigModule(get(), get(), config, get()) }
-                single<Ui> { KorgeUi(get()) }
-            }
+            single { KorgeConfigModule(get(), get(), config, get()) }
+            single<Ui> { KorgeUi(get()) }
         }
 
         startKoin {

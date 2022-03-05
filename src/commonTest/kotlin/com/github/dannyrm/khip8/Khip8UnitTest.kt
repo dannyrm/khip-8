@@ -29,7 +29,7 @@ class Khip8UnitTest: BaseTest() {
     private var config: Config = Config(
         systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
         soundConfig = SoundConfig(midiInstrumentNumber = 0, midiNoteNumber = 0, midiNoteVelocity = 0),
-        frontEndConfig = FrontEndConfig(FrontEndType.JAVA_AWT, windowWidth = 512, windowHeight = 256),
+        frontEndConfig = FrontEndConfig(windowWidth = 512, windowHeight = 256),
         systemMode = SystemMode.SUPER_CHIP_MODE,
         memoryConfig = MemoryConfig(
             memorySize = 4096,

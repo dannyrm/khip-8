@@ -24,7 +24,5 @@ class ConfigIntegrationTest {
         expect(0x0) { config.memoryConfig.interpreterStartAddress }
         expect(4096) { config.memoryConfig.memorySize }
         expect(16) { config.memoryConfig.stackSize }
-
-        expect(FrontEndType.JAVA_AWT) { config.frontEndConfig.frontEnd }
     }
 }
