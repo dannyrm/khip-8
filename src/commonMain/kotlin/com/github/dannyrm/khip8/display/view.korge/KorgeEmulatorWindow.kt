@@ -11,14 +11,27 @@ import com.soywiz.korev.Key
 import com.soywiz.korge.input.KeysEvents
 import com.soywiz.korge.input.keys
 import com.soywiz.korge.scene.Scene
+import com.soywiz.korge.ui.UIText
+import com.soywiz.korge.ui.UIVerticalList
+import com.soywiz.korge.ui.uiVerticalList
+import com.soywiz.korge.ui.uiWindow
 import com.soywiz.korge.view.*
+import com.soywiz.korio.file.VfsFile
+import com.soywiz.korio.file.std.resourcesVfs
 
 class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val chip8InputManager: Chip8InputManager,
                           private val config: Config, private val khip8: Khip8): Scene() {
+    private lateinit var displayContainer: Container
+    private lateinit var uiContainer: Container
 
     override suspend fun Container.sceneInit() {
-        khip8DisplayContainer(config, displayMemory)
-            .alignTopToBottomOf(khip8UiContainer(khip8))
+        val romFiles = resourcesVfs["c8/"].listSimple()
+
+        displayContainer = khip8DisplayContainer(config, displayMemory)
+        uiContainer = khip8UiContainer(khip8, romFiles)
+
+        displayContainer
+            .alignTopToBottomOf(uiContainer)
 
         keys {
             mapKhip8Key(Key.KP_0, Chip8Inputs.ONE)
@@ -39,6 +52,7 @@ class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val 
             mapKhip8Key(Key.V, Chip8Inputs.F)
         }
     }
+
 
     private fun KeysEvents.mapKhip8Key(key: Key, chip8Inputs: Chip8Inputs) {
         down(key) { chip8InputManager[chip8Inputs] = true }

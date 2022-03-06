@@ -18,9 +18,9 @@ class MemoryManager(private val memoryConfig: MemoryConfig,
     var pc: UInt = memoryConfig.programStartAddress.toUInt() // 16 bits, program counter
         set(value) { field = value % 0x10000u }
 
-    fun loadProgram(inputPath: String?): Boolean {
-        return inputPath?.run {
-            loadFile(inputPath).toUByteArray().forEachIndexed { index, byte ->
+    fun loadProgram(input: ByteArray?): Boolean {
+        return input?.run {
+            input.toUByteArray().forEachIndexed { index, byte ->
                 ram[memoryConfig.programStartAddress + index] = byte
             }
             true
