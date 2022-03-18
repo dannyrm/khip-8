@@ -23,13 +23,16 @@ class KorgeUiContainer(private val khip8: Khip8, private val romList: List<VfsFi
                 .onClick {
                     pauseButtonText = if (khip8.togglePause()) PAUSE_TEXT else UNPAUSE_TEXT
                 }
+
             uiButton(text = "Reset")
                 .onClick { khip8.reset() }
+
+            uiPropertyComboBox(title = "",  field = ::selectedRom, values = romList.map { it.baseName }, width = 200.0)
+
             uiButton(text = "Load")
                 .onClick {
                     khip8.load(findSelectedFile())
                 }
-            uiPropertyComboBox(title = "ROM:",  field = ::selectedRom, values = romList.map { it.baseName }, width = 200.0)
         }
     }
 

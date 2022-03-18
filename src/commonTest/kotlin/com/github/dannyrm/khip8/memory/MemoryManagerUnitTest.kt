@@ -19,7 +19,7 @@ class MemoryManagerUnitTest: BaseTest() {
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadProgram(
-            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
+            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).asByteArray()
         )
 
         val expectedOutput = hexToByteArray("inputs/15-puzzle.hex")
@@ -36,7 +36,7 @@ class MemoryManagerUnitTest: BaseTest() {
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadProgram(
-            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
+            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).asByteArray()
         )
 
         expect(0x200u) { memoryManager.pc }

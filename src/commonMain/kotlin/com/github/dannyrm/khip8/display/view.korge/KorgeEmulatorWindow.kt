@@ -5,21 +5,25 @@ import com.github.dannyrm.khip8.config.Config
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.display.view.korge.containers.khip8DisplayContainer
 import com.github.dannyrm.khip8.display.view.korge.containers.khip8UiContainer
-import com.github.dannyrm.khip8.input.Chip8InputManager
-import com.github.dannyrm.khip8.input.Chip8Inputs
+import com.github.dannyrm.khip8.input.InputManager
+import com.github.dannyrm.khip8.input.KeyboardInput
+import com.soywiz.klock.TimeSpan
+import com.soywiz.korau.sound.AudioData
+import com.soywiz.korau.sound.AudioSamples
+import com.soywiz.korau.sound.AudioTone
+import com.soywiz.korau.sound.nativeSoundProvider
 import com.soywiz.korev.Key
 import com.soywiz.korge.input.KeysEvents
 import com.soywiz.korge.input.keys
 import com.soywiz.korge.scene.Scene
-import com.soywiz.korge.ui.UIText
-import com.soywiz.korge.ui.UIVerticalList
-import com.soywiz.korge.ui.uiVerticalList
-import com.soywiz.korge.ui.uiWindow
 import com.soywiz.korge.view.*
-import com.soywiz.korio.file.VfsFile
+import com.soywiz.korio.async.launch
+import com.soywiz.korio.async.launchImmediately
+import com.soywiz.korio.dynamic.KDynamic.Companion.toShort
 import com.soywiz.korio.file.std.resourcesVfs
+import kotlinx.coroutines.Dispatchers
 
-class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val chip8InputManager: Chip8InputManager,
+class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val inputManager: InputManager,
                           private val config: Config, private val khip8: Khip8): Scene() {
     private lateinit var displayContainer: Container
     private lateinit var uiContainer: Container
@@ -34,28 +38,28 @@ class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val 
             .alignTopToBottomOf(uiContainer)
 
         keys {
-            mapKhip8Key(Key.KP_0, Chip8Inputs.ONE)
-            mapKhip8Key(Key.KP_2, Chip8Inputs.TWO)
-            mapKhip8Key(Key.KP_3, Chip8Inputs.THREE)
-            mapKhip8Key(Key.KP_4, Chip8Inputs.C)
-            mapKhip8Key(Key.Q, Chip8Inputs.FOUR)
-            mapKhip8Key(Key.W, Chip8Inputs.FIVE)
-            mapKhip8Key(Key.E, Chip8Inputs.SIX)
-            mapKhip8Key(Key.R, Chip8Inputs.D)
-            mapKhip8Key(Key.A, Chip8Inputs.SEVEN)
-            mapKhip8Key(Key.S, Chip8Inputs.EIGHT)
-            mapKhip8Key(Key.D, Chip8Inputs.NINE)
-            mapKhip8Key(Key.F, Chip8Inputs.E)
-            mapKhip8Key(Key.Z, Chip8Inputs.A)
-            mapKhip8Key(Key.X, Chip8Inputs.ZERO)
-            mapKhip8Key(Key.C, Chip8Inputs.B)
-            mapKhip8Key(Key.V, Chip8Inputs.F)
+            mapKhip8Key(Key.KP_0, KeyboardInput.ONE)
+            mapKhip8Key(Key.KP_2, KeyboardInput.TWO)
+            mapKhip8Key(Key.KP_3, KeyboardInput.THREE)
+            mapKhip8Key(Key.KP_4, KeyboardInput.C)
+            mapKhip8Key(Key.Q, KeyboardInput.FOUR)
+            mapKhip8Key(Key.W, KeyboardInput.FIVE)
+            mapKhip8Key(Key.E, KeyboardInput.SIX)
+            mapKhip8Key(Key.R, KeyboardInput.D)
+            mapKhip8Key(Key.A, KeyboardInput.SEVEN)
+            mapKhip8Key(Key.S, KeyboardInput.EIGHT)
+            mapKhip8Key(Key.D, KeyboardInput.NINE)
+            mapKhip8Key(Key.F, KeyboardInput.E)
+            mapKhip8Key(Key.Z, KeyboardInput.A)
+            mapKhip8Key(Key.X, KeyboardInput.ZERO)
+            mapKhip8Key(Key.C, KeyboardInput.B)
+            mapKhip8Key(Key.V, KeyboardInput.F)
         }
     }
 
 
-    private fun KeysEvents.mapKhip8Key(key: Key, chip8Inputs: Chip8Inputs) {
-        down(key) { chip8InputManager[chip8Inputs] = true }
-        up(key) { chip8InputManager[chip8Inputs] = false }
+    private fun KeysEvents.mapKhip8Key(key: Key, keyboardInput: KeyboardInput) {
+        down(key) { inputManager[keyboardInput] = true }
+        up(key) { inputManager[keyboardInput] = false }
     }
 }

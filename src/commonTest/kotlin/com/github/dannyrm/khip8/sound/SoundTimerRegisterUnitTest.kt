@@ -1,7 +1,10 @@
 package com.github.dannyrm.khip8.sound
 
+import com.github.dannyrm.khip8.Khip8State
+import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.expect
 
@@ -9,38 +12,40 @@ class SoundTimerRegisterUnitTest {
 
     @Test
     fun `Check decrements correctly`() {
-        val expectedTimerValue = 5u
+        runTest {
+            val expectedTimerValue = 5u
 
-        val soundGenerator = mockk<SoundGenerator>(relaxed = true)
+            val soundGenerator = mockk<SoundGenerator>(relaxed = true)
 
-        val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
-        timerRegister.value = expectedTimerValue.toUByte()
+            val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
+            timerRegister.value = expectedTimerValue.toUByte()
 
-        expect(5u) { timerRegister.value }
-        timerRegister.tick()
-        expect(4u) { timerRegister.value }
-        timerRegister.tick()
-        expect(3u) { timerRegister.value }
-        timerRegister.tick()
-        expect(2u) { timerRegister.value }
-        timerRegister.tick()
-        expect(1u) { timerRegister.value }
-        timerRegister.tick()
-        expect(0u) { timerRegister.value }
-        timerRegister.tick()
-        expect(0u) { timerRegister.value }
-        timerRegister.tick()
-        expect(0u) { timerRegister.value }
+            expect(5u) { timerRegister.value }
+            timerRegister.tick()
+            expect(4u) { timerRegister.value }
+            timerRegister.tick()
+            expect(3u) { timerRegister.value }
+            timerRegister.tick()
+            expect(2u) { timerRegister.value }
+            timerRegister.tick()
+            expect(1u) { timerRegister.value }
+            timerRegister.tick()
+            expect(0u) { timerRegister.value }
+            timerRegister.tick()
+            expect(0u) { timerRegister.value }
+            timerRegister.tick()
+            expect(0u) { timerRegister.value }
+        }
     }
 
     @Test
-    fun `Clears timer value`() {
+    fun `Stopping the timer clears timer value`() {
         val soundGenerator = mockk<SoundGenerator>(relaxed = true)
 
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = 54u
 
-        timerRegister.clear()
+        timerRegister.state = Khip8State.STOPPED
 
         expect(0u) { timerRegister.value }
     }
@@ -52,7 +57,7 @@ class SoundTimerRegisterUnitTest {
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = 54u
 
-        verify { soundGenerator.start() }
+        coVerify { soundGenerator.start() }
     }
 
     @Test
@@ -62,25 +67,27 @@ class SoundTimerRegisterUnitTest {
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = 0u
 
-        verify(inverse = true) { soundGenerator.start() }
+        coVerify(inverse = true) { soundGenerator.start() }
     }
 
     @Test
     fun `Check sound generator only stops when timer reaches zero`() {
-        val soundGenerator = mockk<SoundGenerator>(relaxed = true)
+        runTest {
+            val soundGenerator = mockk<SoundGenerator>(relaxed = true)
 
-        val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
-        timerRegister.value = 3u
+            val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
+            timerRegister.value = 3u
 
-        verify(inverse = true) { soundGenerator.stop() }
-        timerRegister.tick()
+            coVerify(inverse = true) { soundGenerator.stop() }
+            timerRegister.tick()
 
-        verify(inverse = true) { soundGenerator.stop() }
-        timerRegister.tick()
+            coVerify(inverse = true) { soundGenerator.stop() }
+            timerRegister.tick()
 
-        verify(inverse = true) { soundGenerator.stop() }
-        timerRegister.tick()
+            coVerify(inverse = true) { soundGenerator.stop() }
+            timerRegister.tick()
 
-        verify { soundGenerator.stop() }
+            coVerify { soundGenerator.stop() }
+        }
     }
 }

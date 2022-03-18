@@ -4,5 +4,5 @@ import com.github.dannyrm.khip8.config.Config
 import kotlinx.coroutines.Job
 
 interface Ui {
-    suspend fun start(config: Config, rootJob: Job)
+    suspend fun start(config: Config)
 }

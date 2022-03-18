@@ -1,5 +1,7 @@
 package com.github.dannyrm.khip8.cpu
 
+import com.github.dannyrm.khip8.Khip8State
+import com.github.dannyrm.khip8.Khip8State.RUNNING
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.memory.MemoryManager
@@ -38,7 +40,7 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryConfig,
-            CpuState.RUNNING
+            RUNNING
         )
 
         cpu.tick()
@@ -67,7 +69,7 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryConfig,
-            CpuState.RUNNING
+            RUNNING
         )
         cpuInstructionExecutor.init(cpu)
 
@@ -90,7 +92,7 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryConfig,
-            CpuState.RUNNING
+            RUNNING
         )
 
         val instruction1 = 0x7510
@@ -131,7 +133,7 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryConfig,
-            CpuState.RUNNING
+            RUNNING
         )
 
         val instruction1 = 0x7503
@@ -176,7 +178,7 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryConfig,
-            CpuState.RUNNING
+            RUNNING
         )
 
         val instruction0 = 0x7510u
@@ -231,7 +233,7 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryConfig,
-            CpuState.RUNNING
+            RUNNING
         )
 
         memoryManager.registers[0x0] = 0u
@@ -267,7 +269,7 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryConfig,
-            CpuState.RUNNING
+            RUNNING
         )
 
         memoryManager.registers[0x0] = 9u
@@ -339,7 +341,7 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 memoryConfig,
-                CpuState.RUNNING
+                RUNNING
             )
 
             memoryManager.registers[registerNumber] = registerValue.toUByte()
@@ -372,7 +374,7 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 memoryConfig,
-                CpuState.RUNNING
+                RUNNING
             )
 
             try {
@@ -423,7 +425,7 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 memoryConfig,
-                CpuState.RUNNING
+                RUNNING
             )
 
             try {

@@ -17,7 +17,7 @@ class DissasemblerIntegrationTest {
         val memoryManager = MemoryManager(memoryConfig = memoryConfig)
 
         memoryManager.loadProgram(
-            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).getAbsolutePath()
+            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).asByteArray()
         )
 
         execute(memoryManager, InstructionDecoder(), DissassemblerInstructionExecutor(),

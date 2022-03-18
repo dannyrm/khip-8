@@ -1,12 +1,11 @@
 package com.github.dannyrm.khip8
 
+import com.github.dannyrm.khip8.Khip8State.*
 import com.github.dannyrm.khip8.config.*
 import com.github.dannyrm.khip8.cpu.Cpu
-import com.github.dannyrm.khip8.cpu.CpuState
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
-import com.github.dannyrm.khip8.memory.TimerRegisterState
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.test.utils.BaseTest
 import io.mockk.impl.annotations.InjectMockKs
@@ -44,91 +43,85 @@ class Khip8UnitTest: BaseTest() {
 
     @Test
     fun `load loads rom into memory`() {
-        val filePath = "the-file-path"
+        val file = byteArrayOf()
 
-        every { khip8Status.loadedRomPath } returns filePath
-        every { memoryManager.loadProgram(filePath) } returns true
+        every { khip8Status.loadedRom } returns file
+        every { memoryManager.loadProgram(file) } returns true
 
-        khip8.load(filePath)
+        khip8.load(file)
 
-        verify { khip8Status.loadedRomPath = filePath }
+        verify { khip8Status.loadedRom = file }
 
-        verify { delayRegister.clear() }
-        verify { soundRegister.clear() }
         verify { display.clear() }
         verify { memoryManager.resetMemory() }
-        verify { memoryManager.loadProgram(filePath) }
+        verify { memoryManager.loadProgram(file) }
 
         verifyOrder {
             // Initially the machine will be empty and paused
-            khip8Status.khip8State = Khip8State.EMPTY
-            cpu.cpuState = CpuState.PAUSED
-            delayRegister.state = TimerRegisterState.PAUSED
-            soundRegister.state = TimerRegisterState.PAUSED
+            khip8Status.khip8State = STOPPED
+            cpu.cpuState = STOPPED
+            delayRegister.state = STOPPED
+            soundRegister.state = STOPPED
 
             // Once the Rom is successfully loaded we indicate this and unpause
-            khip8Status.khip8State = Khip8State.LOADED
-            cpu.cpuState = CpuState.RUNNING
-            delayRegister.state = TimerRegisterState.RUNNING
-            soundRegister.state = TimerRegisterState.RUNNING
+            khip8Status.khip8State = RUNNING
+            cpu.cpuState = RUNNING
+            delayRegister.state = RUNNING
+            soundRegister.state = RUNNING
         }
     }
 
     @Test
     fun `Reset clears state`() {
-        val filePath = "the-file-path"
+        val file = byteArrayOf()
 
-        every { khip8Status.loadedRomPath } returns filePath
-        every { memoryManager.loadProgram(filePath) } returns true
+        every { khip8Status.loadedRom } returns file
+        every { memoryManager.loadProgram(file) } returns true
 
         khip8.reset()
 
-        verify { delayRegister.clear() }
-        verify { soundRegister.clear() }
         verify { display.clear() }
         verify { memoryManager.resetMemory() }
 
         verifyOrder {
-            // Initially the machine will be empty and paused
-            khip8Status.khip8State = Khip8State.EMPTY
-            cpu.cpuState = CpuState.PAUSED
-            delayRegister.state = TimerRegisterState.PAUSED
-            soundRegister.state = TimerRegisterState.PAUSED
+            // Initially the machine will be empty and stopped
+            khip8Status.khip8State = STOPPED
+            cpu.cpuState = STOPPED
+            delayRegister.state = STOPPED
+            soundRegister.state = STOPPED
 
             // Once the Rom is successfully loaded we indicate this and unpause
-            khip8Status.khip8State = Khip8State.LOADED
-            cpu.cpuState = CpuState.RUNNING
-            delayRegister.state = TimerRegisterState.RUNNING
-            soundRegister.state = TimerRegisterState.RUNNING
+            khip8Status.khip8State = RUNNING
+            cpu.cpuState = RUNNING
+            delayRegister.state = RUNNING
+            soundRegister.state = RUNNING
         }
     }
 
     @Test
     fun `Reset clears state and leaves the emulator paused if rom does not load`() {
-        val filePath = "the-file-path"
+        val file = byteArrayOf()
 
-        every { khip8Status.loadedRomPath } returns filePath
-        every { memoryManager.loadProgram(filePath) } returns false
+        every { khip8Status.loadedRom } returns file
+        every { memoryManager.loadProgram(file) } returns false
 
         khip8.reset()
 
-        verify { delayRegister.clear() }
-        verify { soundRegister.clear() }
         verify { display.clear() }
         verify { memoryManager.resetMemory() }
 
         verifyOrder {
-            khip8Status.khip8State = Khip8State.EMPTY
-            cpu.cpuState = CpuState.PAUSED
-            delayRegister.state = TimerRegisterState.PAUSED
-            soundRegister.state = TimerRegisterState.PAUSED
+            khip8Status.khip8State = STOPPED
+            cpu.cpuState = STOPPED
+            delayRegister.state = STOPPED
+            soundRegister.state = STOPPED
         }
 
         verifyAll(inverse = true) {
-            khip8Status.khip8State = Khip8State.LOADED
-            cpu.cpuState = CpuState.RUNNING
-            delayRegister.state = TimerRegisterState.RUNNING
-            soundRegister.state = TimerRegisterState.RUNNING
+            khip8Status.khip8State = RUNNING
+            cpu.cpuState = RUNNING
+            delayRegister.state = RUNNING
+            soundRegister.state = RUNNING
         }
     }
 
@@ -166,8 +159,8 @@ class Khip8UnitTest: BaseTest() {
             khip8.execute(15, 0)
 
             verify(exactly = 15) { cpu.tick() }
-            verify { delayRegister.tick() }
-            verify { soundRegister.tick() }
+            coVerify { delayRegister.tick() }
+            coVerify { soundRegister.tick() }
 
             confirmVerified(cpu, delayRegister, soundRegister, display)
         }

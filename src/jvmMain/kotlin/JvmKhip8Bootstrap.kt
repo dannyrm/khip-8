@@ -7,12 +7,6 @@ object JvmKhip8Bootstrap {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val config = loadConfig()
-
-        val modules = module {
-            single { SoundGenerator(config.soundConfig) }
-        }
-
-        Khip8Bootstrap.boot(config, listOf(modules))
+        Khip8Bootstrap.boot(loadConfig(), listOf())
     }
 }

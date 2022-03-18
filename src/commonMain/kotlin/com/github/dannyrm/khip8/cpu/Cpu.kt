@@ -1,5 +1,8 @@
 package com.github.dannyrm.khip8.cpu
 
+import com.github.dannyrm.khip8.Khip8State
+import com.github.dannyrm.khip8.Khip8State.PAUSED
+import com.github.dannyrm.khip8.Khip8State.RUNNING
 import com.github.dannyrm.khip8.config.MemoryConfig
 import nibbleByteHex
 import rightByte
@@ -8,7 +11,7 @@ import rightNibbleByte
 import toHex
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
-import com.github.dannyrm.khip8.input.Chip8InputManager
+import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
@@ -22,14 +25,14 @@ import y
 class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuInstructionExecutor: CpuInstructionExecutor,
           private val displayMemory: DisplayMemory, private val memoryManager: MemoryManager,
           private val delayRegister: TimerRegister, private val soundRegister: SoundTimerRegister,
-          private val chip8InputManager: Chip8InputManager, private val memoryConfig: MemoryConfig,
-          var cpuState: CpuState) {
+          private val inputManager: InputManager, private val memoryConfig: MemoryConfig,
+          var cpuState: Khip8State) {
 
     fun tick() {
         // Lock inputs, so they can't change during the cycle.
-        chip8InputManager.lockInputs()
+        inputManager.lockInputs()
 
-        if (CpuState.RUNNING == cpuState) {
+        if (cpuState == RUNNING) {
             // FETCH
             val instruction = memoryManager.fetchNextInstruction()
 
@@ -465,7 +468,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuIns
         val x = x(value)
         val registerValue = memoryManager.registers[x.toInt()]
 
-        if (chip8InputManager.isActive(registerValue.toInt())) {
+        if (inputManager.isActive(registerValue.toInt())) {
             memoryManager.skipNextInstruction()
         }
         LOG.debug { "SKP V${toHex(x)}" }
@@ -481,7 +484,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuIns
         val x = x(value)
         val registerValue = memoryManager.registers[x.toInt()]
 
-        if (!chip8InputManager.isActive(registerValue.toInt())) {
+        if (!inputManager.isActive(registerValue.toInt())) {
             memoryManager.skipNextInstruction()
         }
         LOG.debug { "SKNP V${toHex(x)}" }
@@ -509,7 +512,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuIns
      * Pause the CPU until a key is pressed. The Chip8InputManager deals with un-pausing the CPU once a key is pressed.
      */
     fun waitForKeyPress(value: UInt) {
-        cpuState = CpuState.PAUSED
+        cpuState = PAUSED
 
         LOG.debug { "Pausing CPU" }
         LOG.debug { "LD V${x(value)}, K" }

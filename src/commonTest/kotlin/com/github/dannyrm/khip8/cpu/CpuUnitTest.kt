@@ -1,9 +1,10 @@
 package com.github.dannyrm.khip8.cpu
 
+import com.github.dannyrm.khip8.Khip8State
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
-import com.github.dannyrm.khip8.input.Chip8InputManager
+import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.Stack
 import com.github.dannyrm.khip8.memory.TimerRegister
@@ -20,7 +21,7 @@ import kotlin.test.expect
 
 @ExperimentalUnsignedTypes
 class CpuUnitTest: FunSpec({
-    lateinit var chip8InputManager: Chip8InputManager
+    lateinit var inputManager: InputManager
     lateinit var memoryManager: MemoryManager
     lateinit var instructionDecoder: InstructionDecoder
     lateinit var displayMemory: DisplayMemory
@@ -34,7 +35,7 @@ class CpuUnitTest: FunSpec({
     val UNUSED_VALUE : UInt = 1u
 
     beforeTest {
-        chip8InputManager = mockk(relaxed = true)
+        inputManager = mockk(relaxed = true)
         memoryManager = mockk(relaxed = true)
         instructionDecoder = mockk(relaxed = true)
         displayMemory = mockk(relaxed = true)
@@ -42,7 +43,9 @@ class CpuUnitTest: FunSpec({
         delayRegister = mockk(relaxed = true)
         soundRegister = mockk(relaxed = true)
 
-        cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, delayRegister, soundRegister, chip8InputManager, memoryConfig, CpuState.RUNNING)
+        cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, delayRegister, soundRegister, inputManager, memoryConfig,
+            Khip8State.RUNNING
+        )
     }
 
     test("tick works correctly") {
@@ -52,7 +55,7 @@ class CpuUnitTest: FunSpec({
 
         cpu.tick()
 
-        verify { chip8InputManager.lockInputs() }
+        verify { inputManager.lockInputs() }
         verify { memoryManager.fetchNextInstruction() }
         verify { instructionDecoder.decodeAndExecute(nextInstruction, listOf(cpuInstructionExecutor)) }
     }
@@ -74,8 +77,8 @@ class CpuUnitTest: FunSpec({
     test("sys call does nothing 0nnn") {
         cpu.sysCall(UNUSED_VALUE)
 
-        verify { listOf(chip8InputManager, memoryManager, instructionDecoder, displayMemory) wasNot Called }
-        confirmVerified(chip8InputManager, memoryManager, instructionDecoder, displayMemory)
+        verify { listOf(inputManager, memoryManager, instructionDecoder, displayMemory) wasNot Called }
+        confirmVerified(inputManager, memoryManager, instructionDecoder, displayMemory)
     }
 
     test("jmp sets correct value to pc 1NNN") {
@@ -515,7 +518,7 @@ class CpuUnitTest: FunSpec({
 
     test("Skip if key not pressed and key is not pressed EXA1") {
         every { memoryManager.registers[4] } returns 14u
-        every { chip8InputManager.isActive(14) } returns false
+        every { inputManager.isActive(14) } returns false
 
         cpu.skipIfKeyNotPressed(0xE4A1u)
 
@@ -524,14 +527,14 @@ class CpuUnitTest: FunSpec({
 
     test("Wait for key press FX0A") {
         every { memoryManager.registers[4] } returns 14u
-        every { chip8InputManager.isActive(14) } returns false
+        every { inputManager.isActive(14) } returns false
 
         cpu.waitForKeyPress(0xF40Au)
     }
 
     test("Skip if key not pressed and key is pressed EXA1") {
         every { memoryManager.registers[4] } returns 14u
-        every { chip8InputManager.isActive(14) } returns true
+        every { inputManager.isActive(14) } returns true
 
         cpu.skipIfKeyNotPressed(0xE4A1u)
 
@@ -540,7 +543,7 @@ class CpuUnitTest: FunSpec({
 
     test("Skip if key pressed and key is not pressed EX9E") {
         every { memoryManager.registers[4] } returns 14u
-        every { chip8InputManager.isActive(14) } returns false
+        every { inputManager.isActive(14) } returns false
 
         cpu.skipIfKeyPressed(0xE49Eu)
 
@@ -549,7 +552,7 @@ class CpuUnitTest: FunSpec({
 
     test("Skip if key pressed and key is pressed EX9E") {
         every { memoryManager.registers[4] } returns 14u
-        every { chip8InputManager.isActive(14) } returns true
+        every { inputManager.isActive(14) } returns true
 
         cpu.skipIfKeyPressed(0xE49Eu)
 

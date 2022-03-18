@@ -1,19 +1,21 @@
 package com.github.dannyrm.khip8
 
+import com.github.dannyrm.khip8.Khip8State.*
 import com.github.dannyrm.khip8.cpu.Cpu
-import com.github.dannyrm.khip8.cpu.CpuState
 import com.github.dannyrm.khip8.display.model.Display
-import com.github.dannyrm.khip8.input.Chip8InputManager
+import com.github.dannyrm.khip8.input.InputEvent
+import com.github.dannyrm.khip8.input.InputObserver
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
-import com.github.dannyrm.khip8.memory.TimerRegisterState
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.logger
+import com.soywiz.korio.async.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 
 class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager, private val display: Display,
             private val delayRegister: TimerRegister, private val soundRegister: SoundTimerRegister,
-            private val chip8InputManager: Chip8InputManager, private var khip8Status: Khip8Status) {
+            private var khip8Status: Khip8Status): InputObserver {
 
 
     fun load(rom: ByteArray?) {
@@ -21,64 +23,79 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager, priv
         reset()
     }
 
+    override fun receiveEvent(inputEvent: InputEvent) {
+        // We only want to unpause the CPU if the emulator is running.
+        if (inputEvent.isActive && khip8Status.khip8State == RUNNING) {
+            cpu.cpuState = RUNNING
+            logSystemState()
+        }
+    }
+
     /*
      * Returns true if the emulator has entered a pause state, false otherwise.
      */
-    fun togglePause(): Boolean {
-        // If the emulator isn't running we don't need to pause.
-        if (khip8Status.khip8State == Khip8State.EMPTY) {
-            LOG.info { "Emulator not running so no need to pause" }
-            return false
+    fun togglePause(): Boolean =
+        when (khip8Status.khip8State) {
+            RUNNING -> {
+                setSystemState(PAUSED)
+
+                true
+            }
+            PAUSED -> {
+                setSystemState(RUNNING)
+
+                false
+            }
+            STOPPED -> {
+                LOG.info { "Emulator not running so no need to pause" }
+                false
+            }
         }
-
-        return if (cpu.cpuState == CpuState.RUNNING) {
-            cpu.cpuState = CpuState.PAUSED
-            delayRegister.state = TimerRegisterState.PAUSED
-            soundRegister.state = TimerRegisterState.PAUSED
-
-            logSystemState()
-
-            true
-        } else {
-            cpu.cpuState = CpuState.RUNNING
-            delayRegister.state = TimerRegisterState.RUNNING
-            soundRegister.state = TimerRegisterState.RUNNING
-
-            logSystemState()
-
-            false
-        }
-    }
 
     fun reset() {
-        khip8Status.khip8State = Khip8State.EMPTY
-        cpu.cpuState = CpuState.PAUSED
-        delayRegister.state = TimerRegisterState.PAUSED
-        soundRegister.state = TimerRegisterState.PAUSED
+        setSystemState(STOPPED)
 
-        delayRegister.clear()
-        soundRegister.clear()
         display.clear()
-
         memoryManager.resetMemory()
 
         if (memoryManager.loadProgram(khip8Status.loadedRom)) {
-            khip8Status.khip8State = Khip8State.LOADED
-            cpu.cpuState = CpuState.RUNNING
-            delayRegister.state = TimerRegisterState.RUNNING
-            soundRegister.state = TimerRegisterState.RUNNING
+            setSystemState(RUNNING)
         }
-
-        logSystemState()
     }
 
     suspend fun execute(cpuTicksPerPeripheralTick: Int, delayInMillis: Long) {
-        for (i in 0 until cpuTicksPerPeripheralTick) {
-            cpu.tick()
-            delay(delayInMillis)
+        val delayPerPeripheralTick = cpuTicksPerPeripheralTick * delayInMillis
+
+        launch(Dispatchers.Default) {
+            while (true) {
+                cpu.tick()
+                delay(delayInMillis)
+            }
         }
-        delayRegister.tick()
-        soundRegister.tick()
+
+        launch(Dispatchers.Default) {
+            while (true) {
+                delay(delayPerPeripheralTick)
+                delayRegister.tick()
+            }
+        }
+
+        launch(Dispatchers.Default) {
+            while (true) {
+                delay(delayPerPeripheralTick)
+                soundRegister.tick()
+            }
+        }
+    }
+
+    private fun setSystemState(state: Khip8State) {
+        khip8Status.khip8State = state
+
+        cpu.cpuState = state
+        delayRegister.state = state
+        soundRegister.state = state
+
+        logSystemState()
     }
 
     private fun logSystemState() {
