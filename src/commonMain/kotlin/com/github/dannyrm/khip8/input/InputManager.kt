@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.input
 
-import com.github.dannyrm.khip8.util.logger
+import com.github.dannyrm.khip8.logger
 
 class InputManager {
     private var chip8InputState: UInt = 0u

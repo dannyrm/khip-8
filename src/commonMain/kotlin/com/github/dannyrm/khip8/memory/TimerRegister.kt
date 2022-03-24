@@ -2,7 +2,7 @@ package com.github.dannyrm.khip8.memory
 
 import com.github.dannyrm.khip8.Khip8State
 import com.github.dannyrm.khip8.Khip8State.RUNNING
-import com.github.dannyrm.khip8.util.logger
+import com.github.dannyrm.khip8.logger
 
 open class TimerRegister(open var value: UByte = 0u) {
 

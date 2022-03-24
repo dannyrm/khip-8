@@ -12,12 +12,12 @@ import toHex
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.input.InputManager
+import com.github.dannyrm.khip8.logger
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.SystemDependentInstructionFeature
-import com.github.dannyrm.khip8.util.logger
 import wordHex
 import x
 import y

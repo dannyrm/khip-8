@@ -33,6 +33,7 @@ korge {
     name = "Khip-8"
 
     targetJvm()
+    targetJs()
 
     jvmMainClassName = "com.github.dannyrm.khip8.display.view.KorgeUiKt"
 }
@@ -51,10 +52,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("com.soywiz.korlibs.klogger:klogger:${property("kLogger.version")}")
-
                 implementation("io.insert-koin:koin-core:${property("koin.version")}")
-
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+                implementation("com.russhwolf:multiplatform-settings:0.8.1")
             }
         }
 
@@ -74,10 +74,10 @@ kotlin {
 
         val jvmMain by getting {
             dependencies {
-                implementation("com.sksamuel.hoplite:hoplite-core:${property("hoplite.version")}")
-                implementation("com.sksamuel.hoplite:hoplite-json:${property("hoplite.version")}")
                 implementation("com.soywiz.korlibs.klogger:klogger-jvm:${property("kLogger.version")}")
             }
+
+            resources.srcDir("resources")
         }
 
         val jvmTest by getting {

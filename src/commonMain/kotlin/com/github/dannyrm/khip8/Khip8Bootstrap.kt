@@ -2,6 +2,7 @@ package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.Khip8State.RUNNING
 import com.github.dannyrm.khip8.config.Config
+import com.github.dannyrm.khip8.config.buildConfig
 import com.github.dannyrm.khip8.config.delayBetweenCycles
 import com.github.dannyrm.khip8.config.numberOfCpuTicksPerPeripheralTick
 import org.koin.core.component.KoinComponent
@@ -24,22 +25,22 @@ import com.github.dannyrm.khip8.memory.ValidatedMemory
 import com.github.dannyrm.khip8.sound.SoundGenerator
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
-import com.github.dannyrm.khip8.util.logger
-import com.github.dannyrm.khip8.util.memoryDump
-import com.soywiz.klock.TimeSpan
-import com.soywiz.korau.sound.*
+import com.russhwolf.settings.Settings
+import com.soywiz.klogger.Logger
+import com.soywiz.klogger.setLevel
 import com.soywiz.korio.async.launch
 import com.soywiz.korio.async.runBlockingNoJs
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.job
 import org.koin.core.component.get
 import org.koin.core.module.Module
+import kotlin.reflect.KClass
 
 object Khip8Bootstrap: KoinComponent {
     private val LOG = logger(this::class)
 
-    fun boot(config: Config, additionalModules: List<Module>) {
+    fun boot(settings: Settings, additionalModules: List<Module>) {
+        val config = buildConfig(settings)
+
         LOG.info { "Loading Config: $config" }
 
         loadDependencies(additionalModules, config)
@@ -52,7 +53,7 @@ object Khip8Bootstrap: KoinComponent {
         // Starts the Chip-8 execution and UI execution in separate Co-routines
         runBlockingNoJs {
             val cpuTicksPerPeripheralTick = numberOfCpuTicksPerPeripheralTick(config)
-            val (delayInMillis, delayInNanos) = delayBetweenCycles(config)
+            val delayInMillis = delayBetweenCycles(config)
 
             khip8.execute(cpuTicksPerPeripheralTick, delayInMillis)
 
@@ -98,16 +99,14 @@ object Khip8Bootstrap: KoinComponent {
             val inputManager = koin.get<InputManager>()
 
             val khip8 = koin.get<Khip8>()
-            val memoryManager = koin.get<MemoryManager>()
-            val display = koin.get<Display>()
-            val systemActionInputManager = koin.get<SystemActionInputManager>()
 
             inputManager.subscribe(khip8)
             cpuInstructionExecutor.init(cpu)
-
-            systemActionInputManager.memoryDumpFunction = {
-                memoryDump(memoryManager.toString() + display.toString())
-            }
         }
     }
 }
+
+typealias FileAbsolutePath = String
+expect fun lineSeparator(): FileAbsolutePath
+
+fun logger(klass: KClass<*>) = Logger(klass.qualifiedName ?: "Unknown").setLevel(Logger.Level.INFO)

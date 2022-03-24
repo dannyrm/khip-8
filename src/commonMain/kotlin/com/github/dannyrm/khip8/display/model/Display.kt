@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.display.model
 
-import com.github.dannyrm.khip8.util.lineSeparator
+import com.github.dannyrm.khip8.lineSeparator
 
 class Display(private val displayMemory: DisplayMemory) {
 

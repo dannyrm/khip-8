@@ -1,16 +1,26 @@
 package com.github.dannyrm.khip8.config
 
 import com.github.dannyrm.khip8.util.SystemMode
+import com.russhwolf.settings.Settings
+import kotlin.math.roundToLong
 
-data class Config(val systemSpeedConfig: SystemSpeedConfig,
-                  val soundConfig: SoundConfig,
-                  val memoryConfig: MemoryConfig,
-                  val frontEndConfig: FrontEndConfig,
-                  val systemMode: SystemMode
+data class Config(val systemSpeedConfig: SystemSpeedConfig = SystemSpeedConfig(),
+                  val memoryConfig: MemoryConfig = MemoryConfig(),
+                  val frontEndConfig: FrontEndConfig = FrontEndConfig(),
+                  val systemMode: SystemMode = SystemMode.SUPER_CHIP_MODE
 )
 
-expect fun loadConfig(): Config
+fun buildConfig(settings: Settings): Config {
+    val config = Config()
 
-expect fun delayBetweenCycles(config: Config): Pair<Long, Int>
+    settings.getIntOrNull(SYSTEM_SPEED_CPU_PROPERTY_NAME)?.let {
+        config.systemSpeedConfig.cpuSpeed = it
+    }
 
-expect fun numberOfCpuTicksPerPeripheralTick(config: Config): Int
+    return config
+}
+
+fun delayBetweenCycles(config: Config) = (1000.0 / config.systemSpeedConfig.cpuSpeed.toDouble()).roundToLong()
+fun numberOfCpuTicksPerPeripheralTick(config: Config): Int = config.systemSpeedConfig.cpuSpeed / config.systemSpeedConfig.timerSpeed
+
+const val SYSTEM_SPEED_CPU_PROPERTY_NAME = "system.speed.cpu"

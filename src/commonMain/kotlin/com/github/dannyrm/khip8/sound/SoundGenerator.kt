@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.sound
 
-import com.github.dannyrm.khip8.util.logger
+import com.github.dannyrm.khip8.logger
 import com.soywiz.klock.TimeSpan
 import com.soywiz.korau.sound.AudioTone
 import com.soywiz.korau.sound.PlatformAudioOutput

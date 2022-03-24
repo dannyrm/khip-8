@@ -27,7 +27,6 @@ class Khip8UnitTest: BaseTest() {
 
     private var config: Config = Config(
         systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
-        soundConfig = SoundConfig(midiInstrumentNumber = 0, midiNoteNumber = 0, midiNoteVelocity = 0),
         frontEndConfig = FrontEndConfig(windowWidth = 512, windowHeight = 256),
         systemMode = SystemMode.SUPER_CHIP_MODE,
         memoryConfig = MemoryConfig(
@@ -132,37 +131,6 @@ class Khip8UnitTest: BaseTest() {
 
     @Test
     fun `Check delay between Cpu ticks`() {
-        expect(Pair(1L, 851851)) { delayBetweenCycles(config) }
-    }
-
-    @Test
-    fun `Check delay between Cpu ticks when a small number of nanos`() {
-        expect(Pair(1L, 25)) {
-            delayBetweenCycles(
-                    config.copy(systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 800, timerSpeed = 60, displayRefreshRate = 60))
-            )
-        }
-    }
-
-    @Test
-    fun `Check delay between Cpu ticks when no nanos`() {
-        expect(Pair(1L, 0)) {
-            delayBetweenCycles(
-                    config.copy(systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 1000, timerSpeed = 60, displayRefreshRate = 60))
-            )
-        }
-    }
-
-    @Test
-    fun `Execute works correctly`() {
-        runTest {
-            khip8.execute(15, 0)
-
-            verify(exactly = 15) { cpu.tick() }
-            coVerify { delayRegister.tick() }
-            coVerify { soundRegister.tick() }
-
-            confirmVerified(cpu, delayRegister, soundRegister, display)
-        }
+        expect(2L) { delayBetweenCycles(config) }
     }
 }

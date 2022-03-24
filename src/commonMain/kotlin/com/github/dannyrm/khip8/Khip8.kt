@@ -8,7 +8,6 @@ import com.github.dannyrm.khip8.input.InputObserver
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
-import com.github.dannyrm.khip8.util.logger
 import com.soywiz.korio.async.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -99,7 +98,7 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager, priv
     }
 
     private fun logSystemState() {
-        LOG.info { "System State: { Console: ${khip8Status.khip8State}, CPU: ${cpu.cpuState}, Delay Timer: ${delayRegister.state}, Sound Timer: ${soundRegister.state} }" }
+        LOG.debug { "System State: { Console: ${khip8Status.khip8State}, CPU: ${cpu.cpuState}, Delay Timer: ${delayRegister.state}, Sound Timer: ${soundRegister.state} }" }
     }
 
     companion object { private val LOG = logger(this::class) }

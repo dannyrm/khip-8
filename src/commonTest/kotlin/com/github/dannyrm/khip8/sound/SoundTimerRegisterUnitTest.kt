@@ -1,6 +1,7 @@
 package com.github.dannyrm.khip8.sound
 
 import com.github.dannyrm.khip8.Khip8State
+import com.soywiz.korio.async.runBlockingNoJs
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
@@ -56,6 +57,8 @@ class SoundTimerRegisterUnitTest {
 
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = 54u
+
+        runBlockingNoJs { timerRegister.tick() }
 
         coVerify { soundGenerator.start() }
     }

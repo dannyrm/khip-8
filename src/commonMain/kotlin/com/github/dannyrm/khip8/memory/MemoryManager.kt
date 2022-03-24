@@ -1,10 +1,8 @@
 package com.github.dannyrm.khip8.memory
 
 import com.github.dannyrm.khip8.config.MemoryConfig
-import com.github.dannyrm.khip8.util.lineSeparator
-import com.github.dannyrm.khip8.util.loadFile
+import com.github.dannyrm.khip8.lineSeparator
 import createBigEndianWordFromBytes
-import toHex
 import wordHex
 
 @OptIn(ExperimentalUnsignedTypes::class)

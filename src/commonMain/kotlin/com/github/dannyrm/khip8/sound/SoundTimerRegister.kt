@@ -6,6 +6,15 @@ import com.github.dannyrm.khip8.memory.TimerRegister
 
 class SoundTimerRegister(private val soundGenerator: SoundGenerator): TimerRegister() {
 
+    override var state: Khip8State = RUNNING
+        set(value) {
+            field = value
+
+            if (state == Khip8State.STOPPED) {
+                this.value = 0u
+            }
+        }
+
     override suspend fun tick() {
         super.tick()
 
