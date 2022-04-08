@@ -2,13 +2,7 @@ package com.github.dannyrm.khip8.executors
 
 import com.github.dannyrm.khip8.cpu.Cpu
 
-class CpuInstructionExecutor: InstructionExecutor {
-    private lateinit var cpu: Cpu
-
-    fun init(cpu: Cpu) {
-        this.cpu = cpu
-    }
-
+class CpuInstructionExecutor(private val cpu: Cpu): InstructionExecutor {
     override fun sysCall(value: UInt) = cpu.sysCall(value)
     override fun clearScreen(value: UInt) = cpu.clearScreen(value)
     override fun doReturn(value: UInt) = cpu.doReturn(value)

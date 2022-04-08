@@ -17,7 +17,7 @@ open class TimerRegister(open var value: UByte = 0u) {
         set(value) {
             field = value
 
-            if (state == Khip8State.STOPPED) {
+            if (value == Khip8State.STOPPED) {
                 this.value = 0u
             }
         }

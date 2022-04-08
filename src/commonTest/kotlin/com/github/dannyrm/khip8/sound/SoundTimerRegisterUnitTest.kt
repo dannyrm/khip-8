@@ -52,6 +52,30 @@ class SoundTimerRegisterUnitTest {
     }
 
     @Test
+    fun `Pausing the timer does not clear timer value`() {
+        val soundGenerator = mockk<SoundGenerator>(relaxed = true)
+
+        val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
+        timerRegister.value = 54u
+
+        timerRegister.state = Khip8State.PAUSED
+
+        expect(54u) { timerRegister.value }
+    }
+
+    @Test
+    fun `Running the timer does not clear timer value`() {
+        val soundGenerator = mockk<SoundGenerator>(relaxed = true)
+
+        val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
+        timerRegister.value = 54u
+
+        timerRegister.state = Khip8State.RUNNING
+
+        expect(54u) { timerRegister.value }
+    }
+
+    @Test
     fun `Check sound generator starts when the timer is set to a value greater than zero`() {
         val soundGenerator = mockk<SoundGenerator>(relaxed = true)
 
@@ -71,6 +95,51 @@ class SoundTimerRegisterUnitTest {
         timerRegister.value = 0u
 
         coVerify(inverse = true) { soundGenerator.start() }
+    }
+
+    @Test
+    fun `Check sound generator stops when the timer state is set to stopped`() {
+        val soundGenerator = mockk<SoundGenerator>(relaxed = true)
+
+        val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
+        timerRegister.value = 5u
+
+        runTest {
+            timerRegister.tick()
+        }
+
+        coVerify { soundGenerator.start() }
+        coVerify(inverse = true) { soundGenerator.stop() }
+
+        timerRegister.state = Khip8State.STOPPED
+
+        runTest {
+            timerRegister.tick()
+        }
+
+        coVerify { soundGenerator.stop() }
+    }
+
+    @Test
+    fun `Check sound generator stops when the timer state is set to paused`() {
+        val soundGenerator = mockk<SoundGenerator>(relaxed = true)
+
+        val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
+        timerRegister.value = 5u
+
+        runTest {
+            timerRegister.tick()
+        }
+
+        coVerify { soundGenerator.start() }
+
+        timerRegister.state = Khip8State.PAUSED
+
+        runTest {
+            timerRegister.tick()
+        }
+
+        coVerify { soundGenerator.stop() }
     }
 
     @Test

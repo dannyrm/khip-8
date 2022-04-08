@@ -4,6 +4,7 @@ import com.github.dannyrm.khip8.Khip8State
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
+import com.github.dannyrm.khip8.executors.InstructionExecutor
 import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.Stack
@@ -16,6 +17,7 @@ import com.github.dannyrm.khip8.test.utils.convertNumericParams
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.*
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.expect
 
@@ -25,7 +27,6 @@ class CpuUnitTest: FunSpec({
     lateinit var memoryManager: MemoryManager
     lateinit var instructionDecoder: InstructionDecoder
     lateinit var displayMemory: DisplayMemory
-    lateinit var cpuInstructionExecutor: CpuInstructionExecutor
     lateinit var delayRegister: TimerRegister
     lateinit var soundRegister: SoundTimerRegister
     val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
@@ -39,11 +40,10 @@ class CpuUnitTest: FunSpec({
         memoryManager = mockk(relaxed = true)
         instructionDecoder = mockk(relaxed = true)
         displayMemory = mockk(relaxed = true)
-        cpuInstructionExecutor = mockk(relaxed = true)
         delayRegister = mockk(relaxed = true)
         soundRegister = mockk(relaxed = true)
 
-        cpu = Cpu(instructionDecoder, cpuInstructionExecutor, displayMemory, memoryManager, delayRegister, soundRegister, inputManager, memoryConfig,
+        cpu = Cpu(instructionDecoder, displayMemory, memoryManager, delayRegister, soundRegister, inputManager, memoryConfig,
             Khip8State.RUNNING
         )
     }
@@ -55,9 +55,14 @@ class CpuUnitTest: FunSpec({
 
         cpu.tick()
 
+        val instructionExecutorsSlot = slot<List<InstructionExecutor>>()
+
         verify { inputManager.lockInputs() }
         verify { memoryManager.fetchNextInstruction() }
-        verify { instructionDecoder.decodeAndExecute(nextInstruction, listOf(cpuInstructionExecutor)) }
+        verify { instructionDecoder.decodeAndExecute(nextInstruction, capture(instructionExecutorsSlot)) }
+
+        assertEquals(1, instructionExecutorsSlot.captured.size)
+        assertTrue { instructionExecutorsSlot.captured[0] is CpuInstructionExecutor }
     }
 
     test("ret sets correct value to pc 00EE") {

@@ -6,6 +6,7 @@ import nibbleByteHex
 import rightByte
 import rightNibble
 import rightNibbleByte
+import toBinary
 import toHex
 import toHexMinimal
 import wordHex
@@ -56,8 +57,18 @@ class BitManipulationUnitTest {
     }
 
     @Test
+    fun `Int to binary converts Int to binary`() {
+        expect("01111") { toBinary(15u, 5) }
+    }
+
+    @Test
     fun `Int to hex with padding of 2`() {
         expect("0x01") { toHex(0x1u, 2) }
+    }
+
+    @Test
+    fun `Int to binary with padding of 10`() {
+        expect("0000010011") { toBinary(19u, 10) }
     }
 
     @Test
@@ -71,8 +82,18 @@ class BitManipulationUnitTest {
     }
 
     @Test
+    fun `Int to binary with padding of 4 and value matches limit`() {
+        expect("1111") { toBinary(15u, 4) }
+    }
+
+    @Test
     fun `Int to hex with padding of 4 and value over limit`() {
         expect("0x12345") { toHex(0x12345u, 4) }
+    }
+
+    @Test
+    fun `Int to binary with padding of 4 and value over limit`() {
+        expect("10000") { toBinary(16u, 4) }
     }
 
     @Test

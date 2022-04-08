@@ -10,7 +10,7 @@ class SoundTimerRegister(private val soundGenerator: SoundGenerator): TimerRegis
         set(value) {
             field = value
 
-            if (state == Khip8State.STOPPED) {
+            if (state == STOPPED) {
                 this.value = 0u
             }
         }
@@ -18,7 +18,7 @@ class SoundTimerRegister(private val soundGenerator: SoundGenerator): TimerRegis
     override suspend fun tick() {
         super.tick()
 
-        when (super.state) {
+        when (state) {
             PAUSED -> soundGenerator.stop()
             RUNNING -> {
                 if (value > 0u) {

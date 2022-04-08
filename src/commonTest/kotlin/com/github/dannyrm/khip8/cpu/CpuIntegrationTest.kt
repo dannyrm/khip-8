@@ -34,7 +34,6 @@ class CpuIntegrationTest: FunSpec({
         val cpu = Cpu(
             instructionDecoder,
             mockk(relaxed = true),
-            mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
             mockk(relaxed = true),
@@ -58,11 +57,9 @@ class CpuIntegrationTest: FunSpec({
         memoryManager.ram[0x201] = 0x55u
 
         val instructionDecoder = InstructionDecoder()
-        val cpuInstructionExecutor = CpuInstructionExecutor()
 
         val cpu = Cpu(
             instructionDecoder,
-            cpuInstructionExecutor,
             mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
@@ -71,7 +68,6 @@ class CpuIntegrationTest: FunSpec({
             memoryConfig,
             RUNNING
         )
-        cpuInstructionExecutor.init(cpu)
 
         cpu.tick()
 
@@ -84,7 +80,6 @@ class CpuIntegrationTest: FunSpec({
         val memoryManager = buildMemoryManager(memoryConfig)
 
         val cpu = Cpu(
-            mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryManager,
@@ -125,7 +120,6 @@ class CpuIntegrationTest: FunSpec({
         val memoryManager = buildMemoryManager(memoryConfig)
 
         val cpu = Cpu(
-            mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryManager,
@@ -170,7 +164,6 @@ class CpuIntegrationTest: FunSpec({
         val memoryManager = buildMemoryManager(memoryConfig)
 
         val cpu = Cpu(
-            mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryManager,
@@ -227,7 +220,6 @@ class CpuIntegrationTest: FunSpec({
         val cpu = Cpu(
             mockk(relaxed = true),
             mockk(relaxed = true),
-            mockk(relaxed = true),
             memoryManager,
             mockk(relaxed = true),
             mockk(relaxed = true),
@@ -261,7 +253,6 @@ class CpuIntegrationTest: FunSpec({
         val memoryManager = buildMemoryManager(memoryConfig)
 
         val cpu = Cpu(
-            mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
             memoryManager,
@@ -335,7 +326,6 @@ class CpuIntegrationTest: FunSpec({
             val cpu = Cpu(
                 mockk(relaxed = true),
                 mockk(relaxed = true),
-                mockk(relaxed = true),
                 memoryManager,
                 mockk(relaxed = true),
                 mockk(relaxed = true),
@@ -366,7 +356,6 @@ class CpuIntegrationTest: FunSpec({
             val memoryManager = buildMemoryManager(memoryConfig)
 
             val cpu = Cpu(
-                mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 memoryManager,
@@ -417,7 +406,6 @@ class CpuIntegrationTest: FunSpec({
             val memoryManager = buildMemoryManager(memoryConfig)
 
             val cpu = Cpu(
-                mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 memoryManager,

@@ -33,7 +33,6 @@ korge {
     name = "Khip-8"
 
     targetJvm()
-    targetJs()
 
     jvmMainClassName = "com.github.dannyrm.khip8.display.view.KorgeUiKt"
 }

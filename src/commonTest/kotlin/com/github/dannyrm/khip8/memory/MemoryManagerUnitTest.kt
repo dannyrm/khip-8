@@ -7,6 +7,8 @@ import com.github.dannyrm.khip8.test.utils.TestFile
 import io.mockk.mockk
 import io.mockk.verify
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.expect
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -17,9 +19,11 @@ class MemoryManagerUnitTest: BaseTest() {
         val memoryConfig =
             MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
         val memoryManager = MemoryManager(memoryConfig)
-        memoryManager.loadProgram(
+        val successfullyLoaded = memoryManager.loadProgram(
             TestFile("inputs/15-puzzle.ch8", fromClasspath = true).asByteArray()
         )
+
+        assertTrue { successfullyLoaded }
 
         val expectedOutput = hexToByteArray("inputs/15-puzzle.hex")
 
@@ -27,6 +31,16 @@ class MemoryManagerUnitTest: BaseTest() {
         expectedOutput.forEachIndexed { index, byte ->
             expect(byte) { memoryManager.ram[0x200 + index] }
         }
+    }
+
+    @Test
+    fun `loadProgram returns false if data is null`() {
+        val memoryConfig =
+            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryManager = MemoryManager(memoryConfig)
+        val successfullyLoaded = memoryManager.loadProgram(null)
+
+        assertFalse { successfullyLoaded }
     }
 
     @Test

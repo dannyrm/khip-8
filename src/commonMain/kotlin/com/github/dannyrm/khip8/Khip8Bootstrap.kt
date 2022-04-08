@@ -24,12 +24,14 @@ import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.memory.ValidatedMemory
 import com.github.dannyrm.khip8.sound.SoundGenerator
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
+import com.github.dannyrm.khip8.sound.SoundTone
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.russhwolf.settings.Settings
 import com.soywiz.klogger.Logger
 import com.soywiz.klogger.setLevel
 import com.soywiz.korio.async.launch
 import com.soywiz.korio.async.runBlockingNoJs
+import com.soywiz.korio.async.runBlockingNoSuspensions
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.component.get
 import org.koin.core.module.Module
@@ -68,18 +70,21 @@ object Khip8Bootstrap: KoinComponent {
 
         val khip8Status = Khip8Status(khip8State = Khip8State.STOPPED)
 
+        val soundTone = runBlockingNoSuspensions {
+            SoundTone(10_000.0, 2000.0)
+        }
+
         val dependencies = module {
             single { SoundTimerRegister(get()) }
             single { TimerRegister() }
             single { InstructionDecoder() }
-            single { Cpu(get(), get(), get(), get(), get(), get(), get(), config.memoryConfig, RUNNING) }
+            single { Cpu(get(), get(), get(), get(), get(), get(), config.memoryConfig, RUNNING) }
             single { Stack(config.memoryConfig.stackSize) }
             single { ValidatedMemory(config.memoryConfig.memorySize) }
             single { MemoryManager(memoryConfig = config.memoryConfig) }
             single { InputManager() }
-            single { SoundGenerator() }
+            single { SoundGenerator(soundTone) }
             single { Khip8(get(), get(), get(), get(), get(), khip8Status) }
-            single { CpuInstructionExecutor() }
             single { SystemActionInputManager() }
             single { DisplayMemory() }
             single { Display(get()) }
@@ -94,14 +99,10 @@ object Khip8Bootstrap: KoinComponent {
                 modules(it)
             }
 
-            val cpu = koin.get<Cpu>()
-            val cpuInstructionExecutor = koin.get<CpuInstructionExecutor>()
             val inputManager = koin.get<InputManager>()
-
             val khip8 = koin.get<Khip8>()
 
             inputManager.subscribe(khip8)
-            cpuInstructionExecutor.init(cpu)
         }
     }
 }

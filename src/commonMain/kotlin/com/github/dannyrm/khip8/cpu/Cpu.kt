@@ -22,11 +22,12 @@ import wordHex
 import x
 import y
 
-class Cpu(private val instructionDecoder: InstructionDecoder, private val cpuInstructionExecutor: CpuInstructionExecutor,
+class Cpu(private val instructionDecoder: InstructionDecoder,
           private val displayMemory: DisplayMemory, private val memoryManager: MemoryManager,
           private val delayRegister: TimerRegister, private val soundRegister: SoundTimerRegister,
           private val inputManager: InputManager, private val memoryConfig: MemoryConfig,
           var cpuState: Khip8State) {
+    private val cpuInstructionExecutor: CpuInstructionExecutor = CpuInstructionExecutor(this)
 
     fun tick() {
         // Lock inputs, so they can't change during the cycle.

@@ -2,6 +2,7 @@ package com.github.dannyrm.khip8.executors
 
 import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.test.utils.BaseTest
+import io.kotest.matchers.throwable.shouldHaveMessage
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import kotlin.test.BeforeTest
@@ -15,14 +16,7 @@ class CpuInstructionExecutorUnitTest: BaseTest() {
 
     @BeforeTest
     fun `Setup instruction executor`() {
-        instructionExecutor = CpuInstructionExecutor()
-        instructionExecutor.init(cpu)
-    }
-
-    @Test
-    fun `Executor fails if Cpu not specified`() {
-        instructionExecutor = CpuInstructionExecutor()
-        assertFailsWith<Exception> { instructionExecutor.clearScreen(UNUSED_VALUE) }
+        instructionExecutor = CpuInstructionExecutor(cpu)
     }
 
     @Test
