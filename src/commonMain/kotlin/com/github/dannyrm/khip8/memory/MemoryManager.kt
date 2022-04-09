@@ -7,9 +7,9 @@ import wordHex
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class MemoryManager(private val memoryConfig: MemoryConfig,
-                    val stack: Stack = Stack(memoryConfig.stackSize),
-                    val ram: ValidatedMemory = ValidatedMemory(memoryConfig.memorySize),
-                    val registers: ValidatedMemory = ValidatedMemory(NUM_GENERAL_PURPOSE_REGISTERS)
+                    internal val stack: Stack = Stack(memoryConfig.stackSize),
+                    internal val ram: ValidatedMemory = ValidatedMemory(memoryConfig.memorySize),
+                    internal val registers: ValidatedMemory = ValidatedMemory(memoryConfig.numberOfGeneralPurposeRegisters)
 ) {
     var i: UInt = 0u // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
 
@@ -112,7 +112,6 @@ class MemoryManager(private val memoryConfig: MemoryConfig,
     }
 
     companion object {
-        private const val NUM_GENERAL_PURPOSE_REGISTERS = 16 // 16 registers, named Vx where x = 1...F
         private const val NUM_BYTES_PER_DIGIT = 5u
     }
 }

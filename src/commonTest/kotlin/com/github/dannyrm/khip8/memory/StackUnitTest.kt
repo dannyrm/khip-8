@@ -16,6 +16,20 @@ class StackUnitTest {
     }
 
     @Test
+    fun `push with empty stack`() {
+        val stack = Stack(0)
+        assertFailsWith<IllegalStateException> { stack.push(5u) }
+    }
+
+    @Test
+    fun `Clear with empty stack`() {
+        val stack = Stack(0)
+        stack.clear()
+
+        expect(0) { stack.sp }
+    }
+
+    @Test
     fun `push and pop with overflow`() {
         val stack = Stack(4)
         stack.push(0x10000u)
@@ -100,5 +114,14 @@ class StackUnitTest {
         val nl = lineSeparator()
 
         expect("\tSize = 4, SP = 0x00$nl") { stack.toString() }
+    }
+
+    @Test
+    fun `Check toString correct with empty stack`() {
+        val stack = Stack(0)
+
+        val nl = lineSeparator()
+
+        expect("\tSize = 0, SP = 0x00$nl") { stack.toString() }
     }
 }
