@@ -71,7 +71,7 @@ object Khip8Bootstrap: KoinComponent {
         val khip8Status = Khip8Status(khip8State = Khip8State.STOPPED)
 
         val soundTone = runBlockingNoSuspensions {
-            SoundTone(10_000.0, 2000.0)
+            SoundTone(config.soundConfig.toneFrequency)
         }
 
         val dependencies = module {

@@ -10,7 +10,6 @@ class Display(private val displayMemory: DisplayMemory) {
 
     fun clear() = displayMemory.clear()
 
-    // TODO: Write tests around collisions
     fun hasCollision(): Boolean {
         if (displayMemory.collision) {
             displayMemory.collision = false

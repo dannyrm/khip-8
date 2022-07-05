@@ -7,6 +7,7 @@ import kotlin.math.roundToLong
 data class Config(val systemSpeedConfig: SystemSpeedConfig = SystemSpeedConfig(),
                   val memoryConfig: MemoryConfig = MemoryConfig(),
                   val frontEndConfig: FrontEndConfig = FrontEndConfig(),
+                  val soundConfig: SoundConfig = SoundConfig(),
                   val systemMode: SystemMode = SystemMode.SUPER_CHIP_MODE
 )
 

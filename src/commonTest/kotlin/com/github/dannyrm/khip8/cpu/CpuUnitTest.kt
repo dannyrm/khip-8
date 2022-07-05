@@ -163,13 +163,24 @@ class CpuUnitTest: FunSpec({
     }
 
     test("Skip if register and byte are not equal 4XNN") {
-        val memory = mockk<ValidatedMemory>()
-        every { memoryManager.registers } returns memory
-        every { memory[5] } returns 0xAu
+        val registers = mockk<ValidatedMemory>()
+        every { memoryManager.registers } returns registers
+        every { registers[5] } returns 0xBu
 
         cpu.skipIfRegisterAndMemoryNotEqual(0x450Au)
 
-        verify(exactly = 0) { memoryManager.skipNextInstruction() }
+        verify { memoryManager.skipNextInstruction() }
+    }
+
+    test("Do not skip if register and byte are equal 4XNN") {
+        val registers = mockk<ValidatedMemory>()
+        every { memoryManager.registers } returns registers
+
+        every { registers[5] } returns 0xAu
+
+        cpu.skipIfRegisterAndMemoryNotEqual(0x450Au)
+
+        verify(inverse = true) { memoryManager.skipNextInstruction() }
     }
 
     test("Skip if register and register are equal 5XY0") {

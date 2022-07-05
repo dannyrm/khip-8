@@ -38,6 +38,11 @@ class DisplayMemoryUnitTest: BaseTest() {
     }
 
     @Test
+    fun `Check getting value outside boundary returns false`() {
+        expect(false) { displayMemory[500, 500] }
+    }
+
+    @Test
     fun `check Display clears correctly`() {
         val (width, height) = displayMemory.dimensions()
 
