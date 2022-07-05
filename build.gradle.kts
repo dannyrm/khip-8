@@ -6,9 +6,9 @@ group = "com.github.dannyrm.khip8"
 version = "1.0-SNAPSHOT"
 
 plugins {
-    kotlin("multiplatform") version "1.6.10"
-    id("io.kotest.multiplatform") version "5.0.2"
-    id("org.jetbrains.kotlinx.kover") version "0.5.0"
+    kotlin("multiplatform") version "1.7.0"
+    id("io.kotest.multiplatform") version "5.3.0"
+    id("org.jetbrains.kotlinx.kover") version "0.5.1"
 }
 
 repositories { mavenCentral() }
@@ -52,7 +52,7 @@ kotlin {
             dependencies {
                 implementation("com.soywiz.korlibs.klogger:klogger:${property("kLogger.version")}")
                 implementation("io.insert-koin:koin-core:${property("koin.version")}")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinStdLibrary.version")}")
                 implementation("com.russhwolf:multiplatform-settings:0.8.1")
             }
         }
@@ -67,7 +67,7 @@ kotlin {
                 implementation("io.kotest:kotest-framework-engine:${property("kotest.version")}")
                 implementation("io.kotest:kotest-framework-datatest:${property("kotest.version")}")
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${property("kotlinStdLibrary.version")}")
             }
         }
 
