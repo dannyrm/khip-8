@@ -3,7 +3,8 @@ package com.github.dannyrm.khip8.memory
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.lineSeparator
 import com.github.dannyrm.khip8.test.utils.BaseTest
-import com.github.dannyrm.khip8.test.utils.TestFile
+import com.soywiz.korio.async.runBlockingNoSuspensions
+import com.soywiz.korio.file.std.resourcesVfs
 import io.mockk.mockk
 import io.mockk.verify
 import kotlin.test.Test
@@ -16,12 +17,14 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Load Program Into Memory`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(memoryConfig)
-        val successfullyLoaded = memoryManager.loadProgram(
-            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).asByteArray()
-        )
+
+        val successfullyLoaded = runBlockingNoSuspensions {
+            memoryManager.loadProgram(
+                resourcesVfs["inputs/15-puzzle.ch8"].readAll()
+            )
+        }
 
         assertTrue { successfullyLoaded }
 
@@ -35,8 +38,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `loadProgram returns false if data is null`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(memoryConfig)
         val successfullyLoaded = memoryManager.loadProgram(null)
 
@@ -45,12 +47,14 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Fetch next instruction`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(memoryConfig)
-        memoryManager.loadProgram(
-            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).asByteArray()
-        )
+
+        runBlockingNoSuspensions {
+            memoryManager.loadProgram(
+                resourcesVfs["inputs/15-puzzle.ch8"].readAll()
+            )
+        }
 
         expect(0x200u) { memoryManager.pc }
 
@@ -69,8 +73,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Check correct values after loading sprite data`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadSpriteDigitsIntoMemory()
 
@@ -100,8 +103,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Check correct data for each sprite digit`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(memoryConfig)
         memoryManager.loadSpriteDigitsIntoMemory()
 
@@ -137,8 +139,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Check skip next instruction works as expected`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(memoryConfig)
         expect(0x200u) { memoryManager.pc }
         memoryManager.skipNextInstruction()
@@ -147,8 +148,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Reset memory`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(
             stack = mockk(relaxed = true),
             ram = mockk(relaxed = true),
@@ -194,8 +194,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `check toString format`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(
             ram = ValidatedMemory(42),
             memoryConfig = memoryConfig,
@@ -247,16 +246,23 @@ class MemoryManagerUnitTest: BaseTest() {
     private fun hexToByteArray(fileName: String): UByteArray {
         val outputList: MutableList<String> = mutableListOf()
 
-        TestFile(fileName, fromClasspath = true).asStringList().forEach {
-            outputList.addAll(it.split(" "))
+        runBlockingNoSuspensions {
+            resourcesVfs[fileName].readLines().forEach {
+                outputList.addAll(it.split(" "))
+            }
         }
+
+        outputList.removeIf {s -> s.trim().isEmpty() }
 
         val outputByteArray = UByteArray(outputList.size)
 
         outputList.forEachIndexed { index, s ->
+            println(s)
             outputByteArray[index] = s.toInt(16).toUByte()
         }
 
         return outputByteArray
     }
 }
+
+private fun memoryConfig() = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200, numberOfGeneralPurposeRegisters = 16)

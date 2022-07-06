@@ -3,8 +3,8 @@ package com.github.dannyrm.khip8.executors
 import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.cpu.InstructionDecoder
 import com.github.dannyrm.khip8.memory.MemoryManager
-import com.github.dannyrm.khip8.test.utils.TestFile
-import io.mockk.mockk
+import com.soywiz.korio.async.runBlockingNoSuspensions
+import com.soywiz.korio.file.std.resourcesVfs
 import kotlin.test.Test
 import kotlin.test.expect
 
@@ -13,12 +13,14 @@ class DissasemblerIntegrationTest {
     @Test
     fun `Check dissasembly of 15 puzzle`() {
         val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200, numberOfGeneralPurposeRegisters = 16)
         val memoryManager = MemoryManager(memoryConfig = memoryConfig)
 
-        memoryManager.loadProgram(
-            TestFile("inputs/15-puzzle.ch8", fromClasspath = true).asByteArray()
-        )
+        runBlockingNoSuspensions {
+            memoryManager.loadProgram(
+                resourcesVfs["inputs/15-puzzle.ch8"].readAll()
+            )
+        }
 
         execute(memoryManager, InstructionDecoder(), DissassemblerInstructionExecutor(),
             listOf(

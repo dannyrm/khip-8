@@ -29,7 +29,7 @@ class CpuUnitTest: FunSpec({
     lateinit var displayMemory: DisplayMemory
     lateinit var delayRegister: TimerRegister
     lateinit var soundRegister: SoundTimerRegister
-    val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200)
+    val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200, numberOfGeneralPurposeRegisters = 16)
 
     lateinit var cpu: Cpu
 

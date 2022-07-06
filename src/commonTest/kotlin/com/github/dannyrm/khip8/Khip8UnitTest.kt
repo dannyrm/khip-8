@@ -33,7 +33,8 @@ class Khip8UnitTest: BaseTest() {
             memorySize = 4096,
             stackSize = 16,
             interpreterStartAddress = 0x0,
-            programStartAddress = 0x200
+            programStartAddress = 0x200,
+            numberOfGeneralPurposeRegisters = 16
         )
     )
 

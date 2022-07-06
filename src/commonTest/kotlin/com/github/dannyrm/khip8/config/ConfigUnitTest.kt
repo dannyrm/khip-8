@@ -7,8 +7,8 @@ import kotlin.test.expect
 class ConfigUnitTest {
 
     @Test
-    fun `Check default config values`() {
-        val config = Config()
+    fun `Check default config values used when settings is null`() {
+        val config = buildConfig(null)
 
         expect(540) { config.systemSpeedConfig.cpuSpeed }
         expect(60) { config.systemSpeedConfig.timerSpeed }
