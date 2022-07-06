@@ -14,7 +14,7 @@ plugins {
 repositories { mavenCentral() }
 
 buildscript {
-    val korgePluginVersion: String by project
+    val korgePluginVersion = "2.4.7"
 
     repositories {
         mavenLocal()
@@ -38,6 +38,14 @@ korge {
 }
 
 kotlin {
+    val kotlinStdLibraryVersion="1.6.3"
+    val koinVersion="3.2.0-beta-1"
+    val kLoggerVersion="2.2.0"
+    val mockKVersion="1.12.4"
+    val koTestVersion="5.3.2"
+    val striktVersion="0.34.1"
+    val multiplatformSettingsVersion="0.8.1"
+
     jvm()
 
     apply<KorgeGradlePlugin>()
@@ -50,30 +58,30 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("com.soywiz.korlibs.klogger:klogger:${property("kLogger.version")}")
-                implementation("io.insert-koin:koin-core:${property("koin.version")}")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinStdLibrary.version")}")
-                implementation("com.russhwolf:multiplatform-settings:0.8.1")
+                implementation("com.soywiz.korlibs.klogger:klogger:$kLoggerVersion")
+                implementation("io.insert-koin:koin-core:$koinVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinStdLibraryVersion")
+                implementation("com.russhwolf:multiplatform-settings:$multiplatformSettingsVersion")
             }
         }
 
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("io.mockk:mockk:${property("mockK.version")}")
-                implementation("io.mockk:mockk-common:${property("mockK.version")}")
+                implementation("io.mockk:mockk:$mockKVersion")
+                implementation("io.mockk:mockk-common:$mockKVersion")
 
-                implementation("io.kotest:kotest-assertions-core:${property("kotest.version")}")
-                implementation("io.kotest:kotest-framework-engine:${property("kotest.version")}")
-                implementation("io.kotest:kotest-framework-datatest:${property("kotest.version")}")
+                implementation("io.kotest:kotest-assertions-core:$koTestVersion")
+                implementation("io.kotest:kotest-framework-engine:$koTestVersion")
+                implementation("io.kotest:kotest-framework-datatest:$koTestVersion")
 
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${property("kotlinStdLibrary.version")}")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinStdLibraryVersion")
             }
         }
 
         val jvmMain by getting {
             dependencies {
-                implementation("com.soywiz.korlibs.klogger:klogger-jvm:${property("kLogger.version")}")
+                implementation("com.soywiz.korlibs.klogger:klogger-jvm:$kLoggerVersion")
             }
 
             resources.srcDir("resources")
@@ -81,12 +89,12 @@ kotlin {
 
         val jvmTest by getting {
             dependencies {
-                implementation("io.strikt:strikt-core:${property("strikt.version")}")
+                implementation("io.strikt:strikt-core:$striktVersion")
 
-                implementation("io.kotest:kotest-runner-junit5-jvm:${property("kotest.version")}")
-                implementation("io.kotest:kotest-framework-engine-jvm:${property("kotest.version")}")
+                implementation("io.kotest:kotest-runner-junit5-jvm:$koTestVersion")
+                implementation("io.kotest:kotest-framework-engine-jvm:$koTestVersion")
 
-                implementation("io.insert-koin:koin-test:${property("koin.version")}")
+                implementation("io.insert-koin:koin-test:$koinVersion")
             }
         }
     }

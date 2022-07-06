@@ -326,7 +326,7 @@ class CpuIntegrationTest: FunSpec({
         }
     }
 
-    context("oad general registers into memory in Chip8 or Chip 48 Mode FX55") {
+    context("Load general registers into memory in Chip8 or Chip 48 Mode FX55") {
         withData("CHIP_8_MODE", "CHIP_48_MODE") { input ->
             val systemMode = SystemMode.valueOf(input)
 
