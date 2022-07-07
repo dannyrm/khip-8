@@ -15,7 +15,6 @@ import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.display.view.korge.KorgeConfigModule
 import com.github.dannyrm.khip8.display.view.korge.KorgeUi
 import com.github.dannyrm.khip8.display.view.Ui
-import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.input.SystemActionInputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
@@ -32,16 +31,23 @@ import com.soywiz.klogger.setLevel
 import com.soywiz.korio.async.launch
 import com.soywiz.korio.async.runBlockingNoJs
 import com.soywiz.korio.async.runBlockingNoSuspensions
+import com.soywiz.korio.file.std.resourcesVfs
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.get
 import org.koin.core.module.Module
+import java.io.ByteArrayInputStream
 import kotlin.reflect.KClass
 
 object Khip8Bootstrap: KoinComponent {
     private val LOG = logger(this::class)
 
-    fun boot(settings: Settings, additionalModules: List<Module>) {
-        val config = buildConfig(settings)
+    fun boot(additionalModules: List<Module>) {
+        val propertiesInputStream = runBlocking {
+            ByteArrayInputStream(resourcesVfs["chip8.properties"].readAll())
+        }
+
+        val config = buildConfig(loadProperties(propertiesInputStream))
 
         LOG.info { "Loading Config: $config" }
 
@@ -109,5 +115,6 @@ object Khip8Bootstrap: KoinComponent {
 
 typealias FileAbsolutePath = String
 expect fun lineSeparator(): FileAbsolutePath
+expect fun loadProperties(propertiesInputStream: ByteArrayInputStream): Settings
 
 fun logger(klass: KClass<*>) = Logger(klass.qualifiedName ?: "Unknown").setLevel(Logger.Level.INFO)
