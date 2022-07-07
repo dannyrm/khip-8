@@ -105,8 +105,8 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions {
-            apiVersion = "1.6"
-            languageVersion = "1.6"
+            apiVersion = "1.7"
+            languageVersion = "1.7"
             jvmTarget = "1.8"
             freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
         }
@@ -114,12 +114,5 @@ tasks {
 
     withType<Test> {
         useJUnitPlatform()
-    }
-
-    withType<Test> {
-        named("jvmTest")
-
-        // Removes "Sharing is only supported for boot loader classes because bootstrap classpath has been appended" warning
-        jvmArgs = listOf("-Xshare:off")
     }
 }
