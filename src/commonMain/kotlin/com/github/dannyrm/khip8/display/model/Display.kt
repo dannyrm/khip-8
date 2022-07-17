@@ -1,7 +1,9 @@
 package com.github.dannyrm.khip8.display.model
 
 import com.github.dannyrm.khip8.lineSeparator
+import org.koin.core.annotation.Single
 
+@Single
 class Display(private val displayMemory: DisplayMemory) {
 
     operator fun set(x: Int, y: Int, value: UByte) {

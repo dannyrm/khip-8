@@ -1,16 +1,18 @@
 package com.github.dannyrm.khip8.memory
 
 import com.github.dannyrm.khip8.lineSeparator
+import org.koin.core.annotation.Single
 import toHex
 import wordHex
 
 @OptIn(ExperimentalUnsignedTypes::class)
+@Single
 data class Stack(private val stackSize: Int) {
-    internal var sp: Int = 0 // 8 bits, stack pointer, represented as an int for simplicity
-    private val stack: UIntArray = UIntArray(stackSize)
+    private val stack: UIntArray = UIntArray(stackSize) { 0u }
+    private var sp: Int = 0 // 8 bits, stack pointer, represented as an int for simplicity
 
     fun push(value: UInt) {
-        if (sp+1 > stackSize) {
+        if (sp+1 > stack.size) {
             throw IllegalStateException("Attempting to push to a full stack")
         }
         stack[sp++] = (value % 0x10000u) // 16 bit values
@@ -36,7 +38,7 @@ data class Stack(private val stackSize: Int) {
 
         val stackDelimiters = "\t----------${lineSeparator()}"
 
-        stringBuilder.append("\tSize = $stackSize, SP = ${toHex(sp.toUByte())}", lineSeparator())
+        stringBuilder.append("\tSize = ${stack.size}, SP = ${toHex(sp.toUByte())}", lineSeparator())
 
         if (sp > 0) {
             stringBuilder.append(stackDelimiters)

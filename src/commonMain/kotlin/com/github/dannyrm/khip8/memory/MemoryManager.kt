@@ -1,25 +1,27 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.config.MemoryConfig
+import com.github.dannyrm.khip8.config.ConfigManager
 import com.github.dannyrm.khip8.lineSeparator
 import createBigEndianWordFromBytes
+import org.koin.core.annotation.Single
 import wordHex
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class MemoryManager(private val memoryConfig: MemoryConfig,
-                    internal val stack: Stack = Stack(memoryConfig.stackSize),
-                    internal val ram: ValidatedMemory = ValidatedMemory(memoryConfig.memorySize),
-                    internal val registers: ValidatedMemory = ValidatedMemory(memoryConfig.numberOfGeneralPurposeRegisters)
-) {
+@Single
+class MemoryManager(internal val stack: Stack,
+                    internal val ram: ValidatedMemory,
+                    internal val registers: ValidatedMemory,
+                    private val programStartAddress: Int,
+                    private val interpreterStartAddress: Int) {
     var i: UInt = 0u // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
 
-    var pc: UInt = memoryConfig.programStartAddress.toUInt() // 16 bits, program counter
+    var pc: UInt = programStartAddress.toUInt() // 16 bits, program counter
         set(value) { field = value % 0x10000u }
 
     fun loadProgram(input: ByteArray?): Boolean {
         return input?.run {
             input.toUByteArray().forEachIndexed { index, byte ->
-                ram[memoryConfig.programStartAddress + index] = byte
+                ram[programStartAddress + index] = byte
             }
             true
         } ?: false
@@ -40,7 +42,7 @@ class MemoryManager(private val memoryConfig: MemoryConfig,
         ram.clear()
         registers.clear()
 
-        pc = memoryConfig.programStartAddress.toUInt()
+        pc = programStartAddress.toUInt()
 
         loadSpriteDigitsIntoMemory()
     }
@@ -54,7 +56,7 @@ class MemoryManager(private val memoryConfig: MemoryConfig,
 
     fun loadSpriteDigitsIntoMemory() {
         populateRam(
-            memoryConfig.interpreterStartAddress.toUInt(),
+            interpreterStartAddress.toUInt(),
             arrayOf(
                 ubyteArrayOf(0xF0u, 0x90u, 0x90u, 0x90u, 0xF0u), // Zero
                 ubyteArrayOf(0x20u, 0x60u, 0x20u, 0x20u, 0x70u), // One
@@ -77,7 +79,7 @@ class MemoryManager(private val memoryConfig: MemoryConfig,
     }
 
     fun getLocationOfSpriteDigit(digit: UInt): UInt {
-        return memoryConfig.interpreterStartAddress.toUInt() + (digit * NUM_BYTES_PER_DIGIT)
+        return interpreterStartAddress.toUInt() + (digit * NUM_BYTES_PER_DIGIT)
     }
 
     private fun populateRam(startLocation: UInt, arrays: Array<UByteArray>) {

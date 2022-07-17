@@ -1,7 +1,6 @@
 package com.github.dannyrm.khip8.cpu
 
 import com.github.dannyrm.khip8.Khip8State
-import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.executors.InstructionExecutor
@@ -29,7 +28,6 @@ class CpuUnitTest: FunSpec({
     lateinit var displayMemory: DisplayMemory
     lateinit var delayRegister: TimerRegister
     lateinit var soundRegister: SoundTimerRegister
-    val memoryConfig = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200, numberOfGeneralPurposeRegisters = 16)
 
     lateinit var cpu: Cpu
 
@@ -43,9 +41,7 @@ class CpuUnitTest: FunSpec({
         delayRegister = mockk(relaxed = true)
         soundRegister = mockk(relaxed = true)
 
-        cpu = Cpu(instructionDecoder, displayMemory, memoryManager, delayRegister, soundRegister, inputManager, memoryConfig,
-            Khip8State.RUNNING
-        )
+        cpu = Cpu(instructionDecoder, displayMemory, memoryManager, delayRegister, soundRegister, inputManager, Khip8State.RUNNING)
     }
 
     test("tick works correctly") {

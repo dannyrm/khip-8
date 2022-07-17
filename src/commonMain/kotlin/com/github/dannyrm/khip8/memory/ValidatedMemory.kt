@@ -1,6 +1,7 @@
 package com.github.dannyrm.khip8.memory
 
 import com.github.dannyrm.khip8.lineSeparator
+import org.koin.core.annotation.Single
 import toHex
 import wordHex
 

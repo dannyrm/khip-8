@@ -1,7 +1,9 @@
 package com.github.dannyrm.khip8.display.model
 
 import com.github.dannyrm.khip8.lineSeparator
+import org.koin.core.annotation.Single
 
+@Single
 class DisplayMemory(private val buffer: Array<ULong> = Array(MAX_HEIGHT_IN_BITS) { 0u },
                     var collision: Boolean = false) {
 

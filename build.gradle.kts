@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.soywiz.korge.gradle.*
-import kotlinx.kover.KoverPlugin
 
 group = "com.github.dannyrm.khip8"
 version = "1.0-SNAPSHOT"
@@ -8,7 +7,6 @@ version = "1.0-SNAPSHOT"
 plugins {
     kotlin("multiplatform") version "1.7.0"
     id("io.kotest.multiplatform") version "5.3.0"
-    id("org.jetbrains.kotlinx.kover") version "0.5.1"
 }
 
 repositories { mavenCentral() }
@@ -39,7 +37,7 @@ korge {
 
 kotlin {
     val kotlinStdLibraryVersion="1.6.3"
-    val koinVersion="3.2.0-beta-1"
+    val koinVersion="3.2.0"
     val kLoggerVersion="2.2.0"
     val mockKVersion="1.12.4"
     val koTestVersion="5.3.2"
@@ -49,7 +47,6 @@ kotlin {
     jvm()
 
     apply<KorgeGradlePlugin>()
-    apply<KoverPlugin>()
 
     configurations.all {
         exclude("org.jetbrains.kotlin", "kotlin-test-junit")
@@ -60,6 +57,7 @@ kotlin {
             dependencies {
                 implementation("com.soywiz.korlibs.klogger:klogger:$kLoggerVersion")
                 implementation("io.insert-koin:koin-core:$koinVersion")
+                implementation("io.insert-koin:koin-annotations:1.0.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinStdLibraryVersion")
                 implementation("com.russhwolf:multiplatform-settings:$multiplatformSettingsVersion")
             }

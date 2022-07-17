@@ -12,7 +12,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import com.github.dannyrm.khip8.util.SystemMode
 import io.mockk.*
-import kotlinx.coroutines.test.*
 import kotlin.test.Test
 import kotlin.test.expect
 
@@ -127,11 +126,11 @@ class Khip8UnitTest: BaseTest() {
 
     @Test
     fun `Check number of Cpu ticks per peripheral tick`() {
-        expect(9) { numberOfCpuTicksPerPeripheralTick(config) }
+        expect(9) { DefaultConfig.numberOfCpuTicksPerPeripheralTick() }
     }
 
     @Test
     fun `Check delay between Cpu ticks`() {
-        expect(2L) { delayBetweenCycles(config) }
+        expect(2L) { DefaultConfig.delayBetweenCycles() }
     }
 }

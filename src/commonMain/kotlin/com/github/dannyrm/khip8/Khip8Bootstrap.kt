@@ -1,10 +1,9 @@
 package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.Khip8State.RUNNING
-import com.github.dannyrm.khip8.config.Config
-import com.github.dannyrm.khip8.config.buildConfig
-import com.github.dannyrm.khip8.config.delayBetweenCycles
-import com.github.dannyrm.khip8.config.numberOfCpuTicksPerPeripheralTick
+import com.github.dannyrm.khip8.Khip8State.STOPPED
+import com.github.dannyrm.khip8.config.Chip8PropertiesConfig
+import com.github.dannyrm.khip8.config.ConfigManager
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -15,6 +14,7 @@ import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.display.view.korge.KorgeConfigModule
 import com.github.dannyrm.khip8.display.view.korge.KorgeUi
 import com.github.dannyrm.khip8.display.view.Ui
+import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.input.SystemActionInputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
@@ -36,85 +36,105 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.get
 import org.koin.core.module.Module
+import org.koin.core.qualifier.Qualifier
+import org.koin.core.qualifier.QualifierValue
+import org.koin.core.qualifier.named
+import org.koin.core.qualifier.qualifier
 import java.io.ByteArrayInputStream
 import kotlin.reflect.KClass
 
+@OptIn(ExperimentalUnsignedTypes::class)
 object Khip8Bootstrap: KoinComponent {
-    private val LOG = logger(this::class)
-
     fun boot(additionalModules: List<Module>) {
-        val propertiesInputStream = runBlocking {
-            ByteArrayInputStream(resourcesVfs["chip8.properties"].readAll())
+        val soundToneLength = 10_000.0
+
+        startKoin {
+            modules(
+                module {
+                    // Config
+                    single<ConfigManager> { Chip8PropertiesConfig() }
+
+                    // System execution
+                    single { Khip8Status(khip8State = STOPPED, loadedRom = null) }
+                    single {
+                        Cpu(
+                            instructionDecoder = get(),
+                            displayMemory = get(),
+                            memoryManager = get(),
+                            delayRegister = get(),
+                            soundRegister = get(),
+                            inputManager = get(),
+                            get<ConfigManager>().memoryConfig().memorySize,
+                            cpuState = RUNNING) }
+                    single {
+                        Khip8(
+                            cpu = get(),
+                            memoryManager = get(),
+                            display = get(),
+                            delayRegister = get(),
+                            soundRegister = get(),
+                            khip8Status = get(),
+                            numberOfCpuTicksPerPeripheralTick = get<ConfigManager>().numberOfCpuTicksPerPeripheralTick(),
+                            delayBetweenCycles = get<ConfigManager>().delayBetweenCycles())
+                    }
+                    single { CpuInstructionExecutor(cpu = get()) }
+                    single { InstructionDecoder(instructionExecutors = listOf(get())) }
+
+                    // Memory
+                    single { Stack(get<ConfigManager>().memoryConfig().stackSize) }
+                    single(named("ram")) { ValidatedMemory(get<ConfigManager>().memoryConfig().memorySize) }
+                    single(named("registers")) { ValidatedMemory(get<ConfigManager>().memoryConfig().numberOfGeneralPurposeRegisters) }
+                    single {
+                        MemoryManager(get(),
+                            get(qualifier = named("ram")),
+                            get(qualifier = named("registers")),
+                            get<ConfigManager>().memoryConfig().programStartAddress,
+                            get<ConfigManager>().memoryConfig().interpreterStartAddress)
+                    }
+                    single { TimerRegister() }
+
+                    // Input
+                    single { InputManager() }
+                    single { SystemActionInputManager() }
+
+                    // Sound
+                    single { runBlockingNoSuspensions { SoundTone(get(), soundToneLength) } }
+                    single { SoundTimerRegister(get()) }
+                    single { SoundGenerator(get()) }
+
+                    // Display
+                    single { DisplayMemory() }
+                    single { Display(get()) }
+
+                    // UI
+                    single { KorgeConfigModule(get(), get(), get(), get()) }
+                    single<Ui> { KorgeUi(get()) }
+                },
+
+                *additionalModules.toTypedArray()
+            )
         }
 
-        val config = buildConfig(loadProperties(propertiesInputStream))
-
-        LOG.info { "Loading Config: $config" }
-
-        loadDependencies(additionalModules, config)
-
+        val inputManager = get<InputManager>()
         val khip8 = get<Khip8>()
         val ui = get<Ui>()
+
+        inputManager.subscribe(khip8)
 
         khip8.reset()
 
         // Starts the Chip-8 execution and UI execution in separate Co-routines
         runBlockingNoJs {
-            val cpuTicksPerPeripheralTick = numberOfCpuTicksPerPeripheralTick(config)
-            val delayInMillis = delayBetweenCycles(config)
-
-            khip8.execute(cpuTicksPerPeripheralTick, delayInMillis)
+            khip8.execute()
 
             launch(Dispatchers.Default) {
-                ui.start(config)
+                ui.start()
             }
-        }
-    }
-
-    private fun loadDependencies(additionalModules: List<Module>, config: Config) {
-        FeatureManager.systemMode = config.systemMode
-
-        val khip8Status = Khip8Status(khip8State = Khip8State.STOPPED)
-
-        val soundTone = runBlockingNoSuspensions {
-            SoundTone(config.soundConfig.toneFrequency)
-        }
-
-        val dependencies = module {
-            single { SoundTimerRegister(get()) }
-            single { TimerRegister() }
-            single { InstructionDecoder() }
-            single { Cpu(get(), get(), get(), get(), get(), get(), config.memoryConfig, RUNNING) }
-            single { Stack(config.memoryConfig.stackSize) }
-            single { ValidatedMemory(config.memoryConfig.memorySize) }
-            single { MemoryManager(memoryConfig = config.memoryConfig) }
-            single { InputManager() }
-            single { SoundGenerator(soundTone) }
-            single { Khip8(get(), get(), get(), get(), get(), khip8Status) }
-            single { SystemActionInputManager() }
-            single { DisplayMemory() }
-            single { Display(get()) }
-
-            single { KorgeConfigModule(get(), get(), config, get()) }
-            single<Ui> { KorgeUi(get()) }
-        }
-
-        startKoin {
-            modules(dependencies)
-            additionalModules.forEach {
-                modules(it)
-            }
-
-            val inputManager = koin.get<InputManager>()
-            val khip8 = koin.get<Khip8>()
-
-            inputManager.subscribe(khip8)
         }
     }
 }
 
-typealias FileAbsolutePath = String
-expect fun lineSeparator(): FileAbsolutePath
-expect fun loadProperties(propertiesInputStream: ByteArrayInputStream): Settings
+expect fun lineSeparator(): String
+expect fun loadProperties(propertiesInputStream: ByteArrayInputStream?): Settings?
 
 fun logger(klass: KClass<*>) = Logger(klass.qualifiedName ?: "Unknown").setLevel(Logger.Level.INFO)

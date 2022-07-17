@@ -1,10 +1,12 @@
 package com.github.dannyrm.khip8.memory
 
 import com.github.dannyrm.khip8.Khip8State
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.expect
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TimerRegisterUnitTest {
     @Test
     fun `Check decrements correctly`() {

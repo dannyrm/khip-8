@@ -3,7 +3,9 @@ package com.github.dannyrm.khip8.memory
 import com.github.dannyrm.khip8.Khip8State
 import com.github.dannyrm.khip8.Khip8State.RUNNING
 import com.github.dannyrm.khip8.logger
+import org.koin.core.annotation.Single
 
+@Single
 open class TimerRegister(open var value: UByte = 0u) {
 
     open suspend fun tick() {

@@ -9,7 +9,7 @@ class StackUnitTest {
 
     @Test
     fun `push and pop`() {
-        val stack = Stack(4)
+        val stack = Stack()
         stack.push(1u)
 
         expect(1u) { stack.pop() }
@@ -23,7 +23,7 @@ class StackUnitTest {
 
     @Test
     fun `Clear with empty stack`() {
-        val stack = Stack(0)
+        val stack = Stack()
         stack.clear()
 
         expect(0) { stack.sp }
@@ -31,7 +31,7 @@ class StackUnitTest {
 
     @Test
     fun `push and pop with overflow`() {
-        val stack = Stack(4)
+        val stack = Stack()
         stack.push(0x10000u)
         stack.push(0x10200u)
 
@@ -41,7 +41,7 @@ class StackUnitTest {
 
     @Test
     fun `push and pop multiple times`() {
-        val stack = Stack(4)
+        val stack = Stack()
         stack.push(1u)
         stack.push(2u)
         stack.push(3u)
@@ -55,7 +55,7 @@ class StackUnitTest {
 
     @Test
     fun `push to full stack`() {
-        val stack = Stack(4)
+        val stack = Stack()
         stack.push(1u)
         stack.push(2u)
         stack.push(3u)
@@ -65,7 +65,7 @@ class StackUnitTest {
 
     @Test
     fun `pop from empty stack`() {
-        val stack = Stack(4)
+        val stack = Stack()
         stack.push(1u)
 
         expect(1u) { stack.pop() }
@@ -74,7 +74,7 @@ class StackUnitTest {
 
     @Test
     fun `Clear stack`() {
-        val stack = Stack(4)
+        val stack = Stack()
         stack.push(1u)
         stack.push(2u)
 
@@ -86,7 +86,7 @@ class StackUnitTest {
 
     @Test
     fun `Check toString correct with elements`() {
-        val stack = Stack(4)
+        val stack = Stack()
         stack.push(1u)
         stack.push(2u)
         stack.push(3u)
@@ -109,7 +109,7 @@ class StackUnitTest {
 
     @Test
     fun `Check toString correct without elements`() {
-        val stack = Stack(4)
+        val stack = Stack()
 
         val nl = lineSeparator()
 
@@ -118,7 +118,7 @@ class StackUnitTest {
 
     @Test
     fun `Check toString correct with empty stack`() {
-        val stack = Stack(0)
+        val stack = Stack()
 
         val nl = lineSeparator()
 

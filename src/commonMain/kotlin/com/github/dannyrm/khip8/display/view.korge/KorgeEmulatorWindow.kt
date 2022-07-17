@@ -1,37 +1,30 @@
 package com.github.dannyrm.khip8.display.view.korge
 
 import com.github.dannyrm.khip8.Khip8
-import com.github.dannyrm.khip8.config.Config
+import com.github.dannyrm.khip8.config.ConfigManager
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.display.view.korge.containers.khip8DisplayContainer
 import com.github.dannyrm.khip8.display.view.korge.containers.khip8UiContainer
 import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.input.KeyboardInput
-import com.soywiz.klock.TimeSpan
-import com.soywiz.korau.sound.AudioData
-import com.soywiz.korau.sound.AudioSamples
-import com.soywiz.korau.sound.AudioTone
-import com.soywiz.korau.sound.nativeSoundProvider
 import com.soywiz.korev.Key
 import com.soywiz.korge.input.KeysEvents
 import com.soywiz.korge.input.keys
 import com.soywiz.korge.scene.Scene
 import com.soywiz.korge.view.*
-import com.soywiz.korio.async.launch
-import com.soywiz.korio.async.launchImmediately
-import com.soywiz.korio.dynamic.KDynamic.Companion.toShort
 import com.soywiz.korio.file.std.resourcesVfs
-import kotlinx.coroutines.Dispatchers
 
-class KorgeEmulatorWindow(private val displayMemory: DisplayMemory, private val inputManager: InputManager,
-                          private val config: Config, private val khip8: Khip8): Scene() {
+class KorgeEmulatorWindow(private val displayMemory: DisplayMemory,
+                          private val inputManager: InputManager,
+                          private val khip8: Khip8,
+                          private val configManager: ConfigManager): Scene() {
     private lateinit var displayContainer: Container
     private lateinit var uiContainer: Container
 
     override suspend fun Container.sceneInit() {
         val romFiles = resourcesVfs["c8/"].listSimple()
 
-        displayContainer = khip8DisplayContainer(config, displayMemory)
+        displayContainer = khip8DisplayContainer(displayMemory, configManager)
         uiContainer = khip8UiContainer(khip8, romFiles)
 
         displayContainer

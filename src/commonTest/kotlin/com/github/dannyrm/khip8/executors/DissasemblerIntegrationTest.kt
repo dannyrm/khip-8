@@ -1,6 +1,5 @@
 package com.github.dannyrm.khip8.executors
 
-import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.cpu.InstructionDecoder
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.soywiz.korio.async.runBlockingNoSuspensions
@@ -12,9 +11,7 @@ class DissasemblerIntegrationTest {
 
     @Test
     fun `Check dissasembly of 15 puzzle`() {
-        val memoryConfig =
-            MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200, numberOfGeneralPurposeRegisters = 16)
-        val memoryManager = MemoryManager(memoryConfig = memoryConfig)
+        val memoryManager = MemoryManager()
 
         runBlockingNoSuspensions {
             memoryManager.loadProgram(

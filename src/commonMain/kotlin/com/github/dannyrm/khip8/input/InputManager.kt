@@ -1,7 +1,9 @@
 package com.github.dannyrm.khip8.input
 
 import com.github.dannyrm.khip8.logger
+import org.koin.core.annotation.Single
 
+@Single
 class InputManager {
     private var chip8InputState: UInt = 0u
     private var chip8LockedInputState: UInt = 0u

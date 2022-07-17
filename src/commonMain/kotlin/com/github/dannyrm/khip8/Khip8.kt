@@ -1,6 +1,7 @@
 package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.Khip8State.*
+import com.github.dannyrm.khip8.config.ConfigManager
 import com.github.dannyrm.khip8.cpu.Cpu
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.input.InputEvent
@@ -11,10 +12,18 @@ import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.soywiz.korio.async.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import org.koin.core.annotation.Single
 
-class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager, private val display: Display,
-            private val delayRegister: TimerRegister, private val soundRegister: SoundTimerRegister,
-            private var khip8Status: Khip8Status): InputObserver {
+@Single
+class Khip8(private val cpu: Cpu,
+            private val memoryManager: MemoryManager,
+            private val display: Display,
+            private val delayRegister: TimerRegister,
+            private val soundRegister: SoundTimerRegister,
+            private var khip8Status: Khip8Status,
+            private val numberOfCpuTicksPerPeripheralTick: Int,
+            private val delayBetweenCycles: Long
+): InputObserver {
 
 
     fun load(rom: ByteArray?) {
@@ -62,13 +71,13 @@ class Khip8(private val cpu: Cpu, private val memoryManager: MemoryManager, priv
         }
     }
 
-    suspend fun execute(cpuTicksPerPeripheralTick: Int, delayInMillis: Long) {
-        val delayPerPeripheralTick = cpuTicksPerPeripheralTick * delayInMillis
+    suspend fun execute() {
+        val delayPerPeripheralTick = numberOfCpuTicksPerPeripheralTick * delayBetweenCycles
 
         launch(Dispatchers.Default) {
             while (true) {
                 cpu.tick()
-                delay(delayInMillis)
+                delay(delayBetweenCycles)
             }
         }
 

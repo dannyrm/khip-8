@@ -1,6 +1,5 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.lineSeparator
 import com.github.dannyrm.khip8.test.utils.BaseTest
 import com.soywiz.korio.async.runBlockingNoSuspensions
@@ -17,8 +16,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Load Program Into Memory`() {
-        val memoryConfig = memoryConfig()
-        val memoryManager = MemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         val successfullyLoaded = runBlockingNoSuspensions {
             memoryManager.loadProgram(
@@ -38,8 +36,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `loadProgram returns false if data is null`() {
-        val memoryConfig = memoryConfig()
-        val memoryManager = MemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
         val successfullyLoaded = memoryManager.loadProgram(null)
 
         assertFalse { successfullyLoaded }
@@ -47,8 +44,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Fetch next instruction`() {
-        val memoryConfig = memoryConfig()
-        val memoryManager = MemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         runBlockingNoSuspensions {
             memoryManager.loadProgram(
@@ -73,8 +69,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Check correct values after loading sprite data`() {
-        val memoryConfig = memoryConfig()
-        val memoryManager = MemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
         memoryManager.loadSpriteDigitsIntoMemory()
 
         val expectedValues = ubyteArrayOf(
@@ -103,8 +98,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Check correct data for each sprite digit`() {
-        val memoryConfig = memoryConfig()
-        val memoryManager = MemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
         memoryManager.loadSpriteDigitsIntoMemory()
 
         val expectedValues = arrayOf(
@@ -139,8 +133,7 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Check skip next instruction works as expected`() {
-        val memoryConfig = memoryConfig()
-        val memoryManager = MemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
         expect(0x200u) { memoryManager.pc }
         memoryManager.skipNextInstruction()
         expect(0x202u) { memoryManager.pc }
@@ -148,12 +141,10 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `Reset memory`() {
-        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(
             stack = mockk(relaxed = true),
             ram = mockk(relaxed = true),
-            registers = mockk(relaxed = true),
-            memoryConfig = memoryConfig
+            registers = mockk(relaxed = true)
         )
         memoryManager.i = 0x50u
         memoryManager.pc = 0x800u
@@ -194,11 +185,9 @@ class MemoryManagerUnitTest: BaseTest() {
 
     @Test
     fun `check toString format`() {
-        val memoryConfig = memoryConfig()
         val memoryManager = MemoryManager(
             ram = ValidatedMemory(42),
-            memoryConfig = memoryConfig,
-            stack = Stack(16)
+            stack = Stack()
         )
 
         memoryManager.ram[24] = 0x11u
@@ -264,5 +253,3 @@ class MemoryManagerUnitTest: BaseTest() {
         return outputByteArray
     }
 }
-
-private fun memoryConfig() = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200, numberOfGeneralPurposeRegisters = 16)

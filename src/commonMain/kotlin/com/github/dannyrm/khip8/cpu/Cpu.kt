@@ -3,7 +3,7 @@ package com.github.dannyrm.khip8.cpu
 import com.github.dannyrm.khip8.Khip8State
 import com.github.dannyrm.khip8.Khip8State.PAUSED
 import com.github.dannyrm.khip8.Khip8State.RUNNING
-import com.github.dannyrm.khip8.config.MemoryConfig
+import com.github.dannyrm.khip8.config.ConfigManager
 import nibbleByteHex
 import rightByte
 import rightNibble
@@ -18,16 +18,20 @@ import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.SystemDependentInstructionFeature
+import org.koin.core.annotation.Single
 import wordHex
 import x
 import y
 
+@Single
 class Cpu(private val instructionDecoder: InstructionDecoder,
-          private val displayMemory: DisplayMemory, private val memoryManager: MemoryManager,
-          private val delayRegister: TimerRegister, private val soundRegister: SoundTimerRegister,
-          private val inputManager: InputManager, private val memoryConfig: MemoryConfig,
+          private val displayMemory: DisplayMemory,
+          private val memoryManager: MemoryManager,
+          private val delayRegister: TimerRegister,
+          private val soundRegister: SoundTimerRegister,
+          private val inputManager: InputManager,
+          private val memorySize: Int,
           var cpuState: Khip8State) {
-    private val cpuInstructionExecutor: CpuInstructionExecutor = CpuInstructionExecutor(this)
 
     fun tick() {
         // Lock inputs, so they can't change during the cycle.
@@ -38,7 +42,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
             val instruction = memoryManager.fetchNextInstruction()
 
             // DECODE & EXECUTE
-            instructionDecoder.decodeAndExecute(instruction, listOf(cpuInstructionExecutor))
+            instructionDecoder.decodeAndExecute(instruction)
         }
     }
 
@@ -608,7 +612,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
 
         for (j in 0..x.toInt()) {
             // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
-            val memoryLocation = (i.toInt() + j) % memoryConfig.memorySize
+            val memoryLocation = (i.toInt() + j) % memorySize
 
             memoryManager.ram[memoryLocation] = memoryManager.registers[j]
         }
@@ -620,7 +624,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
         // had been executed. In SCHIP, I is left unmodified."
         if (FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX55)) {
             // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
-            memoryManager.i += ((x + 1u) % memoryConfig.memorySize.toUInt())
+            memoryManager.i += ((x + 1u) % memorySize.toUInt())
         }
 
         LOG.debug { "LD [I], V${toHex(x)}" }
@@ -637,7 +641,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
 
         for (j in 0..x.toInt()) {
             // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
-            val memoryLocation = (i.toInt() + j) % memoryConfig.memorySize
+            val memoryLocation = (i.toInt() + j) % memorySize
 
             memoryManager.registers[j] = memoryManager.ram[memoryLocation]
         }
@@ -650,7 +654,7 @@ class Cpu(private val instructionDecoder: InstructionDecoder,
 
         if (FeatureManager.isEnabled(SystemDependentInstructionFeature.I_INCREMENT_FX65)) {
             // TODO: Should this wrapping behaviour actually be in the ValidatedMemory class?
-            memoryManager.i += ((x + 1u) % memoryConfig.memorySize.toUInt())
+            memoryManager.i += ((x + 1u) % memorySize.toUInt())
         }
 
         LOG.debug { "LD V${toHex(x)}, [I]" }

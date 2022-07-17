@@ -1,8 +1,8 @@
 package com.github.dannyrm.khip8.cpu
 
 import com.github.dannyrm.khip8.Khip8State.RUNNING
-import com.github.dannyrm.khip8.config.MemoryConfig
 import com.github.dannyrm.khip8.memory.MemoryManager
+import com.github.dannyrm.khip8.memory.Stack
 import com.github.dannyrm.khip8.test.utils.convertNumericParams
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.SystemMode
@@ -13,13 +13,13 @@ import kotlin.test.expect
 
 class CpuIntegrationTest: FunSpec({
 
-    fun buildMemoryManager(memoryConfig: MemoryConfig): MemoryManager {
-        return MemoryManager(memoryConfig = memoryConfig)
+    private fun memoryManager(): MemoryManager {
+        Stack(UIntArray(16) { 0u })
+        MemoryManager()
     }
 
     test("syscall works correctly") {
-        val memoryConfig = memoryConfig()
-        val memoryManager = buildMemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         // Jp to memory instruction
         memoryManager.ram[0x200] = 0x05u
@@ -34,7 +34,6 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
-            memoryConfig,
             RUNNING
         )
 
@@ -44,8 +43,7 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("jump to memory location works correctly") {
-        val memoryConfig = memoryConfig()
-        val memoryManager = buildMemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         // Jp to memory instruction
         memoryManager.ram[0x200] = 0x15u
@@ -60,7 +58,6 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
-            memoryConfig,
             RUNNING
         )
 
@@ -70,8 +67,7 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Add value to register sequence 7XKK") {
-        val memoryConfig = memoryConfig()
-        val memoryManager = buildMemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         val cpu = Cpu(
             mockk(relaxed = true),
@@ -80,7 +76,6 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
-            memoryConfig,
             RUNNING
         )
 
@@ -109,8 +104,7 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Add value with wrapping 7XKK") {
-        val memoryConfig = memoryConfig()
-        val memoryManager = buildMemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         val cpu = Cpu(
             mockk(relaxed = true),
@@ -119,7 +113,6 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
-            memoryConfig,
             RUNNING
         )
 
@@ -152,8 +145,7 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Load register to register sequence 8XK0") {
-        val memoryConfig = memoryConfig()
-        val memoryManager = buildMemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         val cpu = Cpu(
             mockk(relaxed = true),
@@ -162,7 +154,6 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
-            memoryConfig,
             RUNNING
         )
 
@@ -205,8 +196,7 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Load general registers into memory FX55") {
-        val memoryConfig = memoryConfig()
-        val memoryManager = buildMemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         val cpu = Cpu(
             mockk(relaxed = true),
@@ -215,7 +205,6 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
-            memoryConfig,
             RUNNING
         )
 
@@ -239,8 +228,7 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Load memory into general registers FX65") {
-        val memoryConfig = memoryConfig()
-        val memoryManager = buildMemoryManager(memoryConfig)
+        val memoryManager = MemoryManager()
 
         val cpu = Cpu(
             mockk(relaxed = true),
@@ -249,7 +237,6 @@ class CpuIntegrationTest: FunSpec({
             mockk(relaxed = true),
             mockk(relaxed = true),
             mockk(relaxed = true),
-            memoryConfig,
             RUNNING
         )
 
@@ -304,8 +291,7 @@ class CpuIntegrationTest: FunSpec({
                 input
             )
 
-            val memoryConfig = memoryConfig()
-            val memoryManager = buildMemoryManager(memoryConfig)
+            val memoryManager = MemoryManager()
 
             val cpu = Cpu(
                 mockk(relaxed = true),
@@ -314,7 +300,6 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
-                memoryConfig,
                 RUNNING
             )
 
@@ -330,8 +315,7 @@ class CpuIntegrationTest: FunSpec({
         withData("CHIP_8_MODE", "CHIP_48_MODE") { input ->
             val systemMode = SystemMode.valueOf(input)
 
-            val memoryConfig = memoryConfig()
-            val memoryManager = buildMemoryManager(memoryConfig)
+            val memoryManager = MemoryManager()
 
             val cpu = Cpu(
                 mockk(relaxed = true),
@@ -340,7 +324,6 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
-                memoryConfig,
                 RUNNING
             )
 
@@ -374,8 +357,7 @@ class CpuIntegrationTest: FunSpec({
         withData("CHIP_8_MODE", "CHIP_48_MODE") { input ->
             val systemMode = SystemMode.valueOf(input)
 
-            val memoryConfig = memoryConfig()
-            val memoryManager = buildMemoryManager(memoryConfig)
+            val memoryManager = MemoryManager()
 
             val cpu = Cpu(
                 mockk(relaxed = true),
@@ -384,7 +366,6 @@ class CpuIntegrationTest: FunSpec({
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
-                memoryConfig,
                 RUNNING
             )
 
@@ -438,5 +419,3 @@ class CpuIntegrationTest: FunSpec({
         }
     }
 })
-
-private fun memoryConfig() = MemoryConfig(memorySize = 4096, stackSize = 16, interpreterStartAddress = 0x0, programStartAddress = 0x200, numberOfGeneralPurposeRegisters = 16)
