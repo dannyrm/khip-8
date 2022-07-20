@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.Khip8State
+import com.github.dannyrm.khip8.RunningState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -47,14 +47,14 @@ class TimerRegisterUnitTest {
             expect(4u) { timerRegister.value }
             timerRegister.tick()
             expect(3u) { timerRegister.value }
-            timerRegister.state = Khip8State.PAUSED
+            timerRegister.state = RunningState.PAUSED
 
             timerRegister.tick()
             expect(3u) { timerRegister.value }
             timerRegister.tick()
             expect(3u) { timerRegister.value }
 
-            timerRegister.state = Khip8State.RUNNING
+            timerRegister.state = RunningState.RUNNING
             timerRegister.tick()
             expect(2u) { timerRegister.value }
             timerRegister.tick()
@@ -69,7 +69,7 @@ class TimerRegisterUnitTest {
         val timerRegister = TimerRegister()
         timerRegister.value = 54u
 
-        timerRegister.state = Khip8State.STOPPED
+        timerRegister.state = RunningState.STOPPED
 
         expect(0u) { timerRegister.value }
     }

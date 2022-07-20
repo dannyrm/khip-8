@@ -1,6 +1,5 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.config.ConfigManager
 import com.github.dannyrm.khip8.lineSeparator
 import createBigEndianWordFromBytes
 import org.koin.core.annotation.Single

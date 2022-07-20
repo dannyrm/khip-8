@@ -1,18 +1,21 @@
 package com.github.dannyrm.khip8.executors
 
 import com.github.dannyrm.khip8.cpu.Cpu
-import com.github.dannyrm.khip8.test.utils.BaseTest
-import io.kotest.matchers.throwable.shouldHaveMessage
+import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
-class CpuInstructionExecutorUnitTest: BaseTest() {
+class CpuInstructionExecutorUnitTest {
     private lateinit var instructionExecutor: CpuInstructionExecutor
 
     @MockK(relaxed = true) private lateinit var cpu: Cpu
+
+    @BeforeTest
+    fun setup() {
+        MockKAnnotations.init(this)
+    }
 
     @BeforeTest
     fun `Setup instruction executor`() {

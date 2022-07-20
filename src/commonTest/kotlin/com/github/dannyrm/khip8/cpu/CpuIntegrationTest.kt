@@ -1,83 +1,89 @@
 package com.github.dannyrm.khip8.cpu
 
-import com.github.dannyrm.khip8.Khip8State.RUNNING
+import com.github.dannyrm.khip8.Khip8Status
+import com.github.dannyrm.khip8.RunningState.RUNNING
+import com.github.dannyrm.khip8.config.ConfigManager
+import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.Stack
+import com.github.dannyrm.khip8.memory.ValidatedMemory
 import com.github.dannyrm.khip8.test.utils.convertNumericParams
 import com.github.dannyrm.khip8.util.FeatureManager
 import com.github.dannyrm.khip8.util.SystemMode
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.mockk
+import org.koin.core.qualifier.named
 import kotlin.test.expect
 
 class CpuIntegrationTest: FunSpec({
 
-    private fun memoryManager(): MemoryManager {
-        Stack(UIntArray(16) { 0u })
-        MemoryManager()
+    fun memoryManager(): MemoryManager {
+        val stack = Stack(16)
+        val ram = ValidatedMemory(4096)
+        val registers = ValidatedMemory(16)
+
+        return MemoryManager(stack, ram, registers, 512, 0)
+    }
+
+    fun cpu(memoryManager: MemoryManager): Cpu {
+        return Cpu(
+            mockk(relaxed = true),
+            memoryManager,
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            4096,
+            RUNNING,
+            RUNNING
+        )
+    }
+
+    fun instructionProcessor(memoryManager: MemoryManager, cpu: Cpu): InstructionProcessor {
+        val cpuInstructionExecutor = CpuInstructionExecutor(cpu)
+
+        return InstructionProcessor(
+            mockk(relaxed = true),
+            memoryManager,
+            RUNNING,
+            listOf(cpuInstructionExecutor)
+        )
     }
 
     test("syscall works correctly") {
-        val memoryManager = MemoryManager()
+        val memoryManager = memoryManager()
 
         // Jp to memory instruction
         memoryManager.ram[0x200] = 0x05u
         memoryManager.ram[0x201] = 0x55u
 
-        val instructionDecoder = InstructionDecoder()
+        val cpu = cpu(memoryManager)
+        val instructionProcessor = instructionProcessor(memoryManager, cpu)
 
-        val cpu = Cpu(
-            instructionDecoder,
-            mockk(relaxed = true),
-            memoryManager,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            RUNNING
-        )
-
-        cpu.tick()
+        instructionProcessor.tick()
 
         expect(0x202u) { memoryManager.pc }
     }
 
     test("jump to memory location works correctly") {
-        val memoryManager = MemoryManager()
+        val memoryManager = memoryManager()
 
         // Jp to memory instruction
         memoryManager.ram[0x200] = 0x15u
         memoryManager.ram[0x201] = 0x55u
 
-        val instructionDecoder = InstructionDecoder()
+        val cpu = cpu(memoryManager)
+        val instructionProcessor = instructionProcessor(memoryManager, cpu)
 
-        val cpu = Cpu(
-            instructionDecoder,
-            mockk(relaxed = true),
-            memoryManager,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            RUNNING
-        )
-
-        cpu.tick()
+        instructionProcessor.tick()
 
         expect(0x555u) { memoryManager.pc }
     }
 
     test("Add value to register sequence 7XKK") {
-        val memoryManager = MemoryManager()
+        val memoryManager = memoryManager()
 
-        val cpu = Cpu(
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            memoryManager,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            RUNNING
-        )
+        val cpu = cpu(memoryManager)
 
         val instruction1 = 0x7510
         val instruction2 = 0x7F05
@@ -104,17 +110,9 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Add value with wrapping 7XKK") {
-        val memoryManager = MemoryManager()
+        val memoryManager = memoryManager()
 
-        val cpu = Cpu(
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            memoryManager,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            RUNNING
-        )
+        val cpu = cpu(memoryManager)
 
         val instruction1 = 0x7503
         val addFFInstruction = 0x75FF
@@ -145,17 +143,9 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Load register to register sequence 8XK0") {
-        val memoryManager = MemoryManager()
+        val memoryManager = memoryManager()
 
-        val cpu = Cpu(
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            memoryManager,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            RUNNING
-        )
+        val cpu = cpu(memoryManager)
 
         val instruction0 = 0x7510u
         val instruction01 = 0x79FFu
@@ -196,17 +186,9 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Load general registers into memory FX55") {
-        val memoryManager = MemoryManager()
+        val memoryManager = memoryManager()
 
-        val cpu = Cpu(
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            memoryManager,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            RUNNING
-        )
+        val cpu = cpu(memoryManager)
 
         memoryManager.registers[0x0] = 0u
         memoryManager.registers[0x1] = 1u
@@ -228,17 +210,9 @@ class CpuIntegrationTest: FunSpec({
     }
 
     test("Load memory into general registers FX65") {
-        val memoryManager = MemoryManager()
+        val memoryManager = memoryManager()
 
-        val cpu = Cpu(
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            memoryManager,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            RUNNING
-        )
+        val cpu = cpu(memoryManager)
 
         memoryManager.registers[0x0] = 9u
         memoryManager.registers[0x1] = 9u
@@ -291,17 +265,9 @@ class CpuIntegrationTest: FunSpec({
                 input
             )
 
-            val memoryManager = MemoryManager()
+            val memoryManager = memoryManager()
 
-            val cpu = Cpu(
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                memoryManager,
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                RUNNING
-            )
+            val cpu = cpu(memoryManager)
 
             memoryManager.registers[registerNumber] = registerValue.toUByte()
 
@@ -315,17 +281,9 @@ class CpuIntegrationTest: FunSpec({
         withData("CHIP_8_MODE", "CHIP_48_MODE") { input ->
             val systemMode = SystemMode.valueOf(input)
 
-            val memoryManager = MemoryManager()
+            val memoryManager = memoryManager()
 
-            val cpu = Cpu(
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                memoryManager,
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                RUNNING
-            )
+            val cpu = cpu(memoryManager)
 
             try {
                 FeatureManager.systemMode = systemMode
@@ -357,17 +315,9 @@ class CpuIntegrationTest: FunSpec({
         withData("CHIP_8_MODE", "CHIP_48_MODE") { input ->
             val systemMode = SystemMode.valueOf(input)
 
-            val memoryManager = MemoryManager()
+            val memoryManager = memoryManager()
 
-            val cpu = Cpu(
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                memoryManager,
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                mockk(relaxed = true),
-                RUNNING
-            )
+            val cpu = cpu(memoryManager)
 
             try {
                 FeatureManager.systemMode = systemMode

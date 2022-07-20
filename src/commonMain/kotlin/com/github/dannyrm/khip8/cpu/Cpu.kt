@@ -1,17 +1,19 @@
 package com.github.dannyrm.khip8.cpu
 
-import com.github.dannyrm.khip8.Khip8State
-import com.github.dannyrm.khip8.Khip8State.PAUSED
-import com.github.dannyrm.khip8.Khip8State.RUNNING
-import com.github.dannyrm.khip8.config.ConfigManager
+import com.github.dannyrm.khip8.RunningState
+import com.github.dannyrm.khip8.RunningState.PAUSED
+import com.github.dannyrm.khip8.RunningState.STOPPED
 import nibbleByteHex
 import rightByte
 import rightNibble
 import rightNibbleByte
 import toHex
 import com.github.dannyrm.khip8.display.model.DisplayMemory
-import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
+import com.github.dannyrm.khip8.event.Khip8Event
+import com.github.dannyrm.khip8.event.Khip8Observer
+import com.github.dannyrm.khip8.input.event.InputEvent
 import com.github.dannyrm.khip8.input.InputManager
+import com.github.dannyrm.khip8.input.event.InputObserver
 import com.github.dannyrm.khip8.logger
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
@@ -24,25 +26,24 @@ import x
 import y
 
 @Single
-class Cpu(private val instructionDecoder: InstructionDecoder,
-          private val displayMemory: DisplayMemory,
+class Cpu(private val displayMemory: DisplayMemory,
           private val memoryManager: MemoryManager,
           private val delayRegister: TimerRegister,
           private val soundRegister: SoundTimerRegister,
           private val inputManager: InputManager,
           private val memorySize: Int,
-          var cpuState: Khip8State) {
+          internal var cpuState: RunningState,
+          private var khip8RunningState: RunningState): InputObserver, Khip8Observer {
 
-    fun tick() {
-        // Lock inputs, so they can't change during the cycle.
-        inputManager.lockInputs()
 
-        if (cpuState == RUNNING) {
-            // FETCH
-            val instruction = memoryManager.fetchNextInstruction()
+    override fun receiveEvent(khip8Event: Khip8Event) {
+        khip8RunningState = khip8Event.runningState
+    }
 
-            // DECODE & EXECUTE
-            instructionDecoder.decodeAndExecute(instruction)
+    override fun receiveEvent(inputEvent: InputEvent) {
+        // We only want to unpause the CPU if the emulator is running.
+        if (inputEvent.isActive && khip8RunningState == RunningState.RUNNING) {
+            cpuState = RunningState.RUNNING
         }
     }
 

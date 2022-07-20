@@ -1,11 +1,12 @@
 package com.github.dannyrm.khip8
 
-import com.github.dannyrm.khip8.Khip8State.*
-import com.github.dannyrm.khip8.config.ConfigManager
-import com.github.dannyrm.khip8.cpu.Cpu
+import com.github.dannyrm.khip8.RunningState.*
+import com.github.dannyrm.khip8.cpu.InstructionProcessor
 import com.github.dannyrm.khip8.display.model.Display
-import com.github.dannyrm.khip8.input.InputEvent
-import com.github.dannyrm.khip8.input.InputObserver
+import com.github.dannyrm.khip8.event.Khip8Event
+import com.github.dannyrm.khip8.event.Khip8Observer
+import com.github.dannyrm.khip8.input.InputManager
+import com.github.dannyrm.khip8.input.event.InputObserver
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
@@ -15,35 +16,32 @@ import kotlinx.coroutines.delay
 import org.koin.core.annotation.Single
 
 @Single
-class Khip8(private val cpu: Cpu,
+class Khip8(private val instructionProcessor: InstructionProcessor,
             private val memoryManager: MemoryManager,
             private val display: Display,
             private val delayRegister: TimerRegister,
             private val soundRegister: SoundTimerRegister,
-            private var khip8Status: Khip8Status,
             private val numberOfCpuTicksPerPeripheralTick: Int,
-            private val delayBetweenCycles: Long
-): InputObserver {
+            private val delayBetweenCycles: Long,
+            internal var runningState: RunningState) {
+    private val observers: MutableList<Khip8Observer> = mutableListOf()
 
+    fun subscribe(khip8Observer: Khip8Observer) {
+        observers.add(khip8Observer)
 
-    fun load(rom: ByteArray?) {
-        khip8Status.loadedRom = rom
-        reset()
+        LOG.info { "Added new observer: $khip8Observer to Khip8" }
     }
 
-    override fun receiveEvent(inputEvent: InputEvent) {
-        // We only want to unpause the CPU if the emulator is running.
-        if (inputEvent.isActive && khip8Status.khip8State == RUNNING) {
-            cpu.cpuState = RUNNING
-            logSystemState()
-        }
+    fun load(rom: ByteArray?) {
+        Khip8Status.loadedRom = rom
+        reset()
     }
 
     /*
      * Returns true if the emulator has entered a pause state, false otherwise.
      */
     fun togglePause(): Boolean =
-        when (khip8Status.khip8State) {
+        when (runningState) {
             RUNNING -> {
                 setSystemState(PAUSED)
 
@@ -66,7 +64,7 @@ class Khip8(private val cpu: Cpu,
         display.clear()
         memoryManager.resetMemory()
 
-        if (memoryManager.loadProgram(khip8Status.loadedRom)) {
+        if (memoryManager.loadProgram(Khip8Status.loadedRom)) {
             setSystemState(RUNNING)
         }
     }
@@ -76,7 +74,7 @@ class Khip8(private val cpu: Cpu,
 
         launch(Dispatchers.Default) {
             while (true) {
-                cpu.tick()
+                instructionProcessor.tick()
                 delay(delayBetweenCycles)
             }
         }
@@ -96,18 +94,12 @@ class Khip8(private val cpu: Cpu,
         }
     }
 
-    private fun setSystemState(state: Khip8State) {
-        khip8Status.khip8State = state
+    private fun setSystemState(state: RunningState) {
+        runningState = state
 
-        cpu.cpuState = state
-        delayRegister.state = state
-        soundRegister.state = state
-
-        logSystemState()
-    }
-
-    private fun logSystemState() {
-        LOG.debug { "System State: { Console: ${khip8Status.khip8State}, CPU: ${cpu.cpuState}, Delay Timer: ${delayRegister.state}, Sound Timer: ${soundRegister.state} }" }
+        observers.forEach {
+            it.receiveEvent(Khip8Event(runningState))
+        }
     }
 
     companion object { private val LOG = logger(this::class) }

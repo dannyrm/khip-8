@@ -43,6 +43,8 @@ class DissassemblerInstructionExecutor(val codeListing: MutableList<String> = mu
         codeListing.add("$mnemonic V${toHexMinimal(x(value))}, $suffix")
     }
 
+    override fun executionPaused(): Boolean = false
+
     // mnemonic only Instructions
     override fun clearScreen(value: UInt) = mnemonicOnlyInstruction("CLS")
     override fun doReturn(value: UInt) = mnemonicOnlyInstruction("RET")

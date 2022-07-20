@@ -1,6 +1,8 @@
 package com.github.dannyrm.khip8.executors
 
 interface InstructionExecutor {
+    fun executionPaused(): Boolean
+
     fun sysCall(value: UInt)
     fun clearScreen(value: UInt)
     fun doReturn(value: UInt)

@@ -1,20 +1,26 @@
 package com.github.dannyrm.khip8.display.model
 
 import com.github.dannyrm.khip8.display.view.Ui
-import com.github.dannyrm.khip8.test.utils.BaseTest
+import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.expect
 
-class DisplayUnitTest: BaseTest() {
+class DisplayUnitTest {
     @MockK(relaxed = true) private lateinit var displayMemory: DisplayMemory
     @MockK(relaxed = true) private lateinit var ui: Ui
 
     @InjectMockKs
     private lateinit var display: Display
+
+    @BeforeTest
+    fun setup() {
+        MockKAnnotations.init(this)
+    }
 
     @Test
     fun `Clearing the display clears the display memory`() {

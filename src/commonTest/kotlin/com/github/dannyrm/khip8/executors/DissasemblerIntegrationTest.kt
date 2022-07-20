@@ -1,9 +1,14 @@
 package com.github.dannyrm.khip8.executors
 
-import com.github.dannyrm.khip8.cpu.InstructionDecoder
+import com.github.dannyrm.khip8.RunningState
+import com.github.dannyrm.khip8.cpu.Cpu
+import com.github.dannyrm.khip8.cpu.InstructionProcessor
 import com.github.dannyrm.khip8.memory.MemoryManager
+import com.github.dannyrm.khip8.memory.Stack
+import com.github.dannyrm.khip8.memory.ValidatedMemory
 import com.soywiz.korio.async.runBlockingNoSuspensions
 import com.soywiz.korio.file.std.resourcesVfs
+import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.expect
 
@@ -11,7 +16,31 @@ class DissasemblerIntegrationTest {
 
     @Test
     fun `Check dissasembly of 15 puzzle`() {
-        val memoryManager = MemoryManager()
+        val stack = Stack(16)
+        val ram = ValidatedMemory(4096)
+        val registers = ValidatedMemory(16)
+
+        val memoryManager = MemoryManager(stack, ram, registers, 512, 0)
+
+        val cpu = Cpu(
+            mockk(relaxed = true),
+            memoryManager,
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            4096,
+            RunningState.RUNNING,
+            RunningState.RUNNING
+        )
+
+        val dissassemblerInstructionExecutor = DissassemblerInstructionExecutor()
+
+        val instructionProcessor = InstructionProcessor(
+            mockk(relaxed = true),
+            memoryManager,
+            RunningState.RUNNING,
+            listOf(dissassemblerInstructionExecutor)
+        )
 
         runBlockingNoSuspensions {
             memoryManager.loadProgram(
@@ -19,7 +48,7 @@ class DissasemblerIntegrationTest {
             )
         }
 
-        execute(memoryManager, InstructionDecoder(), DissassemblerInstructionExecutor(),
+        execute(memoryManager, instructionProcessor, dissassemblerInstructionExecutor,
             listOf(
                 "CLS",
                 "LD VC, 0",
@@ -156,11 +185,11 @@ class DissasemblerIntegrationTest {
                 "SYS B0F"))
     }
 
-    private fun execute(memoryManager: MemoryManager, instructionDecoder: InstructionDecoder,
+    private fun execute(memoryManager: MemoryManager, instructionProcessor: InstructionProcessor,
                         dissassemblerInstructionExecutor: DissassemblerInstructionExecutor,
                         expectedValues: List<String>) {
         for (i in expectedValues.indices) {
-            instructionDecoder.decodeAndExecute(memoryManager.fetchNextInstruction(), instructionExecutors = listOf(dissassemblerInstructionExecutor))
+            instructionProcessor.decodeAndExecute(memoryManager.fetchNextInstruction())
 
             expect(expectedValues[i]) { dissassemblerInstructionExecutor.codeListing[i] }
         }

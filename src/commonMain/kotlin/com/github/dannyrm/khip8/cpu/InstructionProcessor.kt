@@ -1,17 +1,46 @@
 package com.github.dannyrm.khip8.cpu
 
+import com.github.dannyrm.khip8.RunningState
+import com.github.dannyrm.khip8.Khip8Status
+import com.github.dannyrm.khip8.event.Khip8Event
+import com.github.dannyrm.khip8.event.Khip8Observer
 import leftNibble
 import rightByte
 import rightNibble
 import com.github.dannyrm.khip8.executors.InstructionExecutor
+import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.logger
+import com.github.dannyrm.khip8.memory.MemoryManager
 import org.koin.core.annotation.Single
 import wordHex
 
 @Single
-class InstructionDecoder(private val instructionExecutors: List<InstructionExecutor>) {
+class InstructionProcessor(private val inputManager: InputManager,
+                           private val memoryManager: MemoryManager,
+                           private var khip8RunningState: RunningState,
+                           private val instructionExecutors: List<InstructionExecutor>): Khip8Observer {
+
+    override fun receiveEvent(khip8Event: Khip8Event) {
+        khip8RunningState = khip8Event.runningState
+    }
+
+    fun tick() {
+        // Lock inputs, so they can't change during the cycle.
+        inputManager.lockInputs()
+
+        if (khip8RunningState == RunningState.RUNNING) {
+            // FETCH
+            val instruction = memoryManager.fetchNextInstruction()
+
+            // DECODE & EXECUTE
+            decodeAndExecute(instruction)
+        }
+    }
+
     fun decodeAndExecute(instruction: UInt) {
         LOG.trace { "Decoding instruction: ${wordHex(instruction)}" }
+
+        val instructionExecutors = instructionExecutors.filter { !it.executionPaused() }
 
         when (instruction.toInt()) {
             0x00E0 -> instructionExecutors.forEach { it.clearScreen(instruction) }
@@ -23,23 +52,23 @@ class InstructionDecoder(private val instructionExecutors: List<InstructionExecu
                     0x2 -> instructionExecutors.forEach { it.call(instruction) }
                     0x3 -> instructionExecutors.forEach { it.skipIfRegisterAndMemoryEqual(instruction) }
                     0x4 -> instructionExecutors.forEach { it.skipIfRegisterAndMemoryNotEqual(instruction) }
-                    0x5 -> decode0x5Instruction(instruction)
+                    0x5 -> decode0x5Instruction(instruction, instructionExecutors)
                     0x6 -> instructionExecutors.forEach { it.loadMemoryIntoRegister(instruction) }
                     0x7 -> instructionExecutors.forEach { it.addValueToRegister(instruction) }
-                    0x8 -> decode0x8Instruction(instruction)
-                    0x9 -> decode0x9Instruction(instruction)
+                    0x8 -> decode0x8Instruction(instruction, instructionExecutors)
+                    0x9 -> decode0x9Instruction(instruction, instructionExecutors)
                     0xA -> instructionExecutors.forEach { it.loadMemoryIntoIRegister(instruction) }
                     0xB -> instructionExecutors.forEach { it.jumpWithOffset(instruction) }
                     0xC -> instructionExecutors.forEach { it.random(instruction) }
                     0xD -> instructionExecutors.forEach { it.draw(instruction) }
-                    0xE -> decode0xEInstruction(instruction)
-                    0xF -> decode0xFInstruction(instruction)
+                    0xE -> decode0xEInstruction(instruction, instructionExecutors)
+                    0xF -> decode0xFInstruction(instruction, instructionExecutors)
                 }
             }
         }
     }
 
-    private fun decode0x5Instruction(instruction: UInt) {
+    private fun decode0x5Instruction(instruction: UInt, instructionExecutors: List<InstructionExecutor>) {
         if (rightNibble(instruction).toInt() == 0) {
             instructionExecutors.forEach { it.skipIfRegisterAndRegisterEqual(instruction) }
         } else {
@@ -47,7 +76,7 @@ class InstructionDecoder(private val instructionExecutors: List<InstructionExecu
         }
     }
 
-    private fun decode0x8Instruction(instruction: UInt) {
+    private fun decode0x8Instruction(instruction: UInt, instructionExecutors: List<InstructionExecutor>) {
         when (rightNibble(instruction).toInt()) {
             0x0 -> instructionExecutors.forEach { it.loadRegisterIntoRegister(instruction) }
             0x1 -> instructionExecutors.forEach { it.or(instruction) }
@@ -62,7 +91,7 @@ class InstructionDecoder(private val instructionExecutors: List<InstructionExecu
         }
     }
 
-    private fun decode0x9Instruction(instruction: UInt) {
+    private fun decode0x9Instruction(instruction: UInt, instructionExecutors: List<InstructionExecutor>) {
         if (rightNibble(instruction).toInt() == 0) {
             instructionExecutors.forEach { it.skipIfRegisterAndRegisterNotEqual(instruction) }
         } else {
@@ -70,7 +99,7 @@ class InstructionDecoder(private val instructionExecutors: List<InstructionExecu
         }
     }
 
-    private fun decode0xEInstruction(instruction: UInt) {
+    private fun decode0xEInstruction(instruction: UInt, instructionExecutors: List<InstructionExecutor>) {
         when(rightByte(instruction).toInt()) {
             0x9E -> instructionExecutors.forEach { it.skipIfKeyPressed(instruction) }
             0xA1 -> instructionExecutors.forEach { it.skipIfKeyNotPressed(instruction) }
@@ -78,7 +107,7 @@ class InstructionDecoder(private val instructionExecutors: List<InstructionExecu
         }
     }
 
-    private fun decode0xFInstruction(instruction: UInt) {
+    private fun decode0xFInstruction(instruction: UInt, instructionExecutors: List<InstructionExecutor>) {
         when(rightByte(instruction).toInt()) {
             0x07 -> instructionExecutors.forEach { it.setRegisterToDelayTimerValue(instruction) }
             0x0A -> instructionExecutors.forEach { it.waitForKeyPress(instruction) }

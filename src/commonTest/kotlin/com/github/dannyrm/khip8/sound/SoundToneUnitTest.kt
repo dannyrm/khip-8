@@ -100,7 +100,7 @@ class SoundToneUnitTest {
     @Test
     fun `Check audio stream creation`() {
         runTest {
-            val soundTone = SoundTone(10_000.0)
+            val soundTone = SoundTone(2000.0,10_000.0)
 
             assertEquals(2000, soundTone.audioStream.frequency)
 

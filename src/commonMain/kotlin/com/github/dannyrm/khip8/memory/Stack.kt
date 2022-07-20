@@ -9,7 +9,7 @@ import wordHex
 @Single
 data class Stack(private val stackSize: Int) {
     private val stack: UIntArray = UIntArray(stackSize) { 0u }
-    private var sp: Int = 0 // 8 bits, stack pointer, represented as an int for simplicity
+    internal var sp: Int = 0 // 8 bits, stack pointer, represented as an int for simplicity
 
     fun push(value: UInt) {
         if (sp+1 > stack.size) {

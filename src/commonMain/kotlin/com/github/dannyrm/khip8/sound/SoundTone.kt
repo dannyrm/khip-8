@@ -38,10 +38,8 @@ class SoundTone internal constructor(internal val audioStream: PlatformAudioOutp
     companion object {
         private val LOG = logger(this::class)
 
-        suspend operator fun invoke(configManager: ConfigManager, toneLength: Double): SoundTone {
-            val frequency = configManager.soundConfig().toneFrequency
-
-            return SoundTone(nativeSoundProvider.createAudioStream(frequency.toInt()), AudioTone.generate(TimeSpan(toneLength), frequency))
+        suspend operator fun invoke(toneFrequency: Double, toneLength: Double): SoundTone {
+            return SoundTone(nativeSoundProvider.createAudioStream(toneFrequency.toInt()), AudioTone.generate(TimeSpan(toneLength), toneFrequency))
         }
     }
 }

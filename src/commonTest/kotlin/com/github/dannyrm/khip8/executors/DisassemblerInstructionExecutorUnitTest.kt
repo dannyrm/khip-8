@@ -1,12 +1,18 @@
 package com.github.dannyrm.khip8.executors
 
-import com.github.dannyrm.khip8.test.utils.BaseTest
+import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.expect
 
-class DisassemblerInstructionExecutorUnitTest: BaseTest() {
+class DisassemblerInstructionExecutorUnitTest {
+    @BeforeTest
+    fun setup() {
+        MockKAnnotations.init(this)
+    }
+
     @InjectMockKs
     private lateinit var disassemblerInstructionExecutor: DissassemblerInstructionExecutor
 

@@ -1,6 +1,7 @@
 package com.github.dannyrm.khip8.input
 
-import com.github.dannyrm.khip8.Khip8
+import com.github.dannyrm.khip8.cpu.Cpu
+import com.github.dannyrm.khip8.input.event.InputEvent
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.mockk
@@ -12,24 +13,24 @@ class InputManagerUnitTest: FunSpec({
 
     context("Single key is pressed") {
         withData(KeyboardInput.values().asSequence()) { chip8Input: KeyboardInput ->
-            val khip8 = mockk<Khip8>(relaxed = true)
+            val cpu = mockk<Cpu>(relaxed = true)
             val inputManager = InputManager()
-            inputManager.subscribe(khip8)
+            inputManager.subscribe(cpu)
 
             inputManager[chip8Input] = true
             inputManager.lockInputs()
 
             assertTrue { inputManager.isActive(chip8Input.ordinal) }
 
-            verify(exactly = 1) { khip8.receiveEvent(InputEvent(chip8Input, true)) }
+            verify(exactly = 1) { cpu.receiveEvent(InputEvent(chip8Input, true)) }
         }
     }
 
     context("Single key is pressed then released") {
         withData(KeyboardInput.values().asSequence()) { chip8Input: KeyboardInput ->
-            val khip8 = mockk<Khip8>(relaxed = true)
+            val cpu = mockk<Cpu>(relaxed = true)
             val inputManager = InputManager()
-            inputManager.subscribe(khip8)
+            inputManager.subscribe(cpu)
 
             inputManager[chip8Input] = true
             inputManager[chip8Input] = false
@@ -37,14 +38,14 @@ class InputManagerUnitTest: FunSpec({
 
             assertFalse { inputManager.isActive(chip8Input.ordinal) }
 
-            verify(exactly = 1) { khip8.receiveEvent(InputEvent(chip8Input, true)) }
+            verify(exactly = 1) { cpu.receiveEvent(InputEvent(chip8Input, true)) }
         }
     }
 
     test("Multiple keys are pressed") {
-        val khip8 = mockk<Khip8>(relaxed = true)
+        val cpu = mockk<Cpu>(relaxed = true)
         val inputManager = InputManager()
-        inputManager.subscribe(khip8)
+        inputManager.subscribe(cpu)
 
         inputManager[KeyboardInput.D] = true
         inputManager[KeyboardInput.ZERO] = true
@@ -68,15 +69,15 @@ class InputManagerUnitTest: FunSpec({
         assertFalse { inputManager.isActive(KeyboardInput.E.ordinal) }
         assertFalse { inputManager.isActive(KeyboardInput.F.ordinal) }
 
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.D, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.D, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
     }
 
     test("Multiple keys are pressed then released") {
-        val khip8 = mockk<Khip8>(relaxed = true)
+        val cpu = mockk<Cpu>(relaxed = true)
         val inputManager = InputManager()
-        inputManager.subscribe(khip8)
+        inputManager.subscribe(cpu)
 
         inputManager[KeyboardInput.D] = true
         inputManager[KeyboardInput.ZERO] = true
@@ -103,18 +104,18 @@ class InputManagerUnitTest: FunSpec({
         assertFalse { inputManager.isActive(KeyboardInput.E.ordinal) }
         assertTrue { inputManager.isActive(KeyboardInput.F.ordinal) }
 
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.D, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.ZERO, false)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.F, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.ONE, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.D, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.ZERO, false)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.F, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.ONE, true)) }
     }
 
     test("Pressed keys are not reflected if inputs are not locked") {
-        val khip8 = mockk<Khip8>(relaxed = true)
+        val cpu = mockk<Cpu>(relaxed = true)
         val inputManager = InputManager()
-        inputManager.subscribe(khip8)
+        inputManager.subscribe(cpu)
 
         inputManager[KeyboardInput.D] = true
         inputManager[KeyboardInput.ZERO] = true
@@ -124,15 +125,15 @@ class InputManagerUnitTest: FunSpec({
         assertFalse { inputManager.isActive(KeyboardInput.EIGHT.ordinal) }
         assertFalse { inputManager.isActive(KeyboardInput.D.ordinal) }
 
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.D, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.D, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
     }
 
     test("Pressed keys after lock are not reflected") {
-        val khip8 = mockk<Khip8>(relaxed = true)
+        val cpu = mockk<Cpu>(relaxed = true)
         val inputManager = InputManager()
-        inputManager.subscribe(khip8)
+        inputManager.subscribe(cpu)
 
         inputManager[KeyboardInput.D] = true
         inputManager[KeyboardInput.ZERO] = true
@@ -151,8 +152,8 @@ class InputManagerUnitTest: FunSpec({
 
         assertFalse { inputManager.isActive(KeyboardInput.D.ordinal) }
 
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.D, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
-        verify(exactly = 1) { khip8.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.D, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.ZERO, true)) }
+        verify(exactly = 1) { cpu.receiveEvent(InputEvent(KeyboardInput.EIGHT, true)) }
     }
 })

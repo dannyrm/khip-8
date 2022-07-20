@@ -1,10 +1,9 @@
 package com.github.dannyrm.khip8.sound
 
-import com.github.dannyrm.khip8.Khip8State
+import com.github.dannyrm.khip8.RunningState
 import com.soywiz.korio.async.runBlockingNoJs
 import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.expect
@@ -46,7 +45,7 @@ class SoundTimerRegisterUnitTest {
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = 54u
 
-        timerRegister.state = Khip8State.STOPPED
+        timerRegister.state = RunningState.STOPPED
 
         expect(0u) { timerRegister.value }
     }
@@ -58,7 +57,7 @@ class SoundTimerRegisterUnitTest {
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = 54u
 
-        timerRegister.state = Khip8State.PAUSED
+        timerRegister.state = RunningState.PAUSED
 
         expect(54u) { timerRegister.value }
     }
@@ -70,7 +69,7 @@ class SoundTimerRegisterUnitTest {
         val timerRegister = SoundTimerRegister(soundGenerator = soundGenerator)
         timerRegister.value = 54u
 
-        timerRegister.state = Khip8State.RUNNING
+        timerRegister.state = RunningState.RUNNING
 
         expect(54u) { timerRegister.value }
     }
@@ -111,7 +110,7 @@ class SoundTimerRegisterUnitTest {
         coVerify { soundGenerator.start() }
         coVerify(inverse = true) { soundGenerator.stop() }
 
-        timerRegister.state = Khip8State.STOPPED
+        timerRegister.state = RunningState.STOPPED
 
         runTest {
             timerRegister.tick()
@@ -133,7 +132,7 @@ class SoundTimerRegisterUnitTest {
 
         coVerify { soundGenerator.start() }
 
-        timerRegister.state = Khip8State.PAUSED
+        timerRegister.state = RunningState.PAUSED
 
         runTest {
             timerRegister.tick()

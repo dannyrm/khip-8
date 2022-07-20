@@ -1,8 +1,11 @@
 package com.github.dannyrm.khip8.executors
 
+import com.github.dannyrm.khip8.RunningState
 import com.github.dannyrm.khip8.cpu.Cpu
 
 class CpuInstructionExecutor(private val cpu: Cpu): InstructionExecutor {
+    override fun executionPaused(): Boolean = cpu.cpuState == RunningState.PAUSED
+
     override fun sysCall(value: UInt) = cpu.sysCall(value)
     override fun clearScreen(value: UInt) = cpu.clearScreen(value)
     override fun doReturn(value: UInt) = cpu.doReturn(value)

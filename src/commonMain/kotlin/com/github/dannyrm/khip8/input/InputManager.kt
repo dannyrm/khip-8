@@ -1,5 +1,8 @@
 package com.github.dannyrm.khip8.input
 
+import com.github.dannyrm.khip8.Khip8Status
+import com.github.dannyrm.khip8.input.event.InputEvent
+import com.github.dannyrm.khip8.input.event.InputObserver
 import com.github.dannyrm.khip8.logger
 import org.koin.core.annotation.Single
 

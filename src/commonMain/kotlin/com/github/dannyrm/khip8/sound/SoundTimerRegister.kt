@@ -1,14 +1,14 @@
 package com.github.dannyrm.khip8.sound
 
-import com.github.dannyrm.khip8.Khip8State
-import com.github.dannyrm.khip8.Khip8State.*
+import com.github.dannyrm.khip8.RunningState
+import com.github.dannyrm.khip8.RunningState.*
 import com.github.dannyrm.khip8.memory.TimerRegister
 import org.koin.core.annotation.Single
 
 @Single
 class SoundTimerRegister(private val soundGenerator: SoundGenerator): TimerRegister() {
 
-    override var state: Khip8State = RUNNING
+    override var state: RunningState = RUNNING
         set(value) {
             field = value
 

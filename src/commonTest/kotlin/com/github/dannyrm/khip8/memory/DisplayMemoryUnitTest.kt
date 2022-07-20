@@ -3,19 +3,21 @@ package com.github.dannyrm.khip8.memory
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.lineSeparator
-import com.github.dannyrm.khip8.test.utils.BaseTest
+import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
-import kotlin.test.expect
+import kotlin.test.*
 
-class DisplayMemoryUnitTest: BaseTest() {
+class DisplayMemoryUnitTest {
     @MockK
     private lateinit var display: Display
     @InjectMockKs
     private lateinit var displayMemory: DisplayMemory
+
+    @BeforeTest
+    fun setup() {
+        MockKAnnotations.init(this)
+    }
 
     @Test
     fun `Check setting of the four corners of the display`() {

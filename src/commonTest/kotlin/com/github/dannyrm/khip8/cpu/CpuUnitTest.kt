@@ -1,6 +1,6 @@
 package com.github.dannyrm.khip8.cpu
 
-import com.github.dannyrm.khip8.Khip8State
+import com.github.dannyrm.khip8.RunningState
 import com.github.dannyrm.khip8.display.model.DisplayMemory
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.executors.InstructionExecutor
@@ -24,7 +24,7 @@ import kotlin.test.expect
 class CpuUnitTest: FunSpec({
     lateinit var inputManager: InputManager
     lateinit var memoryManager: MemoryManager
-    lateinit var instructionDecoder: InstructionDecoder
+    lateinit var instructionProcessor: InstructionProcessor
     lateinit var displayMemory: DisplayMemory
     lateinit var delayRegister: TimerRegister
     lateinit var soundRegister: SoundTimerRegister
@@ -36,12 +36,20 @@ class CpuUnitTest: FunSpec({
     beforeTest {
         inputManager = mockk(relaxed = true)
         memoryManager = mockk(relaxed = true)
-        instructionDecoder = mockk(relaxed = true)
         displayMemory = mockk(relaxed = true)
         delayRegister = mockk(relaxed = true)
         soundRegister = mockk(relaxed = true)
 
-        cpu = Cpu(instructionDecoder, displayMemory, memoryManager, delayRegister, soundRegister, inputManager, Khip8State.RUNNING)
+        cpu = Cpu(displayMemory, memoryManager, delayRegister, soundRegister, inputManager, 4096, RunningState.RUNNING, RunningState.RUNNING)
+
+        val cpuInstructionExecutor = CpuInstructionExecutor(cpu)
+
+        instructionProcessor = InstructionProcessor(
+            mockk(relaxed = true),
+            memoryManager,
+            RunningState.RUNNING,
+            listOf(cpuInstructionExecutor)
+        )
     }
 
     test("tick works correctly") {
@@ -49,16 +57,13 @@ class CpuUnitTest: FunSpec({
 
         every { memoryManager.fetchNextInstruction() } returns nextInstruction
 
-        cpu.tick()
+        instructionProcessor.tick()
 
         val instructionExecutorsSlot = slot<List<InstructionExecutor>>()
 
         verify { inputManager.lockInputs() }
         verify { memoryManager.fetchNextInstruction() }
-        verify { instructionDecoder.decodeAndExecute(nextInstruction, capture(instructionExecutorsSlot)) }
-
-        assertEquals(1, instructionExecutorsSlot.captured.size)
-        assertTrue { instructionExecutorsSlot.captured[0] is CpuInstructionExecutor }
+        verify { instructionProcessor.decodeAndExecute(nextInstruction) }
     }
 
     test("ret sets correct value to pc 00EE") {
@@ -78,8 +83,8 @@ class CpuUnitTest: FunSpec({
     test("sys call does nothing 0nnn") {
         cpu.sysCall(UNUSED_VALUE)
 
-        verify { listOf(inputManager, memoryManager, instructionDecoder, displayMemory) wasNot Called }
-        confirmVerified(inputManager, memoryManager, instructionDecoder, displayMemory)
+        verify { listOf(inputManager, memoryManager, displayMemory) wasNot Called }
+        confirmVerified(inputManager, memoryManager, displayMemory)
     }
 
     test("jmp sets correct value to pc 1NNN") {

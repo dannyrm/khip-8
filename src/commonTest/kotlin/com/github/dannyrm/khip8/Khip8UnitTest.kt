@@ -1,55 +1,48 @@
 package com.github.dannyrm.khip8
 
-import com.github.dannyrm.khip8.Khip8State.*
-import com.github.dannyrm.khip8.config.*
-import com.github.dannyrm.khip8.cpu.Cpu
+import com.github.dannyrm.khip8.RunningState.*
+import com.github.dannyrm.khip8.config.DefaultConfig
 import com.github.dannyrm.khip8.display.model.Display
+import com.github.dannyrm.khip8.event.Khip8Event
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
-import com.github.dannyrm.khip8.test.utils.BaseTest
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import com.github.dannyrm.khip8.util.SystemMode
 import io.mockk.*
 import kotlin.test.Test
 import kotlin.test.expect
 
-class Khip8UnitTest: BaseTest() {
-
-    @MockK(relaxed = true) private lateinit var memoryManager: MemoryManager
-    @MockK(relaxed = true) private lateinit var cpu: Cpu
-    @MockK(relaxed = true) private lateinit var display: Display
-    @MockK(relaxed = true) private lateinit var delayRegister: TimerRegister
-    @MockK(relaxed = true) private lateinit var soundRegister: SoundTimerRegister
-    @MockK(relaxed = true) private lateinit var khip8Status: Khip8Status
-
-    private var config: Config = Config(
-        systemSpeedConfig = SystemSpeedConfig(cpuSpeed = 540, timerSpeed = 60, displayRefreshRate = 60),
-        frontEndConfig = FrontEndConfig(windowWidth = 512, windowHeight = 256),
-        systemMode = SystemMode.SUPER_CHIP_MODE,
-        memoryConfig = MemoryConfig(
-            memorySize = 4096,
-            stackSize = 16,
-            interpreterStartAddress = 0x0,
-            programStartAddress = 0x200,
-            numberOfGeneralPurposeRegisters = 16
-        )
-    )
-
-    @InjectMockKs
-    private lateinit var khip8: Khip8
+class Khip8UnitTest {
 
     @Test
     fun `load loads rom into memory`() {
+        val memoryManager = mockk<MemoryManager>(relaxed = true)
+        val display = mockk<Display>(relaxed = true)
+        val delayRegister = mockk<TimerRegister>(relaxed = true)
+        val soundRegister = mockk<SoundTimerRegister>(relaxed = true)
+
+        val khip8 = Khip8(
+            instructionProcessor = mockk(),
+            memoryManager = memoryManager,
+            display = display,
+            delayRegister = delayRegister,
+            soundRegister = soundRegister,
+            numberOfCpuTicksPerPeripheralTick = 1,
+            delayBetweenCycles = 1,
+            runningState =  RUNNING
+        )
+
+        khip8.subscribe(delayRegister)
+        khip8.subscribe(soundRegister)
+
         val file = byteArrayOf()
 
-        every { khip8Status.loadedRom } returns file
         every { memoryManager.loadProgram(file) } returns true
+
+        mockkObject(Khip8Status)
 
         khip8.load(file)
 
-        verify { khip8Status.loadedRom = file }
+        verify { Khip8Status.loadedRom = file }
 
         verify { display.clear() }
         verify { memoryManager.resetMemory() }
@@ -57,25 +50,45 @@ class Khip8UnitTest: BaseTest() {
 
         verifyOrder {
             // Initially the machine will be empty and paused
-            khip8Status.khip8State = STOPPED
-            cpu.cpuState = STOPPED
-            delayRegister.state = STOPPED
-            soundRegister.state = STOPPED
+            khip8.runningState = STOPPED
+            // Notify all observers of the state change
+            delayRegister.receiveEvent(Khip8Event(STOPPED))
+            soundRegister.receiveEvent(Khip8Event(STOPPED))
 
             // Once the Rom is successfully loaded we indicate this and unpause
-            khip8Status.khip8State = RUNNING
-            cpu.cpuState = RUNNING
-            delayRegister.state = RUNNING
-            soundRegister.state = RUNNING
+            khip8.runningState = RUNNING
+            // Notify all observers of the state change
+            delayRegister.receiveEvent(Khip8Event(RUNNING))
+            soundRegister.receiveEvent(Khip8Event(RUNNING))
         }
     }
 
     @Test
     fun `Reset clears state`() {
+        val memoryManager = mockk<MemoryManager>(relaxed = true)
+        val display = mockk<Display>(relaxed = true)
+        val delayRegister = mockk<TimerRegister>(relaxed = true)
+        val soundRegister = mockk<SoundTimerRegister>(relaxed = true)
+
+        val khip8 = Khip8(
+            instructionProcessor = mockk(),
+            memoryManager = memoryManager,
+            display = display,
+            delayRegister = delayRegister,
+            soundRegister = soundRegister,
+            numberOfCpuTicksPerPeripheralTick = 1,
+            delayBetweenCycles = 1,
+            runningState =  RUNNING
+        )
+
+        khip8.subscribe(delayRegister)
+        khip8.subscribe(soundRegister)
+
         val file = byteArrayOf()
 
-        every { khip8Status.loadedRom } returns file
         every { memoryManager.loadProgram(file) } returns true
+
+        mockkObject(Khip8Status)
 
         khip8.reset()
 
@@ -83,17 +96,17 @@ class Khip8UnitTest: BaseTest() {
         verify { memoryManager.resetMemory() }
 
         verifyOrder {
-            // Initially the machine will be empty and stopped
-            khip8Status.khip8State = STOPPED
-            cpu.cpuState = STOPPED
-            delayRegister.state = STOPPED
-            soundRegister.state = STOPPED
+            // Initially the machine will be empty and paused
+            khip8.runningState = STOPPED
+            // Notify all observers of the state change
+            delayRegister.receiveEvent(Khip8Event(STOPPED))
+            soundRegister.receiveEvent(Khip8Event(STOPPED))
 
             // Once the Rom is successfully loaded we indicate this and unpause
-            khip8Status.khip8State = RUNNING
-            cpu.cpuState = RUNNING
-            delayRegister.state = RUNNING
-            soundRegister.state = RUNNING
+            khip8.runningState = RUNNING
+            // Notify all observers of the state change
+            delayRegister.receiveEvent(Khip8Event(RUNNING))
+            soundRegister.receiveEvent(Khip8Event(RUNNING))
         }
     }
 
@@ -101,7 +114,28 @@ class Khip8UnitTest: BaseTest() {
     fun `Reset clears state and leaves the emulator paused if rom does not load`() {
         val file = byteArrayOf()
 
-        every { khip8Status.loadedRom } returns file
+        val memoryManager = mockk<MemoryManager>(relaxed = true)
+        val display = mockk<Display>(relaxed = true)
+        val delayRegister = mockk<TimerRegister>(relaxed = true)
+        val soundRegister = mockk<SoundTimerRegister>(relaxed = true)
+
+        val khip8 = Khip8(
+            instructionProcessor = mockk(),
+            memoryManager = memoryManager,
+            display = display,
+            delayRegister = delayRegister,
+            soundRegister = soundRegister,
+            numberOfCpuTicksPerPeripheralTick = 1,
+            delayBetweenCycles = 1,
+            runningState =  RUNNING
+        )
+
+        khip8.subscribe(delayRegister)
+        khip8.subscribe(soundRegister)
+
+        mockkObject(Khip8Status)
+
+        every { Khip8Status.loadedRom } returns file
         every { memoryManager.loadProgram(file) } returns false
 
         khip8.reset()
@@ -110,17 +144,17 @@ class Khip8UnitTest: BaseTest() {
         verify { memoryManager.resetMemory() }
 
         verifyOrder {
-            khip8Status.khip8State = STOPPED
-            cpu.cpuState = STOPPED
-            delayRegister.state = STOPPED
-            soundRegister.state = STOPPED
+            khip8.runningState = STOPPED
+            // Notify all observers of the state change
+            delayRegister.receiveEvent(Khip8Event(STOPPED))
+            soundRegister.receiveEvent(Khip8Event(STOPPED))
         }
 
         verifyAll(inverse = true) {
-            khip8Status.khip8State = RUNNING
-            cpu.cpuState = RUNNING
-            delayRegister.state = RUNNING
-            soundRegister.state = RUNNING
+            khip8.runningState = RUNNING
+            // Observers will not be notified as the rom didn't load
+            delayRegister.receiveEvent(Khip8Event(RUNNING))
+            soundRegister.receiveEvent(Khip8Event(RUNNING))
         }
     }
 
