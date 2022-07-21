@@ -76,7 +76,7 @@ class Khip8UnitTest {
             display = display,
             delayRegister = delayRegister,
             soundRegister = soundRegister,
-            numberOfCpuTicksPerPeripheralTick = 1,
+            numberOfCpuTicksPerPeripheralTick = 5,
             delayBetweenCycles = 1,
             runningState =  RUNNING
         )
@@ -84,9 +84,7 @@ class Khip8UnitTest {
         khip8.subscribe(delayRegister)
         khip8.subscribe(soundRegister)
 
-        val file = byteArrayOf()
-
-        every { memoryManager.loadProgram(file) } returns true
+        every { memoryManager.loadProgram(any()) } returns true
 
         mockkObject(Khip8Status)
 

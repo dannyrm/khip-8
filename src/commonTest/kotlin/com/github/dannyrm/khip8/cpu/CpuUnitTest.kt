@@ -2,8 +2,6 @@ package com.github.dannyrm.khip8.cpu
 
 import com.github.dannyrm.khip8.RunningState
 import com.github.dannyrm.khip8.display.model.DisplayMemory
-import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
-import com.github.dannyrm.khip8.executors.InstructionExecutor
 import com.github.dannyrm.khip8.input.InputManager
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.Stack
@@ -16,7 +14,6 @@ import com.github.dannyrm.khip8.test.utils.convertNumericParams
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.*
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.expect
 
@@ -24,7 +21,6 @@ import kotlin.test.expect
 class CpuUnitTest: FunSpec({
     lateinit var inputManager: InputManager
     lateinit var memoryManager: MemoryManager
-    lateinit var instructionProcessor: InstructionProcessor
     lateinit var displayMemory: DisplayMemory
     lateinit var delayRegister: TimerRegister
     lateinit var soundRegister: SoundTimerRegister
@@ -41,29 +37,6 @@ class CpuUnitTest: FunSpec({
         soundRegister = mockk(relaxed = true)
 
         cpu = Cpu(displayMemory, memoryManager, delayRegister, soundRegister, inputManager, 4096, RunningState.RUNNING, RunningState.RUNNING)
-
-        val cpuInstructionExecutor = CpuInstructionExecutor(cpu)
-
-        instructionProcessor = InstructionProcessor(
-            mockk(relaxed = true),
-            memoryManager,
-            RunningState.RUNNING,
-            listOf(cpuInstructionExecutor)
-        )
-    }
-
-    test("tick works correctly") {
-        val nextInstruction: UInt = 0xE654u
-
-        every { memoryManager.fetchNextInstruction() } returns nextInstruction
-
-        instructionProcessor.tick()
-
-        val instructionExecutorsSlot = slot<List<InstructionExecutor>>()
-
-        verify { inputManager.lockInputs() }
-        verify { memoryManager.fetchNextInstruction() }
-        verify { instructionProcessor.decodeAndExecute(nextInstruction) }
     }
 
     test("ret sets correct value to pc 00EE") {

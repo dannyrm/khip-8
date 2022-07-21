@@ -5,8 +5,6 @@ import com.github.dannyrm.khip8.cpu.InstructionProcessor
 import com.github.dannyrm.khip8.display.model.Display
 import com.github.dannyrm.khip8.event.Khip8Event
 import com.github.dannyrm.khip8.event.Khip8Observer
-import com.github.dannyrm.khip8.input.InputManager
-import com.github.dannyrm.khip8.input.event.InputObserver
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
@@ -28,8 +26,6 @@ class Khip8(private val instructionProcessor: InstructionProcessor,
 
     fun subscribe(khip8Observer: Khip8Observer) {
         observers.add(khip8Observer)
-
-        LOG.info { "Added new observer: $khip8Observer to Khip8" }
     }
 
     fun load(rom: ByteArray?) {
