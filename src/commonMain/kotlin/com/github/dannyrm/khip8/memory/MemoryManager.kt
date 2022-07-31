@@ -1,5 +1,8 @@
 package com.github.dannyrm.khip8.memory
 
+import com.github.dannyrm.khip8.event.RomStateEvent
+import com.github.dannyrm.khip8.event.RomStateObserver
+import com.github.dannyrm.khip8.event.RomStatus
 import com.github.dannyrm.khip8.lineSeparator
 import createBigEndianWordFromBytes
 import org.koin.core.annotation.Single
@@ -11,7 +14,7 @@ class MemoryManager(internal val stack: Stack,
                     internal val ram: ValidatedMemory,
                     internal val registers: ValidatedMemory,
                     private val programStartAddress: Int,
-                    private val interpreterStartAddress: Int) {
+                    private val interpreterStartAddress: Int): RomStateObserver {
     var i: UInt = 0u // 16-bits, generally stores memory addresses so only lowest 12 bits usually used
 
     var pc: UInt = programStartAddress.toUInt() // 16 bits, program counter
@@ -86,6 +89,13 @@ class MemoryManager(internal val stack: Stack,
 
         arrays.forEach { array ->
             array.forEach { element -> ram[currentLocation++] = element }
+        }
+    }
+
+    override fun receiveEvent(romStateEvent: RomStateEvent) {
+        if (romStateEvent.status == RomStatus.LOADED) {
+            resetMemory()
+            loadProgram(romStateEvent.rom)
         }
     }
 

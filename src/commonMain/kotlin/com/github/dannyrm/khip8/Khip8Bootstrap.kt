@@ -1,6 +1,7 @@
 package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.RunningState.RUNNING
+import com.github.dannyrm.khip8.RunningState.STOPPED
 import com.github.dannyrm.khip8.config.Chip8PropertiesConfig
 import com.github.dannyrm.khip8.config.ConfigManager
 import org.koin.core.component.KoinComponent
@@ -38,8 +39,20 @@ import kotlin.reflect.KClass
 object Khip8Bootstrap: KoinComponent {
 
     fun boot(additionalModules: List<Module>) {
-        val soundToneLength = 10_000.0
+        setupDependencies(additionalModules)
+        setupSubscriptions()
 
+        // Starts the Chip-8 execution and UI execution in separate Co-routines
+        runBlockingNoJs {
+            get<Khip8>().execute()
+
+            launch(Dispatchers.Default) {
+                get<Ui>().start()
+            }
+        }
+    }
+
+    private fun setupDependencies(additionalModules: List<Module>) {
         startKoin {
             modules(
                 module {
@@ -69,13 +82,10 @@ object Khip8Bootstrap: KoinComponent {
                     single {
                         Khip8(
                             instructionProcessor = get(),
-                            memoryManager = get(),
-                            display = get(),
                             delayRegister = get(),
                             soundRegister = get(),
                             numberOfCpuTicksPerPeripheralTick = get<ConfigManager>().numberOfCpuTicksPerPeripheralTick(),
-                            delayBetweenCycles = get<ConfigManager>().delayBetweenCycles(),
-                            RUNNING)
+                            delayBetweenCycles = get<ConfigManager>().delayBetweenCycles())
                     }
 
                     // Memory
@@ -95,7 +105,7 @@ object Khip8Bootstrap: KoinComponent {
                     single { InputManager() }
 
                     // Sound
-                    single { runBlockingNoSuspensions { SoundTone(2000.0, soundToneLength) } }
+                    single { runBlockingNoSuspensions { SoundTone(toneFrequency = 2000.0, toneLength = 10_000.0) } }
                     single { SoundTimerRegister(get()) }
                     single { SoundGenerator(get()) }
 
@@ -111,14 +121,17 @@ object Khip8Bootstrap: KoinComponent {
                 *additionalModules.toTypedArray()
             )
         }
+    }
 
+    private fun setupSubscriptions() {
         val inputManager = get<InputManager>()
         val khip8 = get<Khip8>()
         val cpu = get<Cpu>()
-        val ui = get<Ui>()
         val instructionProcessor = get<InstructionProcessor>()
         val timerRegister = get<TimerRegister>()
         val soundTimerRegister = get<SoundTimerRegister>()
+        val display = get<Display>()
+        val memoryManager = get<MemoryManager>()
 
         inputManager.subscribe(cpu)
 
@@ -127,16 +140,8 @@ object Khip8Bootstrap: KoinComponent {
         khip8.subscribe(timerRegister)
         khip8.subscribe(soundTimerRegister)
 
-        khip8.reset()
-
-        // Starts the Chip-8 execution and UI execution in separate Co-routines
-        runBlockingNoJs {
-            khip8.execute()
-
-            launch(Dispatchers.Default) {
-                ui.start()
-            }
-        }
+        khip8.subscribe(display)
+        khip8.subscribe(memoryManager)
     }
 }
 

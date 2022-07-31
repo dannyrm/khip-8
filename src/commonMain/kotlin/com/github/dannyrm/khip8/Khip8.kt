@@ -2,35 +2,75 @@ package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.RunningState.*
 import com.github.dannyrm.khip8.cpu.InstructionProcessor
-import com.github.dannyrm.khip8.display.model.Display
-import com.github.dannyrm.khip8.event.Khip8Event
-import com.github.dannyrm.khip8.event.Khip8Observer
-import com.github.dannyrm.khip8.memory.MemoryManager
+import com.github.dannyrm.khip8.event.RomStateEvent
+import com.github.dannyrm.khip8.event.RomStateObserver
+import com.github.dannyrm.khip8.event.RomStatus
+import com.github.dannyrm.khip8.event.SystemStateObserver
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.soywiz.korio.async.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import org.koin.core.annotation.Single
+import kotlin.properties.Delegates
 
-@Single
+/*
+ * Responsible for starting the emulated units and maintaining two pieces of state:
+ * * The running status of the machine (running, stopped or paused)
+ * * The ROM data being executed by the machine.
+ *
+ * Events are generated and distributed to any observers whenever the running status or ROM data is changed.
+ */
 class Khip8(private val instructionProcessor: InstructionProcessor,
-            private val memoryManager: MemoryManager,
-            private val display: Display,
             private val delayRegister: TimerRegister,
             private val soundRegister: SoundTimerRegister,
             private val numberOfCpuTicksPerPeripheralTick: Int,
-            private val delayBetweenCycles: Long,
-            internal var runningState: RunningState) {
-    private val observers: MutableList<Khip8Observer> = mutableListOf()
+            private val delayBetweenCycles: Long) {
+    private val systemStatusObservers: MutableList<SystemStateObserver> = mutableListOf()
+    private val romStatusObservers: MutableList<RomStateObserver> = mutableListOf()
 
-    fun subscribe(khip8Observer: Khip8Observer) {
-        observers.add(khip8Observer)
+    internal var runningState: RunningState by Delegates.observable(STOPPED) { _, _, newValue ->
+        systemStatusObservers.forEach {
+            it.receiveEvent(newValue)
+        }
+    }
+
+    internal var loadedRom: ByteArray? by Delegates.observable(null) { _, oldValue, newValue ->
+        if (!oldValue.contentEquals(newValue)) {
+
+            val romStatus =
+                if (oldValue == null && newValue != null) {
+                    RomStatus.LOADED
+                } else if (oldValue != null && newValue == null) {
+                    RomStatus.UNLOADED
+                } else { // Rom contents must have changed from one rom to another
+                    RomStatus.LOADED
+                }
+
+            romStatusObservers.forEach {
+                it.receiveEvent(RomStateEvent(newValue, romStatus))
+            }
+
+            runningState = when (romStatus) {
+                RomStatus.LOADED -> {
+                    RUNNING
+                }
+                RomStatus.UNLOADED -> {
+                    STOPPED
+                }
+            }
+        }
+    }
+
+    fun subscribe(systemStateObserver: SystemStateObserver) {
+        systemStatusObservers.add(systemStateObserver)
+    }
+
+    fun subscribe(romStateObserver: RomStateObserver) {
+        romStatusObservers.add(romStateObserver)
     }
 
     fun load(rom: ByteArray?) {
-        Khip8Status.loadedRom = rom
-        reset()
+        loadedRom = rom
     }
 
     /*
@@ -39,12 +79,12 @@ class Khip8(private val instructionProcessor: InstructionProcessor,
     fun togglePause(): Boolean =
         when (runningState) {
             RUNNING -> {
-                setSystemState(PAUSED)
+                runningState = PAUSED
 
                 true
             }
             PAUSED -> {
-                setSystemState(RUNNING)
+                runningState = RUNNING
 
                 false
             }
@@ -54,18 +94,9 @@ class Khip8(private val instructionProcessor: InstructionProcessor,
             }
         }
 
-    fun reset() {
-        setSystemState(STOPPED)
-
-        display.clear()
-        memoryManager.resetMemory()
-
-        if (memoryManager.loadProgram(Khip8Status.loadedRom)) {
-            setSystemState(RUNNING)
-        }
-    }
-
     suspend fun execute() {
+        runningState = STOPPED
+
         val delayPerPeripheralTick = numberOfCpuTicksPerPeripheralTick * delayBetweenCycles
 
         launch(Dispatchers.Default) {
@@ -87,14 +118,6 @@ class Khip8(private val instructionProcessor: InstructionProcessor,
                 delay(delayPerPeripheralTick)
                 soundRegister.tick()
             }
-        }
-    }
-
-    private fun setSystemState(state: RunningState) {
-        runningState = state
-
-        observers.forEach {
-            it.receiveEvent(Khip8Event(runningState))
         }
     }
 

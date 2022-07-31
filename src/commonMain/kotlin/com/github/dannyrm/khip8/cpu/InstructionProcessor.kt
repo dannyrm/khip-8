@@ -1,9 +1,7 @@
 package com.github.dannyrm.khip8.cpu
 
 import com.github.dannyrm.khip8.RunningState
-import com.github.dannyrm.khip8.Khip8Status
-import com.github.dannyrm.khip8.event.Khip8Event
-import com.github.dannyrm.khip8.event.Khip8Observer
+import com.github.dannyrm.khip8.event.SystemStateObserver
 import leftNibble
 import rightByte
 import rightNibble
@@ -18,10 +16,10 @@ import wordHex
 class InstructionProcessor(private val inputManager: InputManager,
                            private val memoryManager: MemoryManager,
                            private var khip8RunningState: RunningState,
-                           private val instructionExecutors: List<InstructionExecutor>): Khip8Observer {
+                           private val instructionExecutors: List<InstructionExecutor>): SystemStateObserver {
 
-    override fun receiveEvent(khip8Event: Khip8Event) {
-        khip8RunningState = khip8Event.runningState
+    override fun receiveEvent(runningState: RunningState) {
+        khip8RunningState = runningState
     }
 
     fun tick() {

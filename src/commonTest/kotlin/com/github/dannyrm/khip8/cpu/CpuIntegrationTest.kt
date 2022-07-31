@@ -1,8 +1,6 @@
 package com.github.dannyrm.khip8.cpu
 
-import com.github.dannyrm.khip8.Khip8Status
 import com.github.dannyrm.khip8.RunningState.RUNNING
-import com.github.dannyrm.khip8.config.ConfigManager
 import com.github.dannyrm.khip8.executors.CpuInstructionExecutor
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.Stack
@@ -13,7 +11,6 @@ import com.github.dannyrm.khip8.util.SystemMode
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.mockk
-import org.koin.core.qualifier.named
 import kotlin.test.expect
 
 class CpuIntegrationTest: FunSpec({

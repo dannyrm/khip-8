@@ -1,10 +1,12 @@
 package com.github.dannyrm.khip8.display.model
 
+import com.github.dannyrm.khip8.event.RomStateEvent
+import com.github.dannyrm.khip8.event.RomStateObserver
 import com.github.dannyrm.khip8.lineSeparator
 import org.koin.core.annotation.Single
 
 @Single
-class Display(private val displayMemory: DisplayMemory) {
+class Display(private val displayMemory: DisplayMemory): RomStateObserver {
 
     operator fun set(x: Int, y: Int, value: UByte) {
         displayMemory[x,y] = value
@@ -19,6 +21,11 @@ class Display(private val displayMemory: DisplayMemory) {
         }
 
         return false
+    }
+
+    // Clear the display memory whenever the rom state changes
+    override fun receiveEvent(romStateEvent: RomStateEvent) {
+        clear()
     }
 
     override fun toString(): String = "Display Memory {${lineSeparator()}$displayMemory}"

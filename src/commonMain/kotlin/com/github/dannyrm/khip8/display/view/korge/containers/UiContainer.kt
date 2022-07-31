@@ -25,7 +25,7 @@ class KorgeUiContainer(private val khip8: Khip8, private val romList: List<VfsFi
                 }
 
             uiButton(text = "Reset")
-                .onClick { khip8.reset() }
+//                .onClick { khip8.reset() }
 
             uiPropertyComboBox(title = "",  field = ::selectedRom, values = romList.map { it.baseName }, width = 200.0)
 

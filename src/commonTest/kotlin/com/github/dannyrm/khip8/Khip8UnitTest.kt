@@ -3,7 +3,6 @@ package com.github.dannyrm.khip8
 import com.github.dannyrm.khip8.RunningState.*
 import com.github.dannyrm.khip8.config.DefaultConfig
 import com.github.dannyrm.khip8.display.model.Display
-import com.github.dannyrm.khip8.event.Khip8Event
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
@@ -28,7 +27,7 @@ class Khip8UnitTest {
             soundRegister = soundRegister,
             numberOfCpuTicksPerPeripheralTick = 1,
             delayBetweenCycles = 1,
-            runningState =  RUNNING
+            initialRunningState =  RUNNING
         )
 
         khip8.subscribe(delayRegister)
@@ -38,11 +37,9 @@ class Khip8UnitTest {
 
         every { memoryManager.loadProgram(file) } returns true
 
-        mockkObject(Khip8Status)
-
         khip8.load(file)
 
-        verify { Khip8Status.loadedRom = file }
+        verify { khip8.loadedRom = file }
 
         verify { display.clear() }
         verify { memoryManager.resetMemory() }
@@ -52,14 +49,14 @@ class Khip8UnitTest {
             // Initially the machine will be empty and paused
             khip8.runningState = STOPPED
             // Notify all observers of the state change
-            delayRegister.receiveEvent(Khip8Event(STOPPED))
-            soundRegister.receiveEvent(Khip8Event(STOPPED))
+            delayRegister.receiveEvent(STOPPED)
+            soundRegister.receiveEvent(STOPPED)
 
             // Once the Rom is successfully loaded we indicate this and unpause
             khip8.runningState = RUNNING
             // Notify all observers of the state change
-            delayRegister.receiveEvent(Khip8Event(RUNNING))
-            soundRegister.receiveEvent(Khip8Event(RUNNING))
+            delayRegister.receiveEvent(RUNNING)
+            soundRegister.receiveEvent(RUNNING)
         }
     }
 
@@ -78,15 +75,13 @@ class Khip8UnitTest {
             soundRegister = soundRegister,
             numberOfCpuTicksPerPeripheralTick = 5,
             delayBetweenCycles = 1,
-            runningState =  RUNNING
+            initialRunningState =  RUNNING
         )
 
         khip8.subscribe(delayRegister)
         khip8.subscribe(soundRegister)
 
         every { memoryManager.loadProgram(any()) } returns true
-
-        mockkObject(Khip8Status)
 
         khip8.reset()
 
@@ -97,14 +92,14 @@ class Khip8UnitTest {
             // Initially the machine will be empty and paused
             khip8.runningState = STOPPED
             // Notify all observers of the state change
-            delayRegister.receiveEvent(Khip8Event(STOPPED))
-            soundRegister.receiveEvent(Khip8Event(STOPPED))
+            delayRegister.receiveEvent(STOPPED)
+            soundRegister.receiveEvent(STOPPED)
 
             // Once the Rom is successfully loaded we indicate this and unpause
             khip8.runningState = RUNNING
             // Notify all observers of the state change
-            delayRegister.receiveEvent(Khip8Event(RUNNING))
-            soundRegister.receiveEvent(Khip8Event(RUNNING))
+            delayRegister.receiveEvent(RUNNING)
+            soundRegister.receiveEvent(RUNNING)
         }
     }
 
@@ -125,15 +120,13 @@ class Khip8UnitTest {
             soundRegister = soundRegister,
             numberOfCpuTicksPerPeripheralTick = 1,
             delayBetweenCycles = 1,
-            runningState =  RUNNING
+            initialRunningState =  RUNNING
         )
 
         khip8.subscribe(delayRegister)
         khip8.subscribe(soundRegister)
 
-        mockkObject(Khip8Status)
-
-        every { Khip8Status.loadedRom } returns file
+        every { khip8.loadedRom } returns file
         every { memoryManager.loadProgram(file) } returns false
 
         khip8.reset()
@@ -144,15 +137,15 @@ class Khip8UnitTest {
         verifyOrder {
             khip8.runningState = STOPPED
             // Notify all observers of the state change
-            delayRegister.receiveEvent(Khip8Event(STOPPED))
-            soundRegister.receiveEvent(Khip8Event(STOPPED))
+            delayRegister.receiveEvent(STOPPED)
+            soundRegister.receiveEvent(STOPPED)
         }
 
         verifyAll(inverse = true) {
             khip8.runningState = RUNNING
             // Observers will not be notified as the rom didn't load
-            delayRegister.receiveEvent(Khip8Event(RUNNING))
-            soundRegister.receiveEvent(Khip8Event(RUNNING))
+            delayRegister.receiveEvent(RUNNING)
+            soundRegister.receiveEvent(RUNNING)
         }
     }
 
