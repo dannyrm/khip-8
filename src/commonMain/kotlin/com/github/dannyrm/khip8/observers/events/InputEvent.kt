@@ -1,4 +1,4 @@
-package com.github.dannyrm.khip8.input.event
+package com.github.dannyrm.khip8.observers.events
 
 import com.github.dannyrm.khip8.input.KeyboardInput
 

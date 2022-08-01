@@ -1,7 +1,7 @@
 package com.github.dannyrm.khip8.display.model
 
-import com.github.dannyrm.khip8.event.RomStateEvent
-import com.github.dannyrm.khip8.event.RomStateObserver
+import com.github.dannyrm.khip8.observers.RomStateEvent
+import com.github.dannyrm.khip8.observers.RomStateObserver
 import com.github.dannyrm.khip8.lineSeparator
 import org.koin.core.annotation.Single
 

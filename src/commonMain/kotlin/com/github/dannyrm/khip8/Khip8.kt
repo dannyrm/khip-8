@@ -2,10 +2,10 @@ package com.github.dannyrm.khip8
 
 import com.github.dannyrm.khip8.RunningState.*
 import com.github.dannyrm.khip8.cpu.InstructionProcessor
-import com.github.dannyrm.khip8.event.RomStateEvent
-import com.github.dannyrm.khip8.event.RomStateObserver
-import com.github.dannyrm.khip8.event.RomStatus
-import com.github.dannyrm.khip8.event.SystemStateObserver
+import com.github.dannyrm.khip8.observers.RomStateEvent
+import com.github.dannyrm.khip8.observers.RomStateObserver
+import com.github.dannyrm.khip8.observers.RomStatus
+import com.github.dannyrm.khip8.observers.SystemStateObserver
 import com.github.dannyrm.khip8.memory.TimerRegister
 import com.github.dannyrm.khip8.sound.SoundTimerRegister
 import com.soywiz.korio.async.launch

@@ -1,7 +1,8 @@
 package com.github.dannyrm.khip8.cpu
 
 import com.github.dannyrm.khip8.RunningState
-import com.github.dannyrm.khip8.event.SystemStateObserver
+import com.github.dannyrm.khip8.RunningState.STOPPED
+import com.github.dannyrm.khip8.observers.SystemStateObserver
 import leftNibble
 import rightByte
 import rightNibble
@@ -15,8 +16,8 @@ import wordHex
 @Single
 class InstructionProcessor(private val inputManager: InputManager,
                            private val memoryManager: MemoryManager,
-                           private var khip8RunningState: RunningState,
                            private val instructionExecutors: List<InstructionExecutor>): SystemStateObserver {
+    private var khip8RunningState: RunningState = STOPPED
 
     override fun receiveEvent(runningState: RunningState) {
         khip8RunningState = runningState

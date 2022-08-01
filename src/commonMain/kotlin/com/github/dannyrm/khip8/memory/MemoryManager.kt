@@ -1,8 +1,8 @@
 package com.github.dannyrm.khip8.memory
 
-import com.github.dannyrm.khip8.event.RomStateEvent
-import com.github.dannyrm.khip8.event.RomStateObserver
-import com.github.dannyrm.khip8.event.RomStatus
+import com.github.dannyrm.khip8.observers.RomStateEvent
+import com.github.dannyrm.khip8.observers.RomStateObserver
+import com.github.dannyrm.khip8.observers.RomStatus
 import com.github.dannyrm.khip8.lineSeparator
 import createBigEndianWordFromBytes
 import org.koin.core.annotation.Single

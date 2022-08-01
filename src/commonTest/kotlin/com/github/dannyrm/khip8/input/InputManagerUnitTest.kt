@@ -1,7 +1,7 @@
 package com.github.dannyrm.khip8.input
 
 import com.github.dannyrm.khip8.cpu.Cpu
-import com.github.dannyrm.khip8.input.event.InputEvent
+import com.github.dannyrm.khip8.observers.events.InputEvent
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.datatest.withData
 import io.mockk.mockk

@@ -2,16 +2,17 @@ package com.github.dannyrm.khip8.cpu
 
 import com.github.dannyrm.khip8.RunningState
 import com.github.dannyrm.khip8.RunningState.PAUSED
+import com.github.dannyrm.khip8.RunningState.STOPPED
 import nibbleByteHex
 import rightByte
 import rightNibble
 import rightNibbleByte
 import toHex
 import com.github.dannyrm.khip8.display.model.DisplayMemory
-import com.github.dannyrm.khip8.event.SystemStateObserver
-import com.github.dannyrm.khip8.input.event.InputEvent
+import com.github.dannyrm.khip8.observers.SystemStateObserver
+import com.github.dannyrm.khip8.observers.events.InputEvent
 import com.github.dannyrm.khip8.input.InputManager
-import com.github.dannyrm.khip8.input.event.InputObserver
+import com.github.dannyrm.khip8.observers.InputObserver
 import com.github.dannyrm.khip8.logger
 import com.github.dannyrm.khip8.memory.MemoryManager
 import com.github.dannyrm.khip8.memory.TimerRegister
@@ -30,9 +31,8 @@ class Cpu(private val displayMemory: DisplayMemory,
           private val soundRegister: SoundTimerRegister,
           private val inputManager: InputManager,
           private val memorySize: Int,
-          internal var cpuState: RunningState,
-          private var khip8RunningState: RunningState): InputObserver, SystemStateObserver {
-
+          internal var cpuState: RunningState): InputObserver, SystemStateObserver {
+    private var khip8RunningState: RunningState = STOPPED
 
     override fun receiveEvent(runningState: RunningState) {
         khip8RunningState = runningState

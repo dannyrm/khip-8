@@ -2,7 +2,7 @@ package com.github.dannyrm.khip8.memory
 
 import com.github.dannyrm.khip8.RunningState
 import com.github.dannyrm.khip8.RunningState.RUNNING
-import com.github.dannyrm.khip8.event.SystemStateObserver
+import com.github.dannyrm.khip8.observers.SystemStateObserver
 import com.github.dannyrm.khip8.logger
 import org.koin.core.annotation.Single
 
