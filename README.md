@@ -8,6 +8,8 @@ A number of Chip-8 games are available within the `resources/c8` directory.
 
 ROM files can be loaded via the drop down list in the UI. You can currently only choose between the ROMs included and cannot load ROMs from disk.
 
+![Screenshot](screenshot.png "Screenshot showing how to load games")
+
 ## Configuration
 
 The interpreter can be configured by modifying the `src/commonMain/resources/chip8.properties` An example configuration follows:
