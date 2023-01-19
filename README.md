@@ -4,6 +4,10 @@ A Kotlin multi-platform Chip-8 interpreter. Currently only supports the JVM.
 
 A number of Chip-8 games are available within the `resources/c8` directory.
 
+## Running the emulator
+
+The easiest way to run the emulator is by executing the `main` method within the `com.github.dannyrm.khip8.JvmKhip8Bootstrap` class.
+
 ## Loading ROM files
 
 ROM files can be loaded via the drop down list in the UI. You can currently only choose between the ROMs included and cannot load ROMs from disk.
